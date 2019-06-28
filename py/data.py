@@ -1,68 +1,35 @@
-from py.variables import coins, hr_intervals, periods, relationship
-from py.functions import refresh_ohlcv_df, group_candles
-from py.ichimoku import ichimoku
-from datetime import datetime
-import numpy as np
+from datetime import datetime, timedelta
+from time import sleep
 import pandas as pd
-
-# Note: some coins don't have data from 2018.01.01.
-# BCH: 2018.11.16
-# EOS: 2018.05.28
-# XRP: 2018.05.06
+import ccxt
+import os
 
 
-for coin in coins:
 
-    # Update CSV's with most recent hourly OHCLV data
-    df = refresh_ohlcv_df(coin)
+def main():
 
-    # Group candles into each hour interval
-    for interval in hr_intervals:
-        df_interval = []
-        for i in range(0, len(df)-interval, interval):
-            candles = df[i:i+interval]
-            dohlcv = group_candles(candles)
-            # Insert index to front
-            dohlcv = [i] + dohlcv
-            df_interval.append(dohlcv)
+    for file in os.listdir('data/'):
+        df = pd.read_csv('data/' + file)
+        df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d %H:%M:%S')
 
-        df_interval = pd.DataFrame(df_interval, columns=['index', 'date', 'open', 'high', 'low', 'close', 'volume'])
+        binance = ccxt.binance()
+        coin = file[:file.find('.')]
 
-        # Create ichimoku cloud columns for each ichi period
-        for period in periods:
-            period *= relationship
-            ichimoku(df_interval, period[0], period[1], period[2], period[3])
-            # Add signal logic
-            signal = [False for i in range(len(df_interval))]
-            # Loop through where...
-            # a. Cloud is green (Span A > Span B == green cloud)
-            green_cloud = list(df_interval['senkou_a'] > df_interval['senkou_b'])
+        df_new = []
+        start_date = df.iloc[-1]['date']
+        while start_date < datetime.now():
+            results = binance.fetch_ohlcv(coin + '/USDT', '1h', since=int(start_date.timestamp()*1000))
+            df_new += results
+            start_date += timedelta(hours=len(results))
+            sleep(1)
 
-            # b. Tenkan > Kijun
-            tk_gt_kj = list(df_interval['tenkan'] > df_interval['kijun'])
+        df_new = pd.DataFrame(df_new, columns=df.columns)
+        df_new['date'] = df_new['date'].apply(lambda x: datetime.fromtimestamp(x/1000))
+        df_new = df_new[df_new['date'] > df.iloc[-1]['date']]
 
-            # c. Price is below tk
-            price_lt_tk = list(df_interval['price'] < df_interval['tenkan'])
-
-            # d. price has already been above tk
-            price_gt_tk = list(df_interval['price'] > df_interval['tenkan'])
-
-            price_reached_tk = False
-
-            for i in range(len(df_interval)):
-                if price_reached_tk & green_cloud[i] & tk_gt_kj[i] & price_lt_tk[i]:
-                    price_diff = (df_interval['low'][i] - df_interval['kijun'][i])/df_interval['kijun'][i]
-                    if price_diff <= 0.01:
-                        signal[i] = True
-                        price_reached_tk = False
-                else:
-                    if not price_reached_tk:
-                        price_reached_tk = price_gt_tk[i]
-
-            col_name = str(period[0]) + '-' + str(period[1]) + '-' + str(period[2]) + '-' + str(period[3])
-            df_interval[col_name] = signal
+        df = df.append(df_new, ignore_index=True)
+        df.to_csv('data/' + file, index=False)
 
 
-        # Save
-        df_interval = df_interval.drop(['price', 'tenkan', 'kijun', 'senkou_a', 'senkou_b', 'chikou'], axis=1)
-        df_interval.to_csv('data/' + str(interval) + '/' + coin + '.csv', index=False)
+if __name__ == '__main__':
+    main()
