@@ -24,8 +24,8 @@ def rsi(prices):
     n = 24 * 14
     deltas = np.diff(prices)
     seed = deltas[:n+1]
-    up = seed[seed>0].sum()/n
-    down = -seed[seed<0].sum()/n
+    up = seed[seed > 0].sum()/n
+    down = -seed[seed < 0].sum()/n
     rs = up/down
     rsi = np.zeros_like(prices)
     rsi[:n] = 100. - 100./(1.+rs)
@@ -61,12 +61,24 @@ def cross(line1, line2):
 
 def main():
 
-    ema(prices, window=40)
+    ema_3 = ema(prices, window=3)
+    ema_40 = ema(prices, window=40)
+    ma_20 = ma(prices, window=20)
     macd(prices)
     rsi(prices)
 
     # Logic
-    intersections = cross(ema(prices, window=3), ma(prices, window=20))
+    intersections = cross(ema_3, ma_20)
+    ema_40_above = ema_40 > ema_3 & ema_40 > ma_20
+    rsi_above = rsi > 50
+    macd_above = macd > 0
+
+    for intersection in intersections:
+        if intersection:
+            if ema_40_above[i] & rsi_above[i] & macd_above[i]:
+                signal = "buy"
+            elif not ema_40_above[i] & not rsi_above[i] & not macd_above[i]:
+                signal = "sell"
 
 
 
