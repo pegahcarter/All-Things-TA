@@ -19,7 +19,9 @@ def macd(prices):
     pass
 
 
-def rsi(prices, n=24):
+def rsi(prices):
+    # Based on last two weeks
+    n = 24 * 14
     deltas = np.diff(prices)
     seed = deltas[:n+1]
     up = seed[seed>0].sum()/n
@@ -30,14 +32,14 @@ def rsi(prices, n=24):
     for i in range(n, len(prices)):
         delta = deltas[i-1]
         if delta > 0:
-            upval = delta
-            downval = 0.
+            up_val = delta
+            down_val = 0.
         else:
-            upval = 0.
-            downval = -delta
+            up_val = 0.
+            down_val = -delta
 
-        up = (up*(n-1) + upval)/n
-        down = (down*(n-1) + downval)/n
+        up = (up*(n-1) + up_val)/n
+        down = (down*(n-1) + down_val)/n
 
         rs = up/down
         rsi[i] = 100. - 100./(1.+rs)
@@ -45,31 +47,26 @@ def rsi(prices, n=24):
     return rsi
 
 
+def cross(line1, line2):
+    cross = []
+    l1_gt_l2 = line1 > line2
+    current_val = l1_gt_l2[0]
+    for next_val in l1_gt_l2[1:]:
+        cross.append(current_val != next_val)
+        current_val = next_val
 
+    return cross
 
 
 
 def main():
 
-    ''' EMA '''
-    # 3 period EMA
-    ema(prices, period=3)
-    # 40 period EMA
-    ema(prices, period=40)
-
-    ''' MA '''
-    # 20 period MA
-    ma(prices, period=20)
-
-    ''' MACD '''
-    # What period should this be?
+    ema(prices, window=40)
     macd(prices)
-
-    ''' RSI '''
-    # What period should this be?
     rsi(prices)
 
-    ''' Logic '''
+    # Logic
+    intersections = cross(ema(prices, window=3), ma(prices, window=20))
 
 
 
