@@ -6,18 +6,25 @@ import numpy as np
 df = pd.read_csv('prices/BTC.csv')
 df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d %H:%M:%S')
 
-results = rsi(df['close'])
-len(results)
-len(df)
-results[:10]
+ema_3 = ema(df['close'], 3)
+ma_20 = ma(df['close'], 20)
+
+len(ma_20) - ma_20.count()
+ma_20.isna().sum()
+
+ema_3 = ema_3[20:]
+ma_20 = ma_20[20:]
+
+
+intersections = cross(ema_3, ma_20)
 
 
 def ma(prices, window):
-    return prices.rolling(window=window)
+    return prices.rolling(window=window).mean()
 
 
 def ema(prices, window):
-    return prices.ewm(span=window, adjust=False)
+    return prices.ewm(span=window, adjust=False).mean()
 
 
 def macd(prices):
@@ -53,14 +60,15 @@ def rsi(prices):
 
 
 def cross(line1, line2):
-    cross = []
+    nan_count = max(line1.isna().sum(), line2.isna().sum())
+    crosses = [None for i in range(nan_count)]
     l1_gt_l2 = line1 > line2
-    current_val = l1_gt_l2[0]
-    for next_val in l1_gt_l2[1:]:
-        cross.append(current_val != next_val)
+    current_val = l1_gt_l2[nan_count]
+    for next_val in l1_gt_l2[nan_count+1:]:
+        crosses.append(current_val != next_val)
         current_val = next_val
 
-    return cross
+    return crosses
 
 
 
