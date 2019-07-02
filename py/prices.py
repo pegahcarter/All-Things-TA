@@ -8,8 +8,8 @@ import os
 
 def main():
 
-    for file in os.listdir('data/'):
-        df = pd.read_csv('data/' + file)
+    for file in os.listdir('prices/'):
+        df = pd.read_csv('prices/' + file)
         df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d %H:%M:%S')
 
         binance = ccxt.binance()
@@ -23,12 +23,12 @@ def main():
             start_date += timedelta(hours=len(results))
             sleep(1)
 
-        df_new = pd.DataFrame(df_new, columns=df.columns)
+        df_new = pd.pricesFrame(df_new, columns=df.columns)
         df_new['date'] = df_new['date'].apply(lambda x: datetime.fromtimestamp(x/1000))
         df_new = df_new[df_new['date'] > df.iloc[-1]['date']]
 
         df = df.append(df_new, ignore_index=True)
-        df.to_csv('data/' + file, index=False)
+        df.to_csv('prices/' + file, index=False)
 
 
 if __name__ == '__main__':

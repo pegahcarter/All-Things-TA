@@ -6,6 +6,11 @@ import numpy as np
 df = pd.read_csv('prices/BTC.csv')
 df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d %H:%M:%S')
 
+results = rsi(df['close'])
+len(results)
+len(df)
+results[:10]
+
 
 def ma(prices, window):
     return prices.rolling(window=window)
