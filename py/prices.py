@@ -23,7 +23,7 @@ def main():
             start_date += timedelta(hours=len(results))
             sleep(1)
 
-        df_new = pd.pricesFrame(df_new, columns=df.columns)
+        df_new = pd.DataFrame(df_new, columns=df.columns)
         df_new['date'] = df_new['date'].apply(lambda x: datetime.fromtimestamp(x/1000))
         df_new = df_new[df_new['date'] > df.iloc[-1]['date']]
 
