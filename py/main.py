@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from py.logic import calc_ma, calc_ema, calc_macd, calc_rsi, cross
 
@@ -20,15 +21,15 @@ def main():
         rsi_above = rsi > 50
         macd_above = macd > 0
 
-        signals = [None for x in range(len(df))]
+        signal = [None for x in range(len(df))]
         for i, val in enumerate(intersections):
             if val:
                 if ema_40_above[i] and rsi_above[i] and macd_above[i]:
-                    signals[i] = "BUY"
+                    signal[i] = "BUY"
                 elif not ema_40_above[i] and not rsi_above[i] and not macd_above[i]:
-                    signals[i] = "SELL"
+                    signal[i] = "SELL"
 
-        df['signals'] = signals
+        df['signal'] = signal
         df.to_csv('prices/' + file, index=False)
 
 
