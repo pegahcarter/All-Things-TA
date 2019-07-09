@@ -1,25 +1,25 @@
 import numpy as np
 
-def ma(prices, window):
-    return prices.rolling(window=window).mean()
+def calc_ma(prices, window):
+    return prices.rolling(window=window).mean().fillna(0)
 
 
-def ema(prices, window):
+def calc_ema(prices, window):
     return prices.ewm(span=window, adjust=False).mean()
 
 
-def macd(prices, fast=12, slow=26):
+def calc_macd(prices, fast=12, slow=26):
     '''
     macd line = fast_ema - slow_ema
     signal line = 9ema of macd line
     histogram = macd line - signal line
     '''
-    ema_fast = ema(prices, window=fast)
-    ema_slow = ema(prices, window=slow)
+    ema_fast = calc_ema(prices, window=fast)
+    ema_slow = calc_ema(prices, window=slow)
     return ema_fast - ema_slow
 
 
-def rsi(prices):
+def calc_rsi(prices):
     n = 14
     deltas = np.diff(prices)
     seed = deltas[:n+1]
