@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from py.logic import calc_ma, calc_ema, calc_macd, calc_rsi, cross
 from py.functions import refresh_ohlcv, combine_signals
 
@@ -20,8 +21,8 @@ def main():
         macd_above = macd > 0
 
         signal = [None for x in range(len(df))]
-        for i, val in enumerate(intersections):
-            if val:
+        for i, intersection in enumerate(intersections):
+            if intersection:
                 if ema_40_above[i] and rsi_above[i] and macd_above[i]:
                     signal[i] = "BUY"
                 elif not ema_40_above[i] and not rsi_above[i] and not macd_above[i]:
@@ -29,7 +30,7 @@ def main():
 
         df['signal'] = signal
         df.to_csv('prices/' + file, index=False)
-        combine_signals(df_signal, df, coin)
+        df_signal = combine_signals(df_signal, df, coin)
 
     df_signal.to_csv('signals.csv', index=False)
 

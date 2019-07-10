@@ -7,7 +7,7 @@ import os
 # Loop to update CSV's with recent OHLCV data
 def refresh_ohlcv(file):
 
-    df = pd.read_csv('prices/' + file)
+    df = pd.read_csv('prices/' + file).drop('signal', axis=1)
     df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d %H:%M:%S')
 
     binance = ccxt.binance()
@@ -23,7 +23,6 @@ def refresh_ohlcv(file):
     df_new = pd.DataFrame(df_new, columns=df.columns)
     df_new['date'] = df_new['date'].apply(lambda x: datetime.fromtimestamp(x/1000))
     df_new = df_new[df_new['date'] > df.iloc[-1]['date']]
-
     df = df.append(df_new, ignore_index=True)
     df.to_csv('prices/' + file, index=False)
 
@@ -48,4 +47,4 @@ def combine_signals(df_signal, df, coin):
     df = df.dropna()
     df['coin'] = coin
     df_signal = df_signal.append(df[['coin', 'date', 'signal']], ignore_index=True)
-    return df_signal 
+    return df_signal
