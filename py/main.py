@@ -1,13 +1,11 @@
 import os
-import pandas as pd
 from py.logic import calc_ma, calc_ema, calc_macd, calc_rsi, cross
-
+from py.functions import refresh_ohlcv, combine_signals
 
 def main():
-
+    df_signal = pd.DataFrame(columns=['coin', 'date', 'signal'])
     for file in os.listdir('prices/'):
-        df = pd.read_csv('prices/' + file)
-        df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d %H:%M:%S')
+        coin, df = refresh_ohlcv(file)
 
         ema_3 = calc_ema(df['close'], window=3)
         ema_40 = calc_ema(df['close'], window=40)
@@ -31,7 +29,9 @@ def main():
 
         df['signal'] = signal
         df.to_csv('prices/' + file, index=False)
+        combine_signals(df_signal, df, coin)
 
+    df_signal.to_csv('signals.csv', index=False)
 
 if __name__ == '__name__':
     main()
