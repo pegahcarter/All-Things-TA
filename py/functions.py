@@ -7,7 +7,9 @@ import os
 # Loop to update CSV's with recent OHLCV data
 def refresh_ohlcv(file, offline=False):
 
-    df = pd.read_csv('prices/' + file).drop('signal', axis=1)
+    df = pd.read_csv('prices/' + file)
+    if 'signal' in df.columns:
+        df.drop('signal', axis=1,inplace=True)
     df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d %H:%M:%S')
     coin = file[:file.find('.')]
 

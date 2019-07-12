@@ -32,6 +32,11 @@ for window in windows:
     df['close_'+str(window)+'_delta'] = [(row['close_'+str(window)] - row['close']) / row['close'] for _, row in df.iterrows()]
     results[window] = [correct(window, row) for _, row in df.iterrows()]
 
-df.drop(['open', 'high', 'low', 'close', 'volume'], axis=1, inplace=True)
+
+df.drop(['open', 'high', 'low', 'volume'], axis=1, inplace=True)
+
 cols = [col for col in df.columns if 'delta' in col]
+
 df.groupby('signal')[cols].mean()
+
+df.head(20)
