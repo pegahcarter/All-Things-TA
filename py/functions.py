@@ -5,16 +5,19 @@ import ccxt
 import os
 
 # Loop to update CSV's with recent OHLCV data
-def refresh_ohlcv(file):
+def refresh_ohlcv(file, offline=False):
 
     df = pd.read_csv('prices/' + file).drop('signal', axis=1)
     df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d %H:%M:%S')
-
-    binance = ccxt.binance()
     coin = file[:file.find('.')]
 
-    df_new = []
+    if offline:
+        return coin, df
+
     start_date = df.iloc[-1]['date']
+    df_new = []
+    binance = ccxt.binance()
+
     while start_date < datetime.now():
         results = binance.fetch_ohlcv(coin + '/USDT', '1h', since=int(start_date.timestamp()*1000))
         df_new += results
@@ -44,7 +47,7 @@ def group_candles(candles):
 
 # Combine signals to save into one CSV
 def combine_signals(df_signal, df, coin):
-    df = df.dropna()
+    df.dropna(inplace=True)
     df['coin'] = coin
     df_signal = df_signal.append(df[['coin', 'date', 'signal']], ignore_index=True)
     return df_signal

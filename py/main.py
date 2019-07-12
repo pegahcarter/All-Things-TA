@@ -6,7 +6,7 @@ from py.functions import refresh_ohlcv, combine_signals
 def main():
     df_signal = pd.DataFrame(columns=['coin', 'date', 'signal'])
     for file in os.listdir('prices/'):
-        coin, df = refresh_ohlcv(file)
+        coin, df = refresh_ohlcv(file, offline=True)
 
         ema_3 = calc_ema(df['close'], window=3)
         ema_40 = calc_ema(df['close'], window=40)
@@ -16,16 +16,16 @@ def main():
 
         # Logic
         intersections = cross(ema_3, ma_20)
-        ema_40_above = (ema_40 > ema_3) & (ema_40 > ma_20)
+        ema_40_below = (ema_40 < ema_3) & (ema_40 < ma_20)
         rsi_above = rsi > 50
         macd_above = macd > 0
 
         signal = [None for x in range(len(df))]
         for i, intersection in enumerate(intersections):
             if intersection:
-                if ema_40_above[i] and rsi_above[i] and macd_above[i]:
+                if ema_40_below[i] and rsi_above[i] and macd_above[i]:
                     signal[i] = "BUY"
-                elif not ema_40_above[i] and not rsi_above[i] and not macd_above[i]:
+                elif not ema_40_below[i] and not rsi_above[i] and not macd_above[i]:
                     signal[i] = "SELL"
 
         df['signal'] = signal
