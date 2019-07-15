@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def calc_ma(prices, window):
     return prices.rolling(window=window).mean().fillna(0)
 

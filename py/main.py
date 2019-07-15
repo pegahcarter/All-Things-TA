@@ -3,6 +3,7 @@ import pandas as pd
 from py.logic import calc_ma, calc_ema, calc_macd, calc_rsi, cross
 from py.functions import refresh_ohlcv, combine_signals
 
+
 def main():
     df_signal = pd.DataFrame(columns=['coin', 'date', 'signal'])
     for file in os.listdir('prices/'):
