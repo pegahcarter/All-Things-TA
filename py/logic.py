@@ -1,4 +1,5 @@
 import numpy as np
+from datetime import datetime
 
 
 def run(df):
@@ -11,19 +12,20 @@ def run(df):
 
     intersections = cross(ema_3, ma_20)
     ma_20_supported = ma_20 > ema_40
-    ema_3_supported = ema_3 > ema_20
+    ema_3_supported = ema_3 > ma_20
     rsi_above = rsi > 50
     macd_above = macd > 0
 
     signal = [None for x in range(len(df))]
     for i, intersection in enumerate(intersections):
         if intersection:
-            if ma_20_supported and ema_3_supported and rsi_above and macd_above:
-                signal[i] = 'BUY'
-            elif not ma_20_supported and not ema_3_supported and not rsi_above and not macd_above:
+            if (ma_20_supported[i] and ema_3_supported[i] and rsi_above[i] and macd_above[i]):
                 signal[i] = 'SELL'
+            elif (not ma_20_supported[i] and not ema_3_supported[i] and not rsi_above[i] and not macd_above[i]):
+                signal[i] = 'BUY'
 
     df['signal'] = signal
+    df['date'] = [datetime.fromtimestamp(x/1000) for x in df['date']]
     return df
 
 
