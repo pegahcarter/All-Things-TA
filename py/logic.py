@@ -1,6 +1,32 @@
 import numpy as np
 
 
+def run(df):
+    prices = df['close'].copy()
+    ema_3 = calc_ema(prices, window=3)
+    ema_40 = calc_ema(prices, window=40)
+    ma_20 = calc_ma(prices, window=20)
+    macd = calc_macd(prices)
+    rsi = calc_rsi(prices)
+
+    intersections = cross(ema_3, ma_20)
+    ma_20_supported = ma_20 > ema_40
+    ema_3_supported = ema_3 > ema_20
+    rsi_above = rsi > 50
+    macd_above = macd > 0
+
+    signal = [None for x in range(len(df))]
+    for i, intersection in enumerate(intersections):
+        if intersection:
+            if ma_20_supported and ema_3_supported and rsi_above and macd_above:
+                signal[i] = 'BUY'
+            elif not ma_20_supported and not ema_3_supported and not rsi_above and not macd_above:
+                signal[i] = 'SELL'
+
+    df['signal'] = signal
+    return df
+
+
 def calc_ma(prices, window):
     return prices.rolling(window=window).mean().fillna(0)
 
