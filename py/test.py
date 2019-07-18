@@ -7,29 +7,37 @@ b = ccxt.binance()
 data = b.fetch_ohlcv('BTC/USDT', '1h')
 df = pd.DataFrame(data=data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
 df['date'] = [datetime.fromtimestamp(x/1000) for x in df['date']]
-df.drop(['open', 'high', 'low', 'volume'], axis=1, inplace=True)
-
+df = pd.read_csv('prices/BTC.csv')[-500:]
+df.drop(['open', 'high', 'low', 'volume', 'signal'], axis=1, inplace=True)
+df.reset_index(drop=True, inplace=True)
 prices = df['close']
 
-ema3 = calc_ema(prices, window=3)
-# ema40 = calc_ema(prices, window=40)
-ma20 = calc_ma(prices, window=20)
-ema3_gt_ma20 = ema3 > ma20
-df['ema3'] = ema3
-df['ma20'] = ma20
-df['ema3_gt_ma20'] = ema3_gt_ma20
+df['ema3'] = calc_ema(prices, window=3)
+df['ma20'] = calc_ma(prices, window=20)
+df['ema40'] = calc_ema(prices, window=40)
+df['ema3_gt_ma20'] = df['ema3'] > df['ma20']
+df['ma20_gt_ema40'] = df['ma20'] > df['ema40']
 
-intersections = cross(ema3, ma20)
+intersections = cross(df['ema3'], df['ma20'])
 intersections = pd.Series(intersections)
 
 cross_indices = list(intersections[intersections == True].index)
 last_cross = cross_indices[-1]
+signal = None
 
-df[last_cross-1:]
+for index, close in prices[last_cross:].iteritems():
+    segment = df[last_cross:index+1]
+    if True and False in set(segment['ema3_gt_ma20']):
+        break
 
-prices_test = df[last_cross:]['close']
+    if True in set(segment['ema3_gt_ma20']):
+        if segment['close'][index] > segment['ema3'][index] and segment['ma20'][index] > segment['ema40'][index]:
+            signal = 'BUY'
+            break
+    else:   # False in set(segment['ema3_gt_ma20'])
+        if segment['close'][index] < segment['ema3'][index] and segment['ma20'][index] < segment['ema40'][index]:
+            signal = 'SELL'
+            break
 
-for index, close in prices_test.iteritems():
-    segment = ema3_gt_ma20[last_cross+1:index+1]
-    print(len(segment))
-    # print(len(segment[segment==True]))
+
+index
