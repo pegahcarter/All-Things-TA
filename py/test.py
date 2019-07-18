@@ -1,44 +1,35 @@
 import ccxt
 import pandas as pd
 from datetime import datetime, timedelta
-from time import sleep
-
-df = pd.read_csv('prices/BTC.csv')
-df = df.dropna().reset_index(drop=True)
-
-test = df[-1:].values[0]
-# Remove milliseconds from date
-test[0] = test[0][:-4]
-
-last_date = datetime.strptime(test[0], '%Y-%m-%d %H:%M:%S')
-
-'BTC - ' + test[-1]
-last_date = last_date.strftime('%H:%M %p %B %d ')
-
-
-# -----------------------------------------------------------------------
-# Initial psuedocode
+from py.logic import *
 
 b = ccxt.binance()
-data = b.fetch_ohlcv('BTC/USDT', '1h', limit=500)
+data = b.fetch_ohlcv('BTC/USDT', '1h')
+df = pd.DataFrame(data=data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
+df['date'] = [datetime.fromtimestamp(x/1000) for x in df['date']]
+df.drop(['open', 'high', 'low', 'volume'], axis=1, inplace=True)
 
-last_candle = data[-1]
-datetime.fromtimestamp(last_candle[0]/1000)
+prices = df['close']
 
+ema3 = calc_ema(prices, window=3)
+# ema40 = calc_ema(prices, window=40)
+ma20 = calc_ma(prices, window=20)
+ema3_gt_ma20 = ema3 > ma20
+df['ema3'] = ema3
+df['ma20'] = ma20
+df['ema3_gt_ma20'] = ema3_gt_ma20
 
-coins = ['BTC', 'ETH', 'LTC', 'BCH', 'BNB']
-b = ccxt.binance()
+intersections = cross(ema3, ma20)
+intersections = pd.Series(intersections)
 
-while True:
-    next_hour = (datetime.now() + timedelta(hours=1)).hour
+cross_indices = list(intersections[intersections == True].index)
+last_cross = cross_indices[-1]
 
-    while datetime.now().hour < next_hour:
-        sleep(60)
-        for coin in coins:
-            df = b.fetch_ohlcv(coin + '/USDT', '1h', limit=500)
+df[last_cross-1:]
 
-            signals = main_logic()
-            # TODO: remove milliseconds?
-            last_signal = get_last_signal(signals)
-            if last_signal['date'].hour == next_hour:
-                send_alert(coin, last_signal)
+prices_test = df[last_cross:]['close']
+
+for index, close in prices_test.iteritems():
+    segment = ema3_gt_ma20[last_cross+1:index+1]
+    print(len(segment))
+    # print(len(segment[segment==True]))

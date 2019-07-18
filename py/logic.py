@@ -81,5 +81,5 @@ def cross(line1, line2):
     for next_val in l1_gt_l2[nan_count+1:]:
         crosses.append(current_val != next_val)
         current_val = next_val
-
+    crosses.insert(0, False)
     return crosses
