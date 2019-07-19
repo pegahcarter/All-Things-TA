@@ -12,32 +12,41 @@ df.drop(['open', 'high', 'low', 'volume', 'signal'], axis=1, inplace=True)
 df.reset_index(drop=True, inplace=True)
 prices = df['close']
 
-df['ema3'] = calc_ema(prices, window=3)
-df['ma20'] = calc_ma(prices, window=20)
-df['ema40'] = calc_ema(prices, window=40)
-df['ema3_gt_ma20'] = df['ema3'] > df['ma20']
-df['ma20_gt_ema40'] = df['ma20'] > df['ema40']
+ema3 = calc_ema(prices, window=3)
+ma20 = calc_ma(prices, window=20)
+ema40 = calc_ema(prices, window=40)
+ema3_gt_ma20 = ema3 > ma20
 
-intersections = cross(df['ema3'], df['ma20'])
+intersections = cross(ema3, ma20)
 intersections = pd.Series(intersections)
 
 cross_indices = list(intersections[intersections == True].index)
-last_cross = cross_indices[-1]
-signal = None
 
-for index, close in prices[last_cross:].iteritems():
-    segment = df[last_cross:index+1]
-    if True and False in set(segment['ema3_gt_ma20']):
-        break
+signal_df = []
 
-    if True in set(segment['ema3_gt_ma20']):
-        if segment['close'][index] > segment['ema3'][index] and segment['ma20'][index] > segment['ema40'][index]:
-            signal = 'BUY'
-            break
-    else:   # False in set(segment['ema3_gt_ma20'])
-        if segment['close'][index] < segment['ema3'][index] and segment['ma20'][index] < segment['ema40'][index]:
-            signal = 'SELL'
+for cross_index in cross_indices:
+    # last_cross = cross_indices[-1]
+    signal = None
+
+    # for index, close in prices[last_cross:].iteritems():
+    for index, close in prices[cross_index:].iteritems():
+        rng = ema3_gt_ma20[cross_index:index+1]
+        if True and False in set(rng):
             break
 
+        if True in set(rng):
+            # if close > ema3[index] and ma20[index] > ema40[index]:
+            if close > ema3[index]:
+                signal = 'BUY'
+                break
+        else:   # False in set(rng)
+            # if close < ema3[index] and ma20[index] < ema40[index]:
+            if close < ema3[index]:
+                signal = 'SELL'
+                break
 
-index
+    if signal:
+        signal_df.append([df['date'][index], 'BTC', signal, close])
+        # temp = signal_df.loc[signal_df['date'] == df['date'][index]]
+        # if len(temp) == 0 or coin not in temp['coin']:
+        #     add_signal(coin, date, signal)
