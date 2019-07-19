@@ -1,20 +1,18 @@
+import pandas as pd
 import numpy as np
 from datetime import datetime
 
 
 def run(df):
-    prices = df['close'].copy()
-    ema_3 = calc_ema(prices, window=3)
-    ema_40 = calc_ema(prices, window=40)
-    ma_20 = calc_ma(prices, window=20)
-    macd = calc_macd(prices)
-    rsi = calc_rsi(prices)
 
-    intersections = cross(ema_3, ma_20)
-    ma_20_supported = ma_20 > ema_40
-    ema_3_supported = ema_3 > ma_20
-    rsi_above = rsi > 50
-    macd_above = macd > 0
+    prices = df['close'].copy()
+
+    ema3 = calc_ema(prices, window=3)
+    ma20 = calc_ma(prices, window=20)
+    ema40 = calc_ema(prices, window=40)
+    ema3_gt_ma20 = ema3 > ma20
+
+    intersections = pd.Series(cross(ema3, ma20))
 
     signal = [None for x in range(len(df))]
     for i, intersection in enumerate(intersections):
