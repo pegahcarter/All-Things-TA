@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime
 
 
-def run(df):
+def run(coin, df):
 
     prices = df['close'].copy()
 
@@ -13,18 +13,32 @@ def run(df):
     ema3_gt_ma20 = ema3 > ma20
 
     intersections = pd.Series(cross(ema3, ma20))
+    cross_indices = list(intersections[intersections == True].index)
+    last_signal = None
+    coin_signals = []
 
-    signal = [None for x in range(len(df))]
-    for i, intersection in enumerate(intersections):
-        if intersection:
-            if (ma_20_supported[i] and ema_3_supported[i] and rsi_above[i] and macd_above[i]):
-                signal[i] = 'SELL'
-            elif (not ma_20_supported[i] and not ema_3_supported[i] and not rsi_above[i] and not macd_above[i]):
-                signal[i] = 'BUY'
+    for cross_index in cross_indices:
+        signal = None
+        for index, close in prices[cross_index:].iteritems():
+            rng = ema3_gt_ma20[cross_index:index+1]
+            if len(set(rng)) == 2:
+                break
 
-    df['signal'] = signal
-    df['date'] = [datetime.fromtimestamp(x/1000) for x in df['date']]
-    return df
+            if True in set(rng):
+                if close > ema3[index] and ma20[index] > ema40[index] and last_signal != 'BUY':
+                    signal = True
+                    last_signal = 'BUY'
+                    break
+            else:   # False in set(rng)
+                if close < ema3[index] and ma20[index] < ema40[index] and last_signal != 'SELL':
+                    signal = True
+                    last_signal = 'SELL'
+                    break
+
+        if signal:
+            coin_signals.append([df['date'][index], last_signal, coin, close])
+
+    return coin_signals
 
 
 def calc_ma(prices, window):

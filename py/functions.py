@@ -45,11 +45,3 @@ def group_candles(candles):
         candles[-1, 4],        # close
         candles[:, 5].sum()    # volume
     ])
-
-
-# Combine signals to save into one CSV
-def combine_signals(df_signal, df, coin):
-    df.dropna(inplace=True)
-    df['coin'] = coin
-    df_signal = df_signal.append(df[['coin', 'date', 'signal']], ignore_index=True)
-    return df_signal
