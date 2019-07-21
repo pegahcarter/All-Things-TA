@@ -1,9 +1,8 @@
 import pandas as pd
 import numpy as np
-from datetime import datetime
 
 
-def run(coin, df):
+def run(ticker, df):
 
     prices = df['close'].copy()
 
@@ -36,7 +35,7 @@ def run(coin, df):
                     break
 
         if signal:
-            coin_signals.append([df['date'][index], last_signal, coin, close])
+            coin_signals.append([df['date'][index], last_signal, ticker, '{:.8f}'.format(close)])
 
     return coin_signals
 
