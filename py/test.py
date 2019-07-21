@@ -1,8 +1,11 @@
 from py.variables import *
-from urllib import quote_plus
-import requests
+from urllib.parse import urlencode
 
-message = 'https://api.telegram.org/bot' + API_KEY
-message += '/sendMessage?chat_id=' + CHAT_ID
+url = 'https://api.telegram.org/bot' + API_KEY + '/sendMessage?'
+mydict = {'chat_id': CHAT_ID, 'text': 'Hello'}
+url + urlencode(mydict)
+
+
+message += 'chat_id=' + CHAT_ID
 message += '&text=' + quote_plus('Hello')
 requests.get(message)
