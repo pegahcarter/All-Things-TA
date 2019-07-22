@@ -20,16 +20,16 @@ for ticker in tickers:
 
 signal_df = pd.DataFrame(signal_df, columns=['date', 'signal', 'coin', 'price'])
 signal_df = signal_df.sort_values('date').reset_index(drop=True)
+signal_df.to_csv('../signals.csv', index=False)
+# old_signal_df = pd.read_csv('../signals.csv')
+# new_signals = signal_df.loc[signal_df['date'] > old_signal_df['date'].iloc[-1]]
+#
+# if len(new_signals) > 0:
+#     for _, row in new_signals.iterrows():
+#         date = row['date'].strftime('%m/%d %H:%M %p (CST)')
+#         text += date + '  -  ' + row['coin'] + '  -  ' + row['signal'] + '  -  '  + str(row['price']) +  '\n\n'
+#
+#     old_signal_df = old_signal_df.append(signal_df, ignore_index=True, sort=False)
+#     old_signal_df.to_csv('../signals.csv', index=False)
 
-old_signal_df = pd.read_csv('signals.csv')
-new_signals = signal_df.loc[signal_df['date'] > old_signal_df['date'].iloc[-1]]
-
-if len(new_signals) > 0:
-    for _, row in new_signals.iterrows():
-        date = row['date'].strftime('%m/%d %H:%M %p (CST)')
-        text += date + '  -  ' + row['coin'] + '  -  ' + row['signal'] + '  -  '  + str(row['price']) +  '\n\n'
-
-    old_signal_df = old_signal_df.append(signal_df, ignore_index=True, sort=False)
-    old_signal_df.to_csv('signals.csv', index=False)
-
-    requests.get(url + urlencode({'chat_id': chat_id, 'text': text}))
+    # requests.get(url + urlencode({'chat_id': chat_id, 'text': text}))

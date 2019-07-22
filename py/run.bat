@@ -1,1 +1,1 @@
-python main.py
+"C:\Users\carter\Documents\crypto\peter-signal\py\main.py"
