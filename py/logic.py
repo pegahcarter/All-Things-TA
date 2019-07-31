@@ -24,19 +24,19 @@ def run(ticker, df):
                 break
 
             if True in set(rng):
-                if last_signal != 'BUY':
-                    if close > ema3[index]:
-                        if ma20[index] > ema40[index]:
-                            signal = True
-                            last_signal = 'BUY'
-                        break
+                # if last_signal != 'BUY':
+                if close > ema3[index]:
+                    if ma20[index] > ema40[index]:
+                        signal = True
+                        last_signal = 'BUY'
+                    break
             else:   # False in set(rng)
-                if last_signal != 'SELL':
-                        if close < ema3[index]:
-                            if ma20[index] < ema40[index]:
-                                signal = True
-                                last_signal = 'SELL'
-                            break
+                # if last_signal != 'SELL':
+                if close < ema3[index]:
+                    if ma20[index] < ema40[index]:
+                        signal = True
+                        last_signal = 'SELL'
+                    break
 
         if signal:
             coin_signals.append([df['date'][index], last_signal, ticker, '{:.8f}'.format(close)])
