@@ -9,7 +9,9 @@ since = datetime.now() - timedelta(hours=500)
 since = int(time.mktime(since.timetuple())*1000)
 
 # tickers = ['BTC/USD', 'ETH/USD', 'ETHU19', 'BCHU19', 'XRPU19', 'LTCU19', 'EOSU19']
-tickers = ['BTC/USDT', 'ETH/USDT', 'ETH/BTC', 'BCH/BTC', 'XRP/BTC', 'LTC/BTC', 'EOS/BTC']
+tickers = ['BTC/USDT', 'ETH/USDT', 'ETH/BTC', 'BCH/USDT', 'BCH/BTC','XRP/USDT', 'XRP/BTC', 'LTC/USDT',
+            'LTC/BTC', 'EOS/USDT', 'EOS/BTC']
+
 candle_intervals = {
     '1h': 'Hourly',
     '1d': 'Daily'
