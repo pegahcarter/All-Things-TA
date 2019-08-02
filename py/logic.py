@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
+from variables import *
 
+def run(ticker, candle_abv):
 
-def run(ticker, df):
-
+    data = binance.fetch_ohlcv(ticker, candle_abv)
+    df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
     prices = df['close'].copy()
 
     ema3 = calc_ema(prices, window=3)

@@ -1,44 +1,60 @@
-import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import time
 import ccxt
 
+import numpy as np
+import pandas as pd
 
-x = ccxt.binance()
-btc = np.array(x.fetch_ohlcv('BTC/USDT', '1h', limit=200))[:, [0,4]]
+def foo():
+    data = [[1,1,1], [2,3,4], [10, 100, 1000]]
+    # df = pd.DataFrame(data*i, columns=['col1', 'col2', 'col3'])
+    return data
 
-df = pd.DataFrame(btc, columns=['date', 'BTC/USD'])
+test1_a = []
+for i in range(3):
+    test1_a += foo()
+test1_a
 
-for coin in ['ETH', 'XRP', 'EOS', 'BCH', 'LTC', 'BNB']:
-    ticker = coin + '/BTC'
-    df[ticker] = np.array(x.fetch_ohlcv(ticker, '1h', limit=200))[:, 4]/df['BTC/USD']
-df.head()
+test1_b = [foo() for i in range(3)]
+test1_b
+
+# ------------------------------------------------------------------------------
+
+def foo2():
+    data = [[1,1,1], [2,3,4], [10, 100, 1000]]
+    return pd.DataFrame(data, columns=['col1', 'col2', 'col3'])
+
+test2_a = pd.DataFrame([])
+for i in range(3):
+    test2_a = test2_a.append(foo())
+test2_a
+
+test2_b = [foo2() for i in range(3)]
+test2_b
+len(test2_b)
+
+test2_c = pd.DataFrame(columns=['col1', 'col2', 'col3'])
+test2_c = test2_c.append([foo2() for i in range(3)], ignore_index=True)
+test2_c
+
+
+test2_d = pd.DataFrame(columns=['col1', 'col2', 'col3'])
+test2_d = test2_d.append([foo() for i in range(3)], ignore_index=True)
+test2_d
+
+test3_a = pd.DataFrame([foo() for i in range(3)], columns=['col1', 'col2', 'col3'])
+test3_a
+
+test3_b = pd.DataFrame([])
 
 
 
 
 
-df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
-df['date'] /= 1000
-
-df['date'] = [datetime.fromtimestamp(x) for x in df['date']]
-df.head()
-
-
-
-
-
-
-
-
-
-
-
-
-from py.variables import *
-from urllib.parse import urlencode
-
-url = 'https://api.telegram.org/bot' + API_KEY + '/sendMessage?'
-mydict = {'chat_id': CHAT_ID, 'text': 'Hello'}
-url + urlencode(mydict)
+# from py.variables import *
+# from urllib.parse import urlencode
+#
+# url = 'https://api.telegram.org/bot' + API_KEY + '/sendMessage?'
+# mydict = {'chat_id': CHAT_ID, 'text': 'Hello'}
+# url + urlencode(mydict)

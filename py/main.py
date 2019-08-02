@@ -10,16 +10,11 @@ import time
 for candle_abv, candle_string in candle_intervals.items():
     text = candle_string + '\n'
     signal_df = []
-
     for ticker in tickers:
-        data = binance.fetch_ohlcv(ticker, candle_abv)
-        df = pd.DataFrame(data=data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
-        df['date'] = [datetime.fromtimestamp(x/1000) for x in df['date']]
-
-        coin_signals = logic.run(ticker, df)
-        signal_df += coin_signals
+        signal_df += logic.run(ticker, candle_abv)
 
     signal_df = pd.DataFrame(signal_df, columns=['date', 'signal', 'coin', 'price'])
+    signal_df['date'] = [datetime.fromtimestamp(x/1000) for x in signal_df['date']]
     signal_df = signal_df.sort_values('date').reset_index(drop=True)
 
     old_signal_df = pd.read_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv')
