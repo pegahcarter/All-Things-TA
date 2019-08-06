@@ -1,7 +1,8 @@
 import os
 import pandas as pd
-import logic as logic
+import logic
 from variables import *
+from google import get_gsheet, save_gsheet
 from datetime import datetime
 from urllib.parse import urlencode
 import requests
