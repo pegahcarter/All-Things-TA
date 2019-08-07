@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 from variables import *
 
+
 def run(ticker, candle_abv):
 
-    data = binance.fetch_ohlcv(ticker, candle_abv)
+    data = binance.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
     df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
     prices = df['close'].copy()
 
@@ -41,7 +42,7 @@ def run(ticker, candle_abv):
                     break
 
         if signal:
-            coin_signals.append([df['date'][index], last_signal, ticker, '{:.8f}'.format(close)])
+            coin_signals.append([df['date'][index], last_signal, ticker, round(close, 8)])
 
     return coin_signals
 
