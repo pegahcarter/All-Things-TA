@@ -5,7 +5,7 @@ from variables import *
 
 def run(ticker, candle_abv):
 
-    data = binance.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
+    data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
     df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
     prices = df['close'].copy()
 

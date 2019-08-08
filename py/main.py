@@ -21,8 +21,8 @@ def main():
         signal_df['date'] = [datetime.fromtimestamp(x/1000) for x in signal_df['date']]
         signal_df = signal_df.sort_values('date').reset_index(drop=True)
 
-        # old_signal_df = pd.read_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv')
-        old_signal_df = get_gsheet(candle_string)
+        old_signal_df = pd.read_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv')
+        # old_signal_df = get_gsheet(candle_string)
         new_signals = signal_df[signal_df['date'] > max(old_signal_df['date'])]
 
         if len(new_signals) > 0:
@@ -35,7 +35,7 @@ def main():
                 text += date + ': ' + row['coin'] + ' - ' + row['signal'] + ' - '  + str(row['price']) +  '\n\n'
 
             old_signal_df = old_signal_df.append(new_signals, ignore_index=True, sort=False)
-            # old_signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv', index=False)
+            old_signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv', index=False)
             save_gsheet(candle_string, old_signal_df)
 
             requests.get(url + urlencode({'chat_id': chat_id, 'text': text}))

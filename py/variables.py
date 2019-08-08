@@ -7,7 +7,7 @@ import os
 since = datetime.now() - timedelta(hours=500)
 since = int(time.mktime(since.timetuple())*1000)
 
-binance = ccxt.binance()
+exchange = ccxt.bitfinex()
 
 candle_intervals = {
     '1h': 'Hourly',
