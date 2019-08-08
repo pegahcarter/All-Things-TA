@@ -3,56 +3,49 @@ import numpy as np
 from variables import *
 
 
-def run(ticker, candle_abv):
+def run(ticker, candle_abv, file=False):
 
-    data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
-    df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
+    if file:
+        data = pd.read_csv(file)
+    else:
+        data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
+        df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
     prices = df['close'].copy()
 
-    ema3 = calc_ema(prices, window=3)
-    ma20 = calc_ma(prices, window=20)
-    ema40 = calc_ema(prices, window=40)
+    ema3 = prices.ewm(span=3, adjust=False).mean()
+    ema40 = prices.ewm(span=40, adjust=False).mean()
+    ma20 = prices.rolling(window=20).mean().fillna(0)
     ema3_gt_ma20 = ema3 > ma20
 
-    intersections = pd.Series(cross(ema3, ma20))
-    cross_indices = list(intersections[intersections == True].index)
-    last_signal = None
+    current_val = ema3_gt_ma20[0]
+    intersections = [False]
+
+    for val in ema3_gt_ma20[1:]:
+        intersections.append(val != current_val)
+        current_val = val
+
     coin_signals = []
-
-    for cross_index in cross_indices:
+    for cross_index, intersection in enumerate(intersections):
         signal = None
-        for index, close in prices[cross_index:].iteritems():
-            rng = ema3_gt_ma20[cross_index:index+1]
-            if len(set(rng)) == 2:
-                break
-
-            if True in set(rng):
-                # if last_signal != 'BUY':
-                if close > ema3[index]:
-                    if ma20[index] > ema40[index]:
-                        signal = True
-                        last_signal = 'BUY'
+        if intersection:
+            for index, close in prices[cross_index:]:
+                rng = set(ema3_gt_ma20[cross_index:index + 1])
+                if True in rng and False in rng:
                     break
-            else:   # False in set(rng)
-                # if last_signal != 'SELL':
-                if close < ema3[index]:
-                    if ma20[index] < ema40[index]:
-                        signal = True
-                        last_signal = 'SELL'
-                    break
-
-        if signal:
-            coin_signals.append([df['date'][index], last_signal, ticker, round(close, 8)])
+                elif True in rng:
+                    if close > ema3[index]:
+                        if ma20[index] > ema40[index]:
+                            signal = 'BUY'
+                        break
+                else:
+                    if close < ema3[index]:
+                        if ma20[index] < ema40[index]:
+                            signal = 'SELL'
+                        break
+            if signal:
+                coin_signals.append([df['date'][index], signal, ticker, round(close, 8)])
 
     return coin_signals
-
-
-def calc_ma(prices, window):
-    return prices.rolling(window=window).mean().fillna(0)
-
-
-def calc_ema(prices, window):
-    return prices.ewm(span=window, adjust=False).mean()
 
 
 def calc_macd(prices, fast=12, slow=26):
@@ -61,8 +54,8 @@ def calc_macd(prices, fast=12, slow=26):
     signal line = 9ema of macd line
     histogram = macd line - signal line
     '''
-    ema_fast = calc_ema(prices, window=fast)
-    ema_slow = calc_ema(prices, window=slow)
+    ema_fast = prices.ewm(span=fast, adjust=False).mean()
+    ema_slow = prices.ewm(span=slow, adjust=False).mean()
     return ema_fast - ema_slow
 
 
@@ -89,15 +82,3 @@ def calc_rsi(prices):
         rsi[i] = 100. - 100./(1. + up/down)
 
     return rsi
-
-
-def cross(line1, line2):
-    nan_count = max(line1.isna().sum(), line2.isna().sum())
-    crosses = [False for i in range(nan_count)]
-    l1_gt_l2 = line1 > line2
-    current_val = l1_gt_l2[nan_count]
-    for next_val in l1_gt_l2[nan_count+1:]:
-        crosses.append(current_val != next_val)
-        current_val = next_val
-    crosses.insert(0, False)
-    return crosses
