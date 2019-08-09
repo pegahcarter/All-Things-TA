@@ -1,11 +1,27 @@
+import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import time
 import ccxt
 
-import numpy as np
-import pandas as pd
 
+import pygsheets
+gc = pygsheets.authorize(service_file='C:/Users/carter/Documents/crypto/peter-signal/credentials.json')
+g_doc = gc.open_by_key('1T67gVealvVutn_VuiedbH7ViK8_OIBWOmoDIMq82oQE')
+
+tick_sheet = g_doc.worksheet_by_title('Tickers')
+tickers = [str(ticker) for ticker in tick_sheet.get_col(2) if len(ticker) > 0 and ticker != 'Tickers']
+
+def get_gsheet(candle_string):
+    return g_doc.worksheet_by_title(candle_string).get_as_df()
+
+def save_gsheet(candle_string, df):
+    return g_doc.worksheet_by_title(candle_string).set_dataframe(df, (1,1))
+
+
+
+
+# ------------------------------------------------------------------------------
 def foo():
     data = [[1,1,1], [2,3,4], [10, 100, 1000]]
     # df = pd.DataFrame(data*i, columns=['col1', 'col2', 'col3'])
