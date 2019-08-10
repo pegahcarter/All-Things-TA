@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from variables import *
+import requests
+from urllib.parse import urlencode
 
 
 def run(ticker, candle_abv):
@@ -22,29 +24,46 @@ def run(ticker, candle_abv):
     for cross_index in cross_indices:
         signal = None
         for index, close in prices[cross_index:].iteritems():
-            rng = ema3_gt_ma20[cross_index:index+1]
-            if len(set(rng)) == 2:
+            rng = set(ema3_gt_ma20[cross_index:index+1])
+            if len(rng) == 2:
                 break
-
-            if True in set(rng):
-                # if last_signal != 'BUY':
+            elif True in rng:
                 if close > ema3[index]:
                     if ma20[index] > ema40[index]:
-                        signal = True
-                        last_signal = 'BUY'
+                        signal = 'Long'
+                        SL = df[index-10:index]['low'].min() * .9975
                     break
-            else:   # False in set(rng)
-                # if last_signal != 'SELL':
+            else:   # False in rng
                 if close < ema3[index]:
                     if ma20[index] < ema40[index]:
-                        signal = True
-                        last_signal = 'SELL'
+                        signal = 'Short'
+                        SL = df[index-10:index]['high'].max() * 1.0025
                     break
 
         if signal:
-            coin_signals.append([df['date'][index], last_signal, ticker, round(close, 8)])
+            coin_signals.append([df['date'][index], ticker, signal, round(close, 8), round(SL, 8)])
 
     return coin_signals
+
+
+def send_signal(row, date):
+
+    text = date + '\n'
+    text += row['ticker'] + '\n'
+    text += 'Bitfinex\n'
+    text += row['signal'] + ' ' + str(row['price']) + '\n'
+
+    diff = row['price'] - row['Stop Loss']
+    tp1 = row['price'] + diff/2
+    tp2 = row['price'] + diff
+    tp3 = row['price'] + diff*2
+    tp4 = row['price'] + diff*3
+
+    text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
+    text += 'Stop loss ' + str(row['Stop Loss'])
+
+    requests.get(url + urlencode({'chat_id': chat_id, 'text': text}))
+
 
 
 def calc_ma(prices, window):
