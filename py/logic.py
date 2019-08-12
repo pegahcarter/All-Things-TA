@@ -86,7 +86,7 @@ def send_signal(row, date):
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
     text += 'Stop loss ' + str(row['Stop Loss'])
 
-    requests.get(url + urlencode({'chat_id': chat_id, 'text': text}))
+    requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
 
 
 

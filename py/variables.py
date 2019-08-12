@@ -18,6 +18,7 @@ candle_intervals = {
 API = '862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8'
 url = 'https://api.telegram.org/bot' + API + '/sendMessage?'
 chat_id = '-360419097'
+test_chat_id = '-1001192596591'
 
 # Google docs
 gc = pygsheets.authorize(service_file='C:/Users/carter/Documents/crypto/peter-signal/credentials.json')
