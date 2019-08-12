@@ -1,10 +1,7 @@
 import pandas as pd
 import numpy as np
 
-
-
-
-df = pd.read_csv('backtests/BTC.csv')
+df = pd.read_csv('backtests/BTC.csv').drop('volume', axis=1)
 _close = np.array(df['close'])
 _open = np.array(df['open'])
 low = np.array(df['low'])
@@ -29,6 +26,8 @@ for cross_index in cross_indices:
         rng = set(ema3_gt_ma20[cross_index:index+1])
         if len(rng) == 2:
             break
+        elif abs(_close[index] - _open[index])/_close[index] > .02:
+            break
         elif True in rng:
             if _close[index] > ema3[index]:
                 if ma20[index] > ema40[index]:
@@ -42,25 +41,29 @@ for cross_index in cross_indices:
 
 df['signal'] = signals
 
-test = df[df['signal'] == 'Long']
 results = [None for i in range(len(df))]
-
+purchase_prices = [None for i in range(len(df))]
+stop_losses = [None for i in range(len(df))]
 
 for signal_index, signal in enumerate(signals):
     if signal is None:
         continue
 
     if signal == 'Long':
-        midrange = _open
         l_bounds = low
+        midrange = _open
         u_bounds = high
+        multiplier = .0025
     else:  # signal == 'Short'
-        midrange = -_open
         l_bounds = -high
+        midrange = -_open
         u_bounds = -low
+        multiplier = -.0025
 
-    purchase_price = midrange[signal_index+1]
-    SL = l_bounds[signal_index-10:signal_index].min()
+    purchase_price = midrange[signal_index+1] * (1 + multiplier)
+    purchase_prices[signal_index] = purchase_price
+    SL = min(l_bounds[signal_index-10:signal_index]) * (1 - multiplier)
+    stop_losses[signal_index] = SL
 
     diff = purchase_price - SL
 
@@ -85,3 +88,22 @@ for signal_index, signal in enumerate(signals):
             SL = purchase_price
 
     results[signal_index] = result
+
+df['result'] = results
+df['purchase-price'] = purchase_prices
+df['stop-loss'] = stop_losses
+
+df['stop-loss %'] = abs(df['purchase-price'] - df['stop-loss']) / df['purchase-price']
+
+test = df[['signal', 'result', 'purchase-price', 'stop-loss %']].dropna().reset_index(drop=True)
+
+tp_pcts = {
+    0: -1,
+    1: -5./8.,
+    2: 3./8.,
+    3: 7./8.,
+    4: 11./8.
+}
+end_pct =  np.array(map(lambda x: tp_pcts[x], test['result']))
+
+sum(test['stop-loss %'] * end_pct)
