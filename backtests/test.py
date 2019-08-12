@@ -2,14 +2,14 @@ import pandas as pd
 import numpy as np
 
 df = pd.read_csv('backtests/BTC.csv')
-prices = df['close'].copy()
+_close = np.array(df['close'])
 _open = np.array(df['open'])
 low = np.array(df['low'])
 high = np.array(df['high'])
 
-ema3 = prices.ewm(span=3, adjust=False).mean()
-ma20 = prices.rolling(window=20).mean().fillna(0)
-ema40 = prices.ewm(span=40, adjust=False).mean()
+ema3 = df['close'].ewm(span=3, adjust=False).mean()
+ma20 = df['close'].rolling(window=20).mean().fillna(0)
+ema40 = df['close'].ewm(span=40, adjust=False).mean()
 ema3_gt_ma20 = ema3 > ma20
 
 cross_indices = []
@@ -27,40 +27,54 @@ for cross_index in cross_indices:
         if len(rng) == 2:
             break
         elif True in rng:
-            if prices[index] > ema3[index]:
+            if _close[index] > ema3[index]:
                 if ma20[index] > ema40[index]:
-                    signals[index] = 'BUY'
+                    signals[index] = 'Long'
                 break
         else:   # False in rng
-            if prices[index] < ema3[index]:
+            if _close[index] < ema3[index]:
                 if ma20[index] < ema40[index]:
-                    signals[index] = 'SELL'
+                    signals[index] = 'Short'
                 break
 
 df['signal'] = signals
 
-test = df[df['signal'] == 'BUY']
+test = df[df['signal'] == 'Long']
 results = [None for i in range(len(df))]
 
-for signal_index in test.index:
-    purchase_price = _open[signal_index]
-    SL = low[signal_index-10:signal_index].min()
+
+for signal_index, signal in enumerate(signals):
+    if signal is None:
+        continue
+
+    if signal == 'Long':
+        midrange = _open
+        l_bounds = low
+        u_bounds = high
+    else:  # signal == 'Short'
+        midrange = -_open
+        l_bounds = -high
+        u_bounds = -low
+
+    purchase_price = midrange[signal_index+1]
+    SL = l_bounds[signal_index-10:signal_index].min()
+
     diff = purchase_price - SL
 
     tp1 = purchase_price + diff/2.
     tp2 = purchase_price + diff
-    tp2 = purchase_price + diff*2.
-    tp3 = purchase_price + diff*3.
+    tp3 = purchase_price + diff*2.
+    tp4 = purchase_price + diff*3.
 
     tp_targets = iter([tp1, tp2, tp3, tp4])
     tp_target = next(tp_targets, None)
     result = 0
 
     for i in range(signal_index, len(df)):
-        if _open[i] < SL or low[i] < SL or result == 4:
+        if result == 4 or midrange[i] < SL or l_bounds[i] < SL:
             break
 
-        while result != 4 and high[i] > tp_target:
+        while result != 4 and u_bounds[i] > tp_target:
             result += 1
             tp_target = next(tp_targets, None)
 
@@ -68,11 +82,6 @@ for signal_index in test.index:
             SL = purchase_price
 
     results[signal_index] = result
-
-
-df['result'] = results
-test = df[df['signal'] == 'BUY']
-test.groupby('result')['result'].count()
 
 
 

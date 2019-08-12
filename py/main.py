@@ -26,7 +26,6 @@ def main():
                 else:  # candle_string == 'Daily'
                     date = row['date'].strftime('%m/%d')
                 logic.send_signal(row, date)
-                # text += date + ': ' + row['coin'] + ' - ' + row['signal'] + ' - '  + str(row['price']) +  '\n\n'
 
             old_signal_df = old_signal_df.append(new_signals, ignore_index=True, sort=False)
             old_signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv', index=False)
