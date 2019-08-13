@@ -39,17 +39,17 @@ def run(ticker, candle_abv):
                 if price > ema3[index]:
                     if ma20[index] > ema40[index]:
                         signal = 'Long'
-                        SL = df[index-10:index]['low'].min() * .9975
+                        SL = df[index-10:index]['low'].min() * 1.0025
                     break
             else:   # False in rng
                 if price < ema3[index]:
                     if ma20[index] < ema40[index]:
                         signal = 'Short'
-                        SL = df[index-10:index]['high'].max() * 1.0025
+                        SL = df[index-10:index]['high'].max() * .00975
                     break
 
         if signal:
-            coin_signals.append([df['date'][index], ticker, signal, round(price, 8), round(SL, 8)])
+            coin_signals.append([df['date'][index], ticker, signal, price, SL])
 
     return coin_signals
 
@@ -59,8 +59,13 @@ def send_signal(row, date):
     if row['ticker'] == 'BTC/USD':
         row['price'] = int(row['price'])
         row['Stop Loss'] = int(row['Stop Loss'])
-    else:
+    elif row['ticker'] == 'XRP/BTC':
+        row['Stop Loss'] = round(row['Stop Loss'], 7)
+    elif '\BTC' in row['ticker']:
         row['Stop Loss'] = round(row['Stop Loss'], 4)
+    else:   # '\USD in row['ticker']'
+        row['Stop Loss'] = round(row['Stop Loss'], 2)
+
     text = date + '\n'
     text += row['ticker'] + '\n'
     text += 'Bitfinex\n'
@@ -77,13 +82,24 @@ def send_signal(row, date):
         tp2 = int(tp2)
         tp3 = int(tp3)
         tp4 = int(tp4)
-    else:
+    elif row['ticker'] == 'XRP/BTC' or row['ticker'] == 'EOS/BTC':
+        tp1 = round(tp1, 7)
+        tp2 = round(tp2, 7)
+        tp3 = round(tp3, 7)
+        tp4 = round(tp4, 7)
+    elif '\BTC' in row['ticker'] or row['ticker'] == 'XRP/USD':
         tp1 = round(tp1, 4)
         tp2 = round(tp2, 4)
         tp3 = round(tp3, 4)
         tp4 = round(tp4, 4)
+    else:  # '\USD' in row['ticker']
+        tp1 = round(tp1, 2)
+        tp2 = round(tp2, 2)
+        tp3 = round(tp3, 2)
+        tp4 = round(tp4, 2)
 
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
+    text += 'Leverage 5x' + '\n'
     text += 'Stop loss ' + str(row['Stop Loss'])
 
     requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
