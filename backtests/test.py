@@ -39,7 +39,6 @@ for cross_index in cross_indices:
                     signals[index] = 'Short'
                 break
 
-df['signal'] = signals
 
 results = [None for i in range(len(df))]
 purchase_prices = [None for i in range(len(df))]
@@ -97,13 +96,7 @@ df['stop-loss %'] = abs(df['purchase-price'] - df['stop-loss']) / df['purchase-p
 
 test = df[['signal', 'result', 'purchase-price', 'stop-loss %']].dropna().reset_index(drop=True)
 
-tp_pcts = {
-    0: -1,
-    1: -5./8.,
-    2: 3./8.,
-    3: 7./8.,
-    4: 11./8.
-}
+
 
 end_pct =  np.array(map(lambda x: tp_pcts[x], test['result']))
 test['gain-loss (%)'] = end_pct * test['stop-loss %']
