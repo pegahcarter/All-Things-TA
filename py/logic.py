@@ -54,7 +54,14 @@ def run(ticker, candle_abv):
     return coin_signals
 
 
-def send_signal(row, date):
+def send_signal(row, candle_string):
+
+    if candle_string == 'Hourly':
+        date = row['date'].strftime('%m/%d %I:%M %p')
+        leverage = '10x'
+    else:   # candle_string == 'Daily'
+        date = row['date'].strftime('%m/%d')
+        leverage + '3x'
 
     if row['ticker'] == 'BTC/USD':
         row['price'] = int(row['price'])
@@ -92,14 +99,14 @@ def send_signal(row, date):
         tp2 = round(tp2, 4)
         tp3 = round(tp3, 4)
         tp4 = round(tp4, 4)
-    else:  # '\USD' in row['ticker']
+    else:  # '\USD'  in row['ticker']
         tp1 = round(tp1, 2)
         tp2 = round(tp2, 2)
         tp3 = round(tp3, 2)
         tp4 = round(tp4, 2)
 
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
-    text += 'Leverage 5x' + '\n'
+    text += 'Leverage ' + leverage +  '\n'
     text += 'Stop loss ' + str(row['Stop Loss'])
 
     requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
