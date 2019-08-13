@@ -61,9 +61,9 @@ for signal_index, signal in enumerate(signals):
         multiplier = -.0025
 
     purchase_price = midrange[signal_index+1] * (1 + multiplier)
-    purchase_prices[signal_index] = purchase_price
-    SL = min(l_bounds[signal_index-10:signal_index]) * (1 - multiplier)
-    stop_losses[signal_index] = SL
+    purchase_prices[signal_index] = abs(purchase_price)
+    SL = min(l_bounds[signal_index-10:signal_index]) * (1 + multiplier)
+    stop_losses[signal_index] = abs(SL)
 
     diff = purchase_price - SL
 
@@ -104,6 +104,12 @@ tp_pcts = {
     3: 7./8.,
     4: 11./8.
 }
-end_pct =  np.array(map(lambda x: tp_pcts[x], test['result']))
 
-sum(test['stop-loss %'] * end_pct)
+end_pct =  np.array(map(lambda x: tp_pcts[x], test['result']))
+test['gain-loss (%)'] = end_pct * test['stop-loss %']
+
+signal_index = np.array(test.index)
+hours_since_last_cross = [signal_index[0]]
+hours_since_last_cross += list(signal_index[1:] - signal_index[:-1])
+
+test['hours_since_last_cross'] = hours_since_last_cross
