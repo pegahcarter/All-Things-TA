@@ -63,48 +63,37 @@ def send_signal(row, candle_string):
         date = row['date'].strftime('%m/%d')
         leverage = '3x'
 
-    if row['ticker'] == 'BTC/USD':
-        row['price'] = int(row['price'])
-        row['Stop Loss'] = int(row['Stop Loss'])
-    elif row['ticker'] == 'XRP/BTC':
-        row['Stop Loss'] = round(row['Stop Loss'], 7)
-    elif '\BTC' in row['ticker']:
-        row['Stop Loss'] = round(row['Stop Loss'], 4)
-    else:   # '\USD in row['ticker']'
-        row['Stop Loss'] = round(row['Stop Loss'], 2)
-
-    text = date + '\n'
-    text += row['ticker'] + '\n'
-    text += 'Bitfinex\n'
-    text += row['signal'] + ' ' + str(row['price']) + '\n'
-
     diff = row['price'] - row['Stop Loss']
-    tp1 = row['price'] + diff/2
+    tp1 = row['price'] + diff/2.
     tp2 = row['price'] + diff
     tp3 = row['price'] + diff*2
     tp4 = row['price'] + diff*3
 
     if row['ticker'] == 'BTC/USD':
+        row['price'] = int(row['price'])
+        row['Stop Loss'] = int(row['Stop Loss'])
         tp1 = int(tp1)
         tp2 = int(tp2)
         tp3 = int(tp3)
         tp4 = int(tp4)
-    elif row['ticker'] == 'XRP/BTC' or row['ticker'] == 'EOS/BTC':
-        tp1 = round(tp1, 7)
-        tp2 = round(tp2, 7)
-        tp3 = round(tp3, 7)
-        tp4 = round(tp4, 7)
-    elif '\BTC' in row['ticker'] or row['ticker'] == 'XRP/USD':
-        tp1 = round(tp1, 4)
-        tp2 = round(tp2, 4)
-        tp3 = round(tp3, 4)
-        tp4 = round(tp4, 4)
-    else:  # '\USD'  in row['ticker']
-        tp1 = round(tp1, 2)
-        tp2 = round(tp2, 2)
-        tp3 = round(tp3, 2)
-        tp4 = round(tp4, 2)
+    else:
+        if row['ticker'] in ['XRP/BTC', 'EOS/BTC']:
+            decimals = 7
+        elif '\BTC' in row['ticker'] or row['ticker'] in ['XRP/USD', 'EOS/USD']:
+            decimals = 4
+        else:
+            decimals = 2
+        row['price'] = round(row['price'], decimals)
+        row['Stop Loss'] = round(row['Stop Loss'], decimals)
+        tp1 = round(tp1, decimals)
+        tp2 = round(tp2, decimals)
+        tp3 = round(tp3, decimals)
+        tp4 = round(tp4, decimals)
 
+    text = date + '\n'
+    text += row['ticker'] + '\n'
+    text += 'Bitfinex\n'
+    text += row['signal'] + ' ' + str(row['price']) + '\n'
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
     text += 'Leverage ' + leverage +  '\n'
     text += 'Stop loss ' + str(row['Stop Loss'])
