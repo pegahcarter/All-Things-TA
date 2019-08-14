@@ -45,7 +45,7 @@ def run(ticker, candle_abv):
                 if price < ema3[index]:
                     if ma20[index] < ema40[index]:
                         signal = 'Short'
-                        SL = df[index-10:index]['high'].max() * .00975
+                        SL = df[index-10:index]['high'].max() * .9975
                     break
 
         if signal:
@@ -61,7 +61,7 @@ def send_signal(row, candle_string):
         leverage = '10x'
     else:   # candle_string == 'Daily'
         date = row['date'].strftime('%m/%d')
-        leverage + '3x'
+        leverage = '3x'
 
     if row['ticker'] == 'BTC/USD':
         row['price'] = int(row['price'])
