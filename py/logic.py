@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 
 def run(ticker, candle_abv):
 
-    data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
+    data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500)
     df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
     _close = df['close'].copy()
     _open = df['open'].copy()

@@ -1,5 +1,5 @@
 import pandas as pd
-import logic
+import logic as logic
 from variables import *
 from datetime import datetime
 
@@ -25,7 +25,6 @@ def main():
             old_signal_df = old_signal_df.append(new_signals, ignore_index=True, sort=False)
             old_signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv', index=False)
             # save_gsheet(candle_string, old_signal_df)
-
 
 
 if __name__ == '__main__':
