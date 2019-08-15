@@ -46,13 +46,13 @@ for cross_index in cross_indices:
         elif True in rng:
             if _close[index] > ema3[index]:
                 if ma20[index] > ema40[index]:
-                    if abs(_close[index] - _open[index])/_open[index] > .02:
+                    if abs(_close[index] - _open[index])/_open[index] < .02:
                         signals[index] = 'Long'
                 break
         else:   # False in rng means ema3 crossed below ma20
             if _close[index] < ema3[index]:
                 if ma20[index] < ema40[index]:
-                    if abs(_close[index] - _open[index])/_open[index] > .02:
+                    if abs(_close[index] - _open[index])/_open[index] < .02:
                         signals[index] = 'Short'
 
 # Now that we have our signals, test out the different SL & TP levels

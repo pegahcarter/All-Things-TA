@@ -36,14 +36,14 @@ def run(ticker, candle_abv):
             elif True in rng:
                 if price > ema3[index]:
                     if ma20[index] > ema40[index]:
-                        if abs(_open[index] - _close[index]) / _open[index] > 0.02:
+                        if abs(_open[index] - _close[index]) / _open[index] < 0.02:
                             signal = 'Long'
                             SL = df[index-10:index]['low'].min() * 1.0025
                     break
             else:   # False in rng
                 if price < ema3[index]:
                     if ma20[index] < ema40[index]:
-                        if abs(_open[index] - _close[index]) / _open[index] > 0.02:
+                        if abs(_open[index] - _close[index]) / _open[index] < 0.02:
                             signal = 'Short'
                             SL = df[index-10:index]['high'].max() * .9975
                     break
