@@ -92,7 +92,7 @@ def send_signal(row, candle_string):
 
     text = date + '\n'
     text += row['ticker'] + '\n'
-    text += 'Bitfinex\n'
+    text += 'Bitmex\n'
     text += row['signal'] + ' ' + str(row['price']) + '\n'
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
     text += 'Leverage ' + leverage +  '\n'

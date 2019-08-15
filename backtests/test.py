@@ -7,6 +7,7 @@ _open = np.array(df['open'])
 low = np.array(df['low'])
 high = np.array(df['high'])
 
+
 ema3 = df['close'].ewm(span=3, adjust=False).mean()
 ma20 = df['close'].rolling(window=20).mean().fillna(0)
 ema40 = df['close'].ewm(span=40, adjust=False).mean()
@@ -20,13 +21,13 @@ for i, val in ema3_gt_ma20[1:].items():
         cross_indices.append(i)
     current_val = val
 
-signals = [None for i in range(len(df))]
+
+signals = {}
 for cross_index in cross_indices:
     for index in range(cross_index, len(df)):
         rng = set(ema3_gt_ma20[cross_index:index+1])
-        if len(rng) == 2:
-            break
-        elif abs(_close[index] - _open[index])/_close[index] > .02:
+        candle_body_pct = abs(_close[index] - _open[index])/_open[index]
+        if len(rng) == 2 or candle_body_pct > .02:
             break
         elif True in rng:
             if _close[index] > ema3[index]:
@@ -40,9 +41,8 @@ for cross_index in cross_indices:
                 break
 
 
-results = [None for i in range(len(df))]
-purchase_prices = [None for i in range(len(df))]
-stop_losses = [None for i in range(len(df))]
+
+results, purchase_prices, stop_losses, stop_losses_pct = [], [], [], []
 
 for signal_index, signal in enumerate(signals):
     if signal is None:
@@ -59,50 +59,47 @@ for signal_index, signal in enumerate(signals):
         u_bounds = -low
         multiplier = -.0025
 
-    purchase_price = midrange[signal_index+1] * (1 + multiplier)
-    purchase_prices[signal_index] = abs(purchase_price)
-    SL = min(l_bounds[signal_index-10:signal_index]) * (1 + multiplier)
-    stop_losses[signal_index] = abs(SL)
+    purchase_price = midrange[signal_index+1]
+    SL = min(l_bounds[signal_index-10:signal_index])
+    purchase_prices.append(abs(purchase_price))
+    stop_losses.append(abs(SL))
 
     diff = purchase_price - SL
+    stop_losses_pct.append(abs(diff / purchase_price))
 
     tp1 = purchase_price + diff/2.
     tp2 = purchase_price + diff
     tp3 = purchase_price + diff*2.
     tp4 = purchase_price + diff*3.
 
-    tp_targets = iter([tp1, tp2, tp3, tp4])
-    tp_target = next(tp_targets, None)
-    result = 0
+    tp_targets = [tp1, tp2, tp3, tp4]
+    tp = 0
 
     for i in range(signal_index, len(df)):
-        if result == 4 or midrange[i] < SL or l_bounds[i] < SL:
+        if tp == 4 or midrange[i] < SL or l_bounds[i] < SL:
             break
 
-        while result != 4 and u_bounds[i] > tp_target:
-            result += 1
-            tp_target = next(tp_targets, None)
+        while tp != 4 and u_bounds[i] > tp_targets[tp]:
+            tp += 1
 
-        if result == 2:
+        if tp >= 2:
             SL = purchase_price
 
-    results[signal_index] = result
 
-df['result'] = results
-df['purchase-price'] = purchase_prices
-df['stop-loss'] = stop_losses
 
-df['stop-loss %'] = abs(df['purchase-price'] - df['stop-loss']) / df['purchase-price']
-
-test = df[['signal', 'result', 'purchase-price', 'stop-loss %']].dropna().reset_index(drop=True)
+    results.append(tp)
 
 
 
-end_pct =  np.array(map(lambda x: tp_pcts[x], test['result']))
-test['gain-loss (%)'] = end_pct * test['stop-loss %']
+end_pct =  list(map(lambda x: tp_dict[x], results))
+np.dot(stop_losses_pct, end_pct)
 
-signal_index = np.array(test.index)
-hours_since_last_cross = [signal_index[0]]
-hours_since_last_cross += list(signal_index[1:] - signal_index[:-1])
 
-test['hours_since_last_cross'] = hours_since_last_cross
+unique, counts = np.unique(results, return_counts=True)
+dict(zip(unique, counts))
+
+
+hours_since_last_cross = [signal_indices[0]]
+
+hrs_since_cross = list(np.subtract(signal_indices[1:], signal_indices[:-1]))
+hrs_since_cross.insert(0, None)
