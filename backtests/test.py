@@ -1,12 +1,19 @@
 import pandas as pd
 import numpy as np
 
+tp_dict = {
+    0: -1,
+    1: -5./8.,
+    2: 3./8.,
+    3: 7./8.,
+    4: 11./8.
+}
+
 df = pd.read_csv('backtests/BTC.csv').drop('volume', axis=1)
 _close = np.array(df['close'])
 _open = np.array(df['open'])
 low = np.array(df['low'])
 high = np.array(df['high'])
-
 
 ema3 = df['close'].ewm(span=3, adjust=False).mean()
 ma20 = df['close'].rolling(window=20).mean().fillna(0)
@@ -41,13 +48,10 @@ for cross_index in cross_indices:
                 break
 
 
+profit_levels = [-1, -5./8., 3./8., 7./8., 11./8.]
+df2 = []
 
-results, purchase_prices, stop_losses, stop_losses_pct = [], [], [], []
-
-for signal_index, signal in enumerate(signals):
-    if signal is None:
-        continue
-
+for signal_index, signal in signals.items():
     if signal == 'Long':
         l_bounds = low
         midrange = _open
@@ -60,13 +64,10 @@ for signal_index, signal in enumerate(signals):
         multiplier = -.0025
 
     purchase_price = midrange[signal_index+1]
-    SL = min(l_bounds[signal_index-10:signal_index])
-    purchase_prices.append(abs(purchase_price))
-    stop_losses.append(abs(SL))
+    stop_loss = min(l_bounds[signal_index-10:signal_index]) * (1 - multiplier)
+    SL = stop_loss
 
     diff = purchase_price - SL
-    stop_losses_pct.append(abs(diff / purchase_price))
-
     tp1 = purchase_price + diff/2.
     tp2 = purchase_price + diff
     tp3 = purchase_price + diff*2.
@@ -76,28 +77,24 @@ for signal_index, signal in enumerate(signals):
     tp = 0
 
     for i in range(signal_index, len(df)):
-        if tp == 4 or midrange[i] < SL or l_bounds[i] < SL:
-            break
-
         while tp != 4 and u_bounds[i] > tp_targets[tp]:
             tp += 1
+
+        if tp == 4 or midrange[i] < SL or l_bounds[i] < SL:
+            break
 
         if tp >= 2:
             SL = purchase_price
 
+    df2.append([signal_index, signal, tp, profit_levels[tp], abs(purchase_price), abs(stop_loss)])
+
+df2 = pd.DataFrame(df2, columns=['index', 'signal', 'tp_hit', 'profit_pct', 'purchase_price', 'stop_loss']).sort_values('index')
 
 
-    results.append(tp)
+profit = np.multiply(stop_loss_pct, end_pct)
 
 
-
-end_pct =  list(map(lambda x: tp_dict[x], results))
-np.dot(stop_losses_pct, end_pct)
-
-
-unique, counts = np.unique(results, return_counts=True)
-dict(zip(unique, counts))
-
+df2['profit'].sum()
 
 hours_since_last_cross = [signal_indices[0]]
 
