@@ -1,5 +1,5 @@
 import pandas as pd
-import logic as logic
+import logic
 from variables import *
 from datetime import datetime
 

@@ -7,7 +7,13 @@ from urllib.parse import urlencode
 
 def run(ticker, candle_abv):
 
-    data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500)
+    if candle_abv == '1h':
+        data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
+    else:
+        data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500)
+
+
+
     df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
     _close = df['close'].copy()
     _open = df['open'].copy()
@@ -33,19 +39,19 @@ def run(ticker, candle_abv):
             rng = set(ema3_gt_ma20[cross_index:index+1])
             if len(rng) == 2:
                 break
+            # elif abs(_open[index] - _close[index]) / _open[index] > 0.02:
+            #     break
             elif True in rng:
                 if price > ema3[index]:
                     if ma20[index] > ema40[index]:
-                        if abs(_open[index] - _close[index]) / _open[index] < 0.02:
-                            signal = 'Long'
-                            SL = df[index-10:index]['low'].min() * 1.0025
+                        signal = 'Long'
+                        SL = df[index-10:index]['low'].min() * .999
                     break
             else:   # False in rng
                 if price < ema3[index]:
                     if ma20[index] < ema40[index]:
-                        if abs(_open[index] - _close[index]) / _open[index] < 0.02:
-                            signal = 'Short'
-                            SL = df[index-10:index]['high'].max() * .9975
+                        signal = 'Short'
+                        SL = df[index-10:index]['high'].max() * 1.001
                     break
 
         if signal:
@@ -77,22 +83,29 @@ def send_signal(row, candle_string):
         tp3 = int(tp3)
         tp4 = int(tp4)
     else:
-        if row['ticker'] in ['XRP/BTC', 'EOS/BTC']:
-            decimals = 7
-        elif '\BTC' in row['ticker'] or row['ticker'] in ['XRP/USD', 'EOS/USD']:
-            decimals = 4
+        if row['ticker'] == 'XRP/BTC':
+            decimals = '.8f'
+        elif row['ticker'] == 'EOS/BTC':
+            decimals = '.7f'
+        elif '/BTC' in row['ticker'] or row['ticker'] in ['XRP/USD', 'EOS/USD']:
+            decimals = '.4f'
         else:
-            decimals = 2
-        row['price'] = round(row['price'], decimals)
-        row['Stop Loss'] = round(row['Stop Loss'], decimals)
-        tp1 = round(tp1, decimals)
-        tp2 = round(tp2, decimals)
-        tp3 = round(tp3, decimals)
-        tp4 = round(tp4, decimals)
+            decimals = '.2f'
+        row['price'] = format(row['price'], decimals)
+        row['Stop Loss'] = format(row['Stop Loss'], decimals)
+        tp1 = format(tp1, decimals)
+        tp2 = format(tp2, decimals)
+        tp3 = format(tp3, decimals)
+        tp4 = format(tp4, decimals)
+
+    if row['ticker'] == 'ETH/BTC':
+        row['ticker'] = 'ETH/M19'
+    elif '/BTC' in row['ticker']:
+        row['ticker'] = ticker[:3] + '/U19'
 
     text = date + '\n'
     text += row['ticker'] + '\n'
-    text += 'Bitmex\n'
+    text += 'BitMEX\n'
     text += row['signal'] + ' ' + str(row['price']) + '\n'
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
     text += 'Leverage ' + leverage +  '\n'
