@@ -7,6 +7,9 @@ from datetime import datetime
 def main():
 
     for candle_abv, candle_string in candle_intervals.items():
+        if candle_string == 'Daily' and datetime.now().hour not in [6, 7]:
+            break
+        
         signal_df = []
         for ticker in tickers:
             signal_df += logic.run(ticker, candle_abv)

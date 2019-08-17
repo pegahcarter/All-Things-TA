@@ -1,14 +1,6 @@
 import pandas as pd
 import numpy as np
 
-tp_dict = {
-    0: -1,
-    1: -5./8.,
-    2: 3./8.,
-    3: 7./8.,
-    4: 11./8.
-}
-
 df = pd.read_csv('backtests/BTC.csv').drop('volume', axis=1)
 _close = np.array(df['close'])
 _open = np.array(df['open'])
@@ -88,15 +80,16 @@ for signal_index, signal in signals.items():
 
     df2.append([signal_index, signal, tp, profit_levels[tp], abs(purchase_price), abs(stop_loss)])
 
-df2 = pd.DataFrame(df2, columns=['index', 'signal', 'tp_hit', 'profit_pct', 'purchase_price', 'stop_loss']).sort_values('index')
+df2 = pd.DataFrame(df2, columns=['index', 'signal', 'tp_hit', 'profit_level', 'purchase_price', 'stop_loss']).sort_values('index')
+df2['stop_loss_pct'] = abs(df2['stop_loss'] - df2['purchase_price']) / df2['purchase_price']
+df2['profit'] = df2['profit_level'] * df2['stop_loss_pct']
 
 
-profit = np.multiply(stop_loss_pct, end_pct)
 
-
+df2
 df2['profit'].sum()
 
-hours_since_last_cross = [signal_indices[0]]
 
+hours_since_last_cross = [signal_indices[0]]
 hrs_since_cross = list(np.subtract(signal_indices[1:], signal_indices[:-1]))
 hrs_since_cross.insert(0, None)
