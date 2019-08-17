@@ -32,12 +32,12 @@ for cross_index in cross_indices:
             if _close[index] > ema3[index]:
                 if ma20[index] > ema40[index]:
                     signals[index] = 'Long'
-                break
+                    break
         else:   # False in rng
             if _close[index] < ema3[index]:
                 if ma20[index] < ema40[index]:
                     signals[index] = 'Short'
-                break
+                    break
 
 
 profit_levels = [-1, -5./8., 3./8., 7./8., 11./8.]
@@ -86,10 +86,12 @@ df2['profit'] = df2['profit_level'] * df2['stop_loss_pct']
 
 
 
-df2
-df2['profit'].sum()
-
 
 hours_since_last_cross = [signal_indices[0]]
 hrs_since_cross = list(np.subtract(signal_indices[1:], signal_indices[:-1]))
 hrs_since_cross.insert(0, None)
+
+
+
+
+test = {12: 'Long', 14: 'Short', 20: 'Long'}
