@@ -1,10 +1,8 @@
 # Determine the best SL and TP levels for 3EMA, 20MA, and 40EMA
 import pandas as pd
 import numpy as np
+from itertools import permutations
 import os
-
-# Fixed variable declarations
-tp_pcts = [-1, -5./8., 3./8., 7./8., 11./8.]
 
 df = pd.read_csv('backtests/BTC.csv').drop(['date', 'volume'], axis=1)
 _open, _high, _low, _close = df.T.values
@@ -48,9 +46,7 @@ for cross_index in cross_indices:
                     break
 
 
-
-profit_pct_list = []
-
+df = []
 for index in signals:
     if signals[index] == 'Long':
         l_bounds = _low
@@ -65,7 +61,8 @@ for index in signals:
 
     purchase_price = midrange[index+1]
     stop_loss = min(l_bounds[index-10:index]) * cushion
-    stop_loss_pct = (purchase_price - stop_loss) / purchase_price
+    # stop_loss_pct = abs((purchase_price - stop_loss) / purchase_price)
+    stop_loss_pct = abs(1 - stop_loss / purchase_price)
 
     diff = purchase_price - stop_loss
     tp1 = purchase_price + diff/2.
@@ -85,6 +82,41 @@ for index in signals:
                 stop_loss = purchase_price
             if tp == 4 or l_bounds[x] < stop_loss:
                 break
-        profit_pct = stop_loss_pct * tp_pcts[tp]
 
-    profit_pct_list.append(profit_pct)
+    df.append([stop_loss_pct, tp])
+
+
+df = pd.DataFrame(df, columns=['stop_loss_pct', 'tp'])
+# df = df[df['tp'] > 0].reset_index(drop=True)
+
+results = {}
+pcts = list(range(10, 71, 10))
+pcts *= 4
+perms = permutations(pcts, 4)
+good_results = [x for x in perms if sum(x) == 100 and len(x) == 4]
+tp_combos = set(good_results)
+for tp_combo in tp_combos:
+
+    tp_combo_pct = np.divide(tp_combo, 100)
+    tp1_pct = tp_combo_pct[0]/2. - 1 - tp_combo_pct[0]
+    tp2_pct = tp_combo_pct[0]/2. + tp_combo_pct[1]
+    tp3_pct = tp2_pct + 2. * tp_combo_pct[2]
+    tp4_pct = tp3_pct + 3. * tp_combo_pct[3]
+    tp_pcts = [-1, tp1_pct, tp2_pct, tp3_pct, tp4_pct]
+
+    col = '-'.join([str(x) for x in tp_combo])
+    df[col] = df['tp'].map(lambda x: tp_pcts[x]) * df['stop_loss_pct']
+    results[col] = df[col].sum()
+
+sorted(results.items(), key=lambda x: x[1])
+
+# 10.  10-20-30-40
+# 9.   10-50-10-30
+# 8.   10-30-20-40
+# 7.   10-10-30-50
+# 6.   10-40-10-40
+# 5.   10-20-20-50
+# 4.   10-30-10-50
+# 3.   10-10-20-60
+# 2.   10-20-10-60
+# 1.   10-10-10-70
