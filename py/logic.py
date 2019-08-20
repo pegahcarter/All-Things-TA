@@ -37,21 +37,19 @@ def run(ticker, candle_abv):
         signal = None
         for index, price in _close[cross_index:].iteritems():
             rng = set(ema3_gt_ma20[cross_index:index+1])
-            if len(rng) == 2:
+            if len(rng) == 2 or abs(_open[index] - _close[index]) / _open[index] > 0.02:
                 break
-            # elif abs(_open[index] - _close[index]) / _open[index] > 0.02:
-            #     break
             elif True in rng:
                 if price > ema3[index]:
                     if ma20[index] > ema40[index]:
                         signal = 'Long'
-                        SL = df[index-10:index]['low'].min() * .999
+                        SL = df[index-10:index]['low'].min() * (1. + 0.003)
                     break
             else:   # False in rng
                 if price < ema3[index]:
                     if ma20[index] < ema40[index]:
                         signal = 'Short'
-                        SL = df[index-10:index]['high'].max() * 1.001
+                        SL = df[index-10:index]['high'].max() * (1. - 0.003)
                     break
 
         if signal:
@@ -61,9 +59,6 @@ def run(ticker, candle_abv):
 
 
 def send_signal(row, candle_string):
-
-    if 'BAB' in row['ticker']:
-        row['ticker'] = 'BCH/' + row['ticker'][-3:]
 
     if candle_string == 'Hourly':
         date = row['date'].strftime('%m/%d %I:%M %p')
@@ -90,9 +85,11 @@ def send_signal(row, candle_string):
             decimals = '.8f'
         elif row['ticker'] == 'EOS/BTC':
             decimals = '.7f'
-        elif row['ticker'] == 'BAB/BTC':
+        elif row['ticker'] == 'LTC/BTC':
+            decimals = '.6f'
+        elif row['ticker'] == 'BCH/BTC':
             decimals = '.5f'
-        elif '/BTC' in row['ticker'] or row['ticker'] in ['XRP/USD', 'EOS/USD']:
+        elif row['ticker'] in ['XRP/USD', 'EOS/USD', 'ETH/BTC']:
             decimals = '.4f'
         else:
             decimals = '.2f'
