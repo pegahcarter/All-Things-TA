@@ -90,8 +90,3 @@ df2['profit'] = df2['profit_level'] * df2['stop_loss_pct']
 hours_since_last_cross = [signal_indices[0]]
 hrs_since_cross = list(np.subtract(signal_indices[1:], signal_indices[:-1]))
 hrs_since_cross.insert(0, None)
-
-
-
-
-test = {12: 'Long', 14: 'Short', 20: 'Long'}
