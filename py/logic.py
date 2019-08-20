@@ -62,8 +62,8 @@ def run(ticker, candle_abv):
 
 def send_signal(row, candle_string):
 
-    if 'BCH' in row['ticker']:
-        row['ticker'] = 'BAB/' + row['ticker'][-3:]
+    if 'BAB' in row['ticker']:
+        row['ticker'] = 'BCH/' + row['ticker'][-3:]
 
     if candle_string == 'Hourly':
         date = row['date'].strftime('%m/%d %I:%M %p')
