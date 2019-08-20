@@ -55,7 +55,7 @@ def run(ticker, candle_abv):
                     break
 
         if signal:
-            coin_signals.append([df['date'][index], ticker, signal, price, SL])
+            coin_signals.append([df['date'][index], ticker, signal, round(price, 8), round(SL, 8)])
 
     return coin_signals
 
