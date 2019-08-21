@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 from itertools import permutations
+from backtests.determine_tp_hit import determine_SL_and_TP
 import os
 
 df = pd.read_csv('backtests/BTC.csv').drop(['date', 'volume'], axis=1)
@@ -47,43 +48,17 @@ for cross_index in cross_indices:
 
 
 df = []
-for index in signals:
-    if signals[index] == 'Long':
-        l_bounds = _low
-        midrange = _open
-        u_bounds = _high
-        cushion = 1. + 0.003
-    else:  # Signal == 'Short'
-        l_bounds = -_high
-        midrange = -_open
-        u_bounds = -_low
-        cushion = 1. - 0.003
+for index, signal in signals.items():
+    SL, TP = determine_TP(signal, index, _open, _high, _low, 0.003)
+    df.append([SL, TP])
+    # purchase_price = midrange[index+1]
+    # stop_loss = min(l_bounds[index-10:index]) * cushion
+    # # stop_loss_pct = abs((purchase_price - stop_loss) / purchase_price)
+    # stop_loss_pct = abs(1 - stop_loss / purchase_price)
+    #
 
-    purchase_price = midrange[index+1]
-    stop_loss = min(l_bounds[index-10:index]) * cushion
-    # stop_loss_pct = abs((purchase_price - stop_loss) / purchase_price)
-    stop_loss_pct = abs(1 - stop_loss / purchase_price)
-
-    diff = abs(purchase_price) - abs(stop_loss)
-    tp1 = purchase_price + diff/2.
-    tp2 = purchase_price + diff
-    tp3 = purchase_price + diff*2
-    tp4 = purchase_price + diff*3
-    tp_targets = [tp1, tp2, tp3, tp4]
-
-    if stop_loss > tp1:
-        profit_pct = None
-    else:
-        tp = 0
-        for x in range(index, len(_open)):
-            if tp > 0:
-                stop_loss = purchase_price
-            if tp == 4 or l_bounds[x] < stop_loss:
-                break
-            while tp < 4 and u_bounds[x] > tp_targets[tp]:
-                tp += 1
-
-    df.append([stop_loss_pct, tp])
+    # df.append([stop_loss_pct, tp])
+df
 
 
 df = pd.DataFrame(df, columns=['stop_loss_pct', 'tp'])
