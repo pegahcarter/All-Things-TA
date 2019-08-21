@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 # Fixed variable declarations
-tp_pcts = [-1, -5./8., 3./8., 7./8., 13./8.]
+tp_pcts = [-1, 1./8., 3./8., 7./8., 13./8.]
 
 df = pd.read_csv('backtests/BTC.csv').drop(['date', 'volume'], axis=1)
 _open, _high, _low, _close = df.T.values
@@ -50,7 +50,7 @@ for cross_index in cross_indices:
 df = pd.DataFrame()
 # Now that we have our signals, test out the different SL & TP levels
 # By increments of .05%, find the SL that returns the most profit
-for multiplier in range(15, 75, 2):
+for multiplier in range(15, 100, 5):
     multiplier /= 10000.
     profit_pct_list = []
     for index in signals:
@@ -67,9 +67,10 @@ for multiplier in range(15, 75, 2):
 
         purchase_price = midrange[index+1]
         stop_loss = min(l_bounds[index-10:index]) * cushion
-        stop_loss_pct = (purchase_price - stop_loss) / purchase_price
 
-        diff = purchase_price - stop_loss
+        diff = abs(purchase_price) - abs(stop_loss)
+        stop_loss_pct = abs(1 - stop_loss/purchase_price)
+
         tp1 = purchase_price + diff/2.
         tp2 = purchase_price + diff
         tp3 = purchase_price + diff*2
@@ -81,16 +82,17 @@ for multiplier in range(15, 75, 2):
         else:
             tp = 0
             for x in range(index, len(_open)):
-                while tp < 4 and u_bounds[x] > tp_targets[tp]:
-                    tp += 1
-                if tp >= 2:
-                    stop_loss = purchase_price
                 if tp == 4 or l_bounds[x] < stop_loss:
                     break
+                if tp > 0:
+                    stop_loss = purchase_price
+                while tp < 4 and u_bounds[x] > tp_targets[tp]:
+                    tp += 1
+
             profit_pct = stop_loss_pct * tp_pcts[tp]
 
         profit_pct_list.append(profit_pct)
-    df[abs(multiplier)] = profit_pct_list
+    df[multiplier] = profit_pct_list
 
 
 results = {}

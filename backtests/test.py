@@ -40,7 +40,7 @@ for cross_index in cross_indices:
                     break
 
 
-profit_levels = [-1, -5./8., 3./8., 7./8., 11./8.]
+profit_levels = [-1, 1./8., 3./8., 7./8., 11./8.]
 df2 = []
 
 for signal_index, signal in signals.items():
@@ -56,10 +56,10 @@ for signal_index, signal in signals.items():
         multiplier = -.0025
 
     purchase_price = midrange[signal_index+1]
-    stop_loss = min(l_bounds[signal_index-10:signal_index]) * (1 - multiplier)
+    stop_loss = min(l_bounds[signal_index-10:signal_index]) * (1 + multiplier)
     SL = stop_loss
 
-    diff = purchase_price - SL
+    diff = abs(purchase_price) - abs(SL)
     tp1 = purchase_price + diff/2.
     tp2 = purchase_price + diff
     tp3 = purchase_price + diff*2.
@@ -75,7 +75,7 @@ for signal_index, signal in signals.items():
         if tp == 4 or midrange[i] < SL or l_bounds[i] < SL:
             break
 
-        if tp >= 2:
+        if tp >= 1:
             SL = purchase_price
 
     df2.append([signal_index, signal, tp, profit_levels[tp], abs(purchase_price), abs(stop_loss)])
@@ -85,6 +85,7 @@ df2['stop_loss_pct'] = abs(df2['stop_loss'] - df2['purchase_price']) / df2['purc
 df2['profit'] = df2['profit_level'] * df2['stop_loss_pct']
 
 
+df2.groupby('tp_hit').count()
 
 
 hours_since_last_cross = [signal_indices[0]]

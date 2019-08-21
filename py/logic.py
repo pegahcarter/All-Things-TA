@@ -74,6 +74,7 @@ def send_signal(row, candle_string):
     tp4 = row['price'] + diff*3
 
     if row['ticker'] == 'BTC/USD':
+        row['ticker'] = 'XBT/USD'
         row['price'] = int(row['price'])
         row['Stop Loss'] = int(row['Stop Loss'])
         tp1 = int(tp1)
@@ -102,10 +103,11 @@ def send_signal(row, candle_string):
 
     if row['ticker'] == 'ETH/BTC':
         row['ticker'] = 'ETH/M19'
-    elif 'BTC' in row['ticker']:
+    elif '/BTC' in row['ticker']:
         row['ticker'] = row['ticker'][:3] + '/U19'
 
-    text = date + '\n'
+    # text = date + '\n'
+    text = candle_string + '\n'
     text += row['ticker'] + '\n'
     text += 'BitMEX\n'
     text += row['signal'] + ' ' + str(row['price']) + '\n'

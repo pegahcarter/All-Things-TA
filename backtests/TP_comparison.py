@@ -64,7 +64,7 @@ for index in signals:
     # stop_loss_pct = abs((purchase_price - stop_loss) / purchase_price)
     stop_loss_pct = abs(1 - stop_loss / purchase_price)
 
-    diff = purchase_price - stop_loss
+    diff = abs(purchase_price) - abs(stop_loss)
     tp1 = purchase_price + diff/2.
     tp2 = purchase_price + diff
     tp3 = purchase_price + diff*2
@@ -76,17 +76,18 @@ for index in signals:
     else:
         tp = 0
         for x in range(index, len(_open)):
-            while tp < 4 and u_bounds[x] > tp_targets[tp]:
-                tp += 1
-            if tp >= 2:
+            if tp > 0:
                 stop_loss = purchase_price
             if tp == 4 or l_bounds[x] < stop_loss:
                 break
+            while tp < 4 and u_bounds[x] > tp_targets[tp]:
+                tp += 1
 
     df.append([stop_loss_pct, tp])
 
 
 df = pd.DataFrame(df, columns=['stop_loss_pct', 'tp'])
+df.groupby('tp').count()
 # df = df[df['tp'] > 0].reset_index(drop=True)
 
 results = {}
@@ -98,8 +99,8 @@ tp_combos = set(good_results)
 for tp_combo in tp_combos:
 
     tp_combo_pct = np.divide(tp_combo, 100)
-    tp1_pct = tp_combo_pct[0]/2. - 1 - tp_combo_pct[0]
-    tp2_pct = tp_combo_pct[0]/2. + tp_combo_pct[1]
+    tp1_pct = tp_combo_pct[0]/2.
+    tp2_pct = tp1_pct + tp_combo_pct[1]
     tp3_pct = tp2_pct + 2. * tp_combo_pct[2]
     tp4_pct = tp3_pct + 3. * tp_combo_pct[3]
     tp_pcts = [-1, tp1_pct, tp2_pct, tp3_pct, tp4_pct]
@@ -109,6 +110,8 @@ for tp_combo in tp_combos:
     results[col] = df[col].sum()
 
 sorted(results.items(), key=lambda x: x[1])
+
+
 
 # 10.  10-20-30-40
 # 9.   10-50-10-30
