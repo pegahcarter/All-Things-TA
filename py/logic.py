@@ -23,13 +23,7 @@ def run(ticker, candle_abv):
     ema40 = calc_ema(_close, window=40)
     ema3_gt_ma20 = ema3 > ma20
 
-    cross_indices = []
-    current_val = ema3_gt_ma20[0]
-
-    for i, val in ema3_gt_ma20[1:].items():
-        if val != current_val:
-            cross_indices.append(i)
-        current_val = val
+    cross_indices = find_intersections(ema3, ma20)    
 
     coin_signals = []
 

@@ -45,3 +45,17 @@ def group_candles(candles):
         candles[-1, 4],        # close
         candles[:, 5].sum()    # volume
     ])
+
+
+# Find intersections indices between two lines
+def find_intersections(line1, line2):
+    line1_gt_line2 = line1 > line2
+    intersections = []
+    current_val = line1_gt_line2[0]
+
+    for index, val in line1_gt_line2.items():
+        if val != current_val:
+            intersections.append(index)
+        current_val = val
+
+    return intersections
