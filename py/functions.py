@@ -4,6 +4,55 @@ import numpy as np
 import ccxt
 import os
 
+
+# Find intersections indices between two lines
+def find_intersections(line1, line2):
+    line1_gt_line2 = line1 > line2
+    intersections = []
+    current_val = line1_gt_line2[0]
+
+    for i, val in line1_gt_line2.items():
+        if val != current_val:
+            intersections.append(i)
+        current_val = val
+
+    return intersections
+
+
+def find_signals(df):
+    '''
+    Determine signals from OHLCV dataframe
+    '''
+
+    ema3 = df['close'].ewm(span=3, adjust=False).mean()
+    ma20 = df['close'].rolling(window=20).mean().fillna(0)
+    ema40 = df['close'].ewm(span=40, adjust=False).mean()
+
+    intersections = find_intersections(ema3, ma20)
+    signals = []
+
+    for i in intersections:
+        if abs(df[i]['open'] - df[i]['close']) / df[i]['open'] > 0.02:
+            continue
+
+        signal = None
+        if df[i]['close'] > ema3[i] and ma20[i] > ema40[i]:
+            signal = 'Long'
+            stop_loss = df[i-10:i]['low'] * 1.003
+        elif df['close'][i] < ema3[i] and ma20[i] < ema40[i]:
+            signal = 'Short'
+            stop_loss = df[i-10:i]['high'] * .997
+
+        if signal:
+            purchase_price = df[i+1]['open']
+            signals.append([df[i]['date'], signal, round(stop_loss, 8), round(purchase_price, 8)])
+
+    return signals
+
+
+# ------------------------------------------------------------------------------
+# Old functions
+
 # Loop to update CSV's with recent OHLCV data
 def refresh_ohlcv(file, offline=False):
 
@@ -45,17 +94,3 @@ def group_candles(candles):
         candles[-1, 4],        # close
         candles[:, 5].sum()    # volume
     ])
-
-
-# Find intersections indices between two lines
-def find_intersections(line1, line2):
-    line1_gt_line2 = line1 > line2
-    intersections = []
-    current_val = line1_gt_line2[0]
-
-    for index, val in line1_gt_line2.items():
-        if val != current_val:
-            intersections.append(index)
-        current_val = val
-
-    return intersections
