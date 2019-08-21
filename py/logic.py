@@ -1,55 +1,27 @@
 import pandas as pd
 import numpy as np
-from variables import *
+from variables import tickers
 import requests
 from urllib.parse import urlencode
 
 
-def run(ticker, candle_abv):
+def run(candle_abv):
+    signal_df = pd.DataFrame()
+    for ticker in tickers:
+        if candle_abv == '1h':
+            df = exchange.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
+        else:
+            df = exchange.fetch_ohlcv(ticker, candle_abv, limit=500)
 
-    if candle_abv == '1h':
-        data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
-    else:
-        data = exchange.fetch_ohlcv(ticker, candle_abv, limit=500)
+        df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
 
+        signals = find_signals(df)
+        signals['ticker'] = ticker
+        signal_df = signal_df.append(signals, ignore_index=True)
 
-
-    df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
-    _close = df['close'].copy()
-    _open = df['open'].copy()
-
-    ema3 = calc_ema(_close, window=3)
-    ma20 = calc_ma(_close, window=20)
-    ema40 = calc_ema(_close, window=40)
-    ema3_gt_ma20 = ema3 > ma20
-
-    cross_indices = find_intersections(ema3, ma20)    
-
-    coin_signals = []
-
-    for cross_index in cross_indices:
-        signal = None
-        for index, price in _close[cross_index:].iteritems():
-            rng = set(ema3_gt_ma20[cross_index:index+1])
-            if len(rng) == 2 or abs(_open[index] - _close[index]) / _open[index] > 0.02:
-                break
-            elif True in rng:
-                if price > ema3[index]:
-                    if ma20[index] > ema40[index]:
-                        signal = 'Long'
-                        SL = df[index-10:index]['low'].min() * (1. + 0.003)
-                    break
-            else:   # False in rng
-                if price < ema3[index]:
-                    if ma20[index] < ema40[index]:
-                        signal = 'Short'
-                        SL = df[index-10:index]['high'].max() * (1. - 0.003)
-                    break
-
-        if signal:
-            coin_signals.append([df['date'][index], ticker, signal, round(price, 8), round(SL, 8)])
-
-    return coin_signals
+    signal_df['date'] = [datetime.fromtimestamp(x/1000) for x in signal_df['date']]
+    signal_df = signal_df.sort_values('date').reset_index(drop=True)
+    return signal_df
 
 
 def send_signal(row, candle_string):

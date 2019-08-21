@@ -64,22 +64,9 @@ test3_a
 
 test3_b = pd.DataFrame([])
 
-
-
-
-
 # from py.variables import *
 # from urllib.parse import urlencode
 #
 # url = 'https://api.telegram.org/bot' + API_KEY + '/sendMessage?'
 # mydict = {'chat_id': CHAT_ID, 'text': 'Hello'}
 # url + urlencode(mydict)
-
-
-
-
-purchase_price = -10000
-stop_loss = -10200
-
-
-purchase_price - stop_loss
