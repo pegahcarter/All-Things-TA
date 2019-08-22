@@ -1,3 +1,4 @@
+
 import pandas as pd
 import logic
 from variables import candle_intervals
@@ -12,7 +13,7 @@ def main():
 
         signal_df = logic.run(candle_abv)
 
-        old_signal_df = pd.read_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv')
+        old_signal_df = pd.read_csv('/home/carl/Documents/crypto/peter-signal/signals/' + candle_string + '.csv')
         new_signals = signal_df[signal_df['date'] > max(old_signal_df['date'])]
 
         if len(new_signals) > 0:
@@ -20,7 +21,7 @@ def main():
                 logic.send_signal(row, candle_string)
 
             old_signal_df = old_signal_df.append(new_signals, ignore_index=True)
-            old_signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv', index=False)
+            old_signal_df.to_csv('/home/carl/Documents/crypto/peter-signal/signals/' + candle_string + '.csv', index=False)
 
 
 if __name__ == '__main__':

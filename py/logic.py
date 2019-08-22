@@ -1,8 +1,10 @@
+from variables import *
+from functions import find_signals
 import pandas as pd
 import numpy as np
-from variables import tickers
 import requests
 from urllib.parse import urlencode
+from datetime import datetime
 
 
 def run(candle_abv):
@@ -13,10 +15,10 @@ def run(candle_abv):
         else:
             df = exchange.fetch_ohlcv(ticker, candle_abv, limit=500)
 
-        df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
+        df = pd.DataFrame(df, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
 
         signals = find_signals(df)
-        signals['ticker'] = ticker
+        signals.loc[:, 'ticker'] = ticker
         signal_df = signal_df.append(signals, ignore_index=True)
 
     signal_df['date'] = [datetime.fromtimestamp(x/1000) for x in signal_df['date']]
@@ -33,7 +35,7 @@ def send_signal(row, candle_string):
         date = row['date'].strftime('%m/%d')
         leverage = '3x'
 
-    diff = row['price'] - row['Stop Loss']
+    diff = row['price'] - row['stop_loss']
     tp1 = row['price'] + diff/2.
     tp2 = row['price'] + diff
     tp3 = row['price'] + diff*2
@@ -42,7 +44,7 @@ def send_signal(row, candle_string):
     if row['ticker'] == 'BTC/USD':
         row['ticker'] = 'XBT/USD'
         row['price'] = int(row['price'])
-        row['Stop Loss'] = int(row['Stop Loss'])
+        row['stop_loss'] = int(row['stop_loss'])
         tp1 = int(tp1)
         tp2 = int(tp2)
         tp3 = int(tp3)
@@ -61,24 +63,21 @@ def send_signal(row, candle_string):
         else:
             decimals = '.2f'
         row['price'] = format(row['price'], decimals)
-        row['Stop Loss'] = format(row['Stop Loss'], decimals)
+        row['stop_loss'] = format(row['stop_loss'], decimals)
         tp1 = format(tp1, decimals)
         tp2 = format(tp2, decimals)
         tp3 = format(tp3, decimals)
         tp4 = format(tp4, decimals)
 
-    if row['ticker'] == 'ETH/BTC':
-        row['ticker'] = 'ETH/M19'
-    elif '/BTC' in row['ticker']:
+    if '/BTC' in row['ticker'] and row['ticker'] != 'ETH/BTC':
         row['ticker'] = row['ticker'][:3] + '/U19'
 
-    # text = date + '\n'
     text = candle_string + '\n'
     text += row['ticker'] + '\n'
     text += 'BitMEX\n'
     text += row['signal'] + ' ' + str(row['price']) + '\n'
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
     text += 'Leverage ' + leverage +  '\n'
-    text += 'Stop loss ' + str(row['Stop Loss'])
+    text += 'Stop loss ' + str(row['stop_loss'])
 
-    requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
+    requests.get(url + urlencode({'chat_id': chat_id, 'text': text}))

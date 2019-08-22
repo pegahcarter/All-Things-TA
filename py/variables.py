@@ -21,7 +21,7 @@ chat_id = '-360419097'
 test_chat_id = '-1001192596591'
 
 # Google docs
-gc = pygsheets.authorize(service_file='C:/Users/carter/Documents/crypto/peter-signal/credentials.json')
+gc = pygsheets.authorize(service_file='/home/carl/Documents/crypto/peter-signal/credentials.json')
 g_doc = gc.open_by_key('1T67gVealvVutn_VuiedbH7ViK8_OIBWOmoDIMq82oQE')
 
 tick_sheet = g_doc.worksheet_by_title('Tickers')

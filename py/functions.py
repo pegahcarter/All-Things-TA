@@ -29,21 +29,22 @@ def find_signals(df):
     signals = []
 
     for i in intersections:
-        if abs(df[i]['open'] - df[i]['close']) / df[i]['open'] > 0.02:
+        if abs(df['open'][i] - df['close'][i]) / df['open'][i] > 0.02:
             continue
 
         signal = None
-        if df[i]['close'] > ema3[i] and ma20[i] > ema40[i]:
+        if df['close'][i] > ema3[i] and ma20[i] > ema40[i]:
             signal = 'Long'
-            stop_loss = df[i-10:i]['low'] * 1.003
+            stop_loss = df['low'][i-10:i].min() * 1.003
         elif df['close'][i] < ema3[i] and ma20[i] < ema40[i]:
             signal = 'Short'
-            stop_loss = df[i-10:i]['high'] * .997
+            stop_loss = df['high'][i-10:i].max() * .997
 
         if signal:
-            purchase_price = df[i+1]['open']
-            signals.append([df[i]['date'], signal, round(stop_loss, 8), round(purchase_price, 8)])
+            purchase_price = df['open'][i+1]
+            signals.append([df['date'][i], signal, round(stop_loss, 8), round(purchase_price, 8)])
 
+    signals = pd.DataFrame(signals, columns=['date', 'signal', 'stop_loss', 'price'])
     return signals
 
 
@@ -72,7 +73,7 @@ def determine_TP(signal, index, df, cushion=0.003):
     tp_targets = [tp1, tp2, tp3, tp4]
     TP = 0
 
-    for x in range(index+1, len(_open)):
+    for x in range(index+1, len(df)):
         if TP > 0:
             stop_loss = purchase_price
         while TP != 4 and u_bounds[x] > tp_targets[TP]:
