@@ -19,11 +19,8 @@ def find_intersections(line1, line2):
     return intersections
 
 
+# Determine signals from OHLCV dataframe
 def find_signals(df):
-    '''
-    Determine signals from OHLCV dataframe
-    '''
-
     ema3 = df['close'].ewm(span=3, adjust=False).mean()
     ma20 = df['close'].rolling(window=20).mean().fillna(0)
     ema40 = df['close'].ewm(span=40, adjust=False).mean()
@@ -48,6 +45,42 @@ def find_signals(df):
             signals.append([df[i]['date'], signal, round(stop_loss, 8), round(purchase_price, 8)])
 
     return signals
+
+
+# Figure out which TP level is hit
+def determine_TP(signal, index, df, cushion=0.003):
+    if signal == 'Long':
+        l_bounds = df['low']
+        midrange = df['open']
+        u_bounds = df['high']
+        cushion = 1. + cushion
+    else:   # signal == 'Short'
+        l_bounds = -df['high']
+        midrange = -df['open']
+        u_bounds = -df['low']
+        cushion = 1. - cushion
+
+    purchase_price = midrange[index+1]
+    stop_loss = min(l_bounds[index-10:index]) * cushion
+
+    diff = abs(purchase_price) - abs(stop_loss)
+    tp1 = purchase_price + diff/2.
+    tp2 = purchase_price + diff
+    tp3 = purchase_price + diff*2
+    tp4 = purchase_price + diff*3
+
+    tp_targets = [tp1, tp2, tp3, tp4]
+    TP = 0
+
+    for x in range(index+1, len(_open)):
+        if TP > 0:
+            stop_loss = purchase_price
+        while TP != 4 and u_bounds[x] > tp_targets[TP]:
+            TP += 1
+        if TP == 4 or stop_loss > l_bounds[x]:
+            break
+
+    return TP
 
 
 # ------------------------------------------------------------------------------
@@ -94,3 +127,39 @@ def group_candles(candles):
         candles[-1, 4],        # close
         candles[:, 5].sum()    # volume
     ])
+
+
+def calc_macd(_close, fast=12, slow=26):
+    '''
+    macd line = fast_ema - slow_ema
+    signal line = 9ema of macd line
+    histogram = macd line - signal line
+    '''
+    ema_fast = _close.ewm(window=fast, adjust=False).mean()
+    ema_slow = _close.ewm(window=slow, adjust=False).mean()
+    return ema_fast - ema_slow
+
+
+def calc_rsi(_close):
+    n = 14
+    deltas = np.diff(_close)
+    seed = deltas[:n+1]
+    up = seed[seed > 0].sum()/n
+    down = -seed[seed < 0].sum()/n
+    rsi = np.zeros_like(_close)
+    rsi[:n] = 100. - 100./(1.+ up/down)
+    for i in range(n, len(_close)):
+        delta = deltas[i-1]
+        if delta > 0:
+            up_val = delta
+            down_val = 0
+        else:
+            up_val = 0
+            down_val = -delta
+
+        up = (up*(n-1) + up_val)/n
+        down = (down*(n-1) + down_val)/n
+
+        rsi[i] = 100. - 100./(1. + up/down)
+
+    return rsi
