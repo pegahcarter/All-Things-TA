@@ -41,47 +41,50 @@ def find_signals(df, cushion=0.003):
             stop_loss = df['high'][i-10:i].max() * (1. - cushion)
 
         if signal:
-            purchase_price = df['open'][i+1]
-            signals.append([i, df['date'][i], signal, round(stop_loss, 8), round(purchase_price, 8)])
+            price = df['open'][i+1]
+            signals.append([i, df['date'][i], signal, round(stop_loss, 8), round(price, 8)])
 
     signals = pd.DataFrame(signals, columns=['index', 'date', 'signal', 'stop_loss', 'price']).set_index('index')
     return signals
 
 
 # Figure out which TP level is hit
-def determine_TP(signal, index, df, cushion=0.003):
+def determine_TP(df, index, signal, price, cushion):
     if signal == 'Long':
         l_bounds = df['low']
-        midrange = df['open']
         u_bounds = df['high']
-        cushion = 1. + cushion
     else:   # signal == 'Short'
         l_bounds = -df['high']
-        midrange = -df['open']
         u_bounds = -df['low']
-        cushion = 1. - cushion
+        cushion *= -1
+        price *= -1
 
-    purchase_price = midrange[index+1]
-    stop_loss = min(l_bounds[index-10:index]) * cushion
+    stop_loss = min(l_bounds[index-10:index]) * (1 - cushion)
+    diff = price - stop_loss
+    if diff < 0:
+        return None
 
-    diff = abs(purchase_price) - abs(stop_loss)
-    tp1 = purchase_price + diff/2.
-    tp2 = purchase_price + diff
-    tp3 = purchase_price + diff*2
-    tp4 = purchase_price + diff*3
+    profit_pct = abs(diff / price)
+
+    tp1 = price + diff/2.
+    tp2 = price + diff
+    tp3 = price + diff*2
+    tp4 = price + diff*3
 
     tp_targets = [tp1, tp2, tp3, tp4]
-    TP = 0
+    tp_hit = 0
 
     for x in range(index+1, len(df)):
-        if TP > 0:
-            stop_loss = purchase_price
-        while TP != 4 and u_bounds[x] > tp_targets[TP]:
-            TP += 1
-        if TP == 4 or stop_loss > l_bounds[x]:
+        if tp_hit > 0:
+            stop_loss = price
+        while tp_hit != 4 and u_bounds[x] > tp_targets[tp_hit]:
+            tp_hit += 1
+        if tp_hit == 4 or stop_loss > l_bounds[x]:
             break
 
-    return TP
+    profit_levels = [-1, 1. + 1/8., 1. + 3/8., 1. + 7/8., 1. + 11/8.]
+    return profit_levels[tp_hit] * profit_pct
+
 
 
 # ------------------------------------------------------------------------------

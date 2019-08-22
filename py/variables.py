@@ -19,6 +19,7 @@ API = '862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8'
 url = 'https://api.telegram.org/bot' + API + '/sendMessage?'
 chat_id = '-360419097'
 test_chat_id = '-1001192596591'
+signal_chat_id = '-1001350840772'
 
 # Google docs
 gc = pygsheets.authorize(service_file='/home/carl/Documents/crypto/peter-signal/credentials.json')

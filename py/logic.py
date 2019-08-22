@@ -3,7 +3,7 @@ from functions import find_signals
 import pandas as pd
 import numpy as np
 import requests
-from urllib.parse import urlencode
+from urllib import urlencode
 from datetime import datetime
 
 
@@ -79,5 +79,8 @@ def send_signal(row, candle_string):
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
     text += 'Leverage ' + leverage +  '\n'
     text += 'Stop loss ' + str(row['stop_loss'])
+
+    if row['ticker'] in ['XBT/USD', 'ETH/USD', 'ETH/BTC']:
+        requests.get(url + urlencode({'chat_id': signal_chat_id, 'text': text}))
 
     requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
