@@ -20,7 +20,7 @@ def find_intersections(line1, line2):
 
 
 # Determine signals from OHLCV dataframe
-def find_signals(df):
+def find_signals(df, cushion=0.003):
     ema3 = df['close'].ewm(span=3, adjust=False).mean()
     ma20 = df['close'].rolling(window=20).mean().fillna(0)
     ema40 = df['close'].ewm(span=40, adjust=False).mean()
@@ -35,16 +35,16 @@ def find_signals(df):
         signal = None
         if df['close'][i] > ema3[i] and ma20[i] > ema40[i]:
             signal = 'Long'
-            stop_loss = df['low'][i-10:i].min() * 1.003
+            stop_loss = df['low'][i-10:i].min() * (1. + cushion)
         elif df['close'][i] < ema3[i] and ma20[i] < ema40[i]:
             signal = 'Short'
-            stop_loss = df['high'][i-10:i].max() * .997
+            stop_loss = df['high'][i-10:i].max() * (1. - cushion)
 
         if signal:
             purchase_price = df['open'][i+1]
-            signals.append([df['date'][i], signal, round(stop_loss, 8), round(purchase_price, 8)])
+            signals.append([i, df['date'][i], signal, round(stop_loss, 8), round(purchase_price, 8)])
 
-    signals = pd.DataFrame(signals, columns=['date', 'signal', 'stop_loss', 'price'])
+    signals = pd.DataFrame(signals, columns=['index', 'date', 'signal', 'stop_loss', 'price']).set_index('index')
     return signals
 
 

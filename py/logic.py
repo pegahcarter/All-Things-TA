@@ -80,4 +80,4 @@ def send_signal(row, candle_string):
     text += 'Leverage ' + leverage +  '\n'
     text += 'Stop loss ' + str(row['stop_loss'])
 
-    requests.get(url + urlencode({'chat_id': chat_id, 'text': text}))
+    requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
