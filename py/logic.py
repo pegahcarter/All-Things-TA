@@ -79,15 +79,19 @@ def send_signal(row, candle_string):
     if '/BTC' in row['ticker'] and row['ticker'] != 'ETH/BTC':
         row['ticker'] = row['ticker'][:3] + '/U19'
 
-    text = candle_string + '\n'
+    text = '🚨🚨🚨\n\n'
+    text += candle_string + '\n'
     text += row['ticker'] + '\n'
     text += 'BitMEX\n'
     text += row['signal'] + ' ' + str(row['price']) + '\n'
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
     text += 'Leverage ' + leverage +  '\n'
-    text += 'Stop loss ' + str(row['stop_loss'])
+    text += 'Stop loss ' + str(row['stop_loss']) + '\n\n'
+    text += '🚨🚨🚨'
+
 
     if row['ticker'] in ['XBT/USD', 'ETH/USD', 'ETH/BTC']:
         requests.get(url + urlencode({'chat_id': signal_chat_id, 'text': text}))
+        requests.get(url + urlencode({'chat_id': signal_members_chat_id, 'text': text}))
 
     requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
