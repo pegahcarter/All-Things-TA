@@ -3,30 +3,25 @@ from functions import find_signals
 import pandas as pd
 import numpy as np
 import requests
-from urllib.parse import urlencode
-from datetime import datetime, timedelta
-import time
+from urllib import urlencode
+from datetime import datetime
 
 
 def run(candle_abv):
     signal_df = pd.DataFrame()
     for ticker in tickers:
         if candle_abv == '1h':
-            limit = 500
-            since = datetime.now() - timedelta(hours=limit)
-        else:  # candle_abv == '1d'
-            limit = 250
-            since = datetime.now() - timedelta(days=limit)
-
-        since = int(time.mktime(since.timetuple()) * 1000)
-        df = exchange.fetch_ohlcv(ticker, candle_abv, since=since, limit=limit)
+            df = exchange.fetch_ohlcv(ticker, candle_abv, limit=500, since=since)
+        else:
+            df = exchange.fetch_ohlcv(ticker, candle_abv, limit=500)
 
         df = pd.DataFrame(df, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
 
         signals = find_signals(df)
-        if len(signals) > 0:
-            signals.loc[:, 'ticker'] = ticker
-            signal_df = signal_df.append(signals, ignore_index=True, sort=False)
+        
+
+        signals.loc[:, 'ticker'] = ticker
+        signal_df = signal_df.append(signals, ignore_index=True)
 
     signal_df['date'] = [datetime.fromtimestamp(x/1000) for x in signal_df['date']]
     signal_df = signal_df.sort_values('date').reset_index(drop=True)
