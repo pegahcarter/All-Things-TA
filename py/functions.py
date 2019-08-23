@@ -41,7 +41,7 @@ def find_signals(df, cushion=0.003):
             stop_loss = df['high'][i-10:i].max() * (1. - cushion)
 
         if signal:
-            price = df['open'][i+1]
+            price = df['close'][i]
             signals.append([i, df['date'][i], signal, round(stop_loss, 8), round(price, 8)])
 
     signals = pd.DataFrame(signals, columns=['index', 'date', 'signal', 'stop_loss', 'price']).set_index('index')
