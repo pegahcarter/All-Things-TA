@@ -55,7 +55,8 @@ def find_signals(df):
 
 # Figure out which TP level is hit
 def determine_TP(df, signals, cushion):
-    for index, (signal, stop_loss, price) in signals.iterrows():
+    tp_lst = []
+    for index, (signal, price, stop_loss) in signals.iterrows():
         if signal == 'Long':
             l_bounds = df['low']
             u_bounds = df['high']
@@ -64,6 +65,7 @@ def determine_TP(df, signals, cushion):
             u_bounds = -df['low']
             cushion *= -1
             price *= -1
+            stop_loss *= -1
 
         stop_loss *= (1 + cushion)
         diff = price - stop_loss
@@ -75,17 +77,19 @@ def determine_TP(df, signals, cushion):
         tp4 = price + diff*3
 
         tp_targets = [tp1, tp2, tp3, tp4]
-        tp_hit = 0
+        tp = 0
 
         for x in range(index+1, len(df)):
-            if tp_hit > 0:
-                stop_loss = price
-            while tp_hit != 4 and u_bounds[x] > tp_targets[tp_hit]:
-                tp_hit += 1
-            if tp_hit == 4 or stop_loss > l_bounds[x]:
+            while tp != 4 and u_bounds[x] > tp_targets[tp]:
+                tp += 1
+            if tp == 4 or l_bounds[x] < stop_loss:
                 break
+            if tp > 0:
+                stop_loss = price
 
-    return profit_levels[tp_hit] * profit_pct
+        tp_lst.append(tp)
+
+    return tp_lst
 
 
 

@@ -1,9 +1,33 @@
 # Determine the best SL and TP levels for 3EMA, 20MA, and 40EMA
 import pandas as pd
-from py.functions import find_signals
+from py.functions import find_signals, determine_TP
 
 df = pd.read_csv('backtests/BTC.csv')
 signals = find_signals(df).drop(['date'], axis=1)
+signals.head()
+cushion = 5. / 10000
+x = determine_TP(df, signals, cushion)
+
+myDict = {0: 0, 1:0, 2:0, 3:0, 4:0}
+
+for y in x:
+    myDict[y] += 1
+myDict
+
+
+test = signals[:5]
+
+test
+
+for index, (signal, stop_loss, price) in test.iterrows():
+    print(stop_loss)
+
+
+
+
+
+
+
 
 for cushion in range(15, 100, 5):
     cushion /= 10000
