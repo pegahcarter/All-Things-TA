@@ -34,7 +34,8 @@ def run(candle_abv):
 
 
 def send_signal(row, candle_string):
-
+    if candle_string in ['LTC/BTC', 'BCH/BTC']:
+        return
     if candle_string == 'Hourly':
         date = row['date'].strftime('%m/%d %I:%M %p')
         leverage = '10x'
@@ -92,6 +93,6 @@ def send_signal(row, candle_string):
 
     if row['ticker'] in ['XBT/USD', 'ETH/USD', 'ETH/BTC']:
         requests.get(url + urlencode({'chat_id': signal_chat_id, 'text': text}))
-        requests.get(url + urlencode({'chat_id': signal_members_chat_id, 'text': text}))
 
     requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
+    requests.get(url + urlencode({'chat_id': signal_members_chat_id, 'text': text}))

@@ -20,13 +20,13 @@ def find_intersections(line1, line2):
 
 
 # Determine signals from OHLCV dataframe
-def find_signals(df, cushion=0.003):
+def find_signals(df):
     ema3 = df['close'].ewm(span=3, adjust=False).mean()
     ma20 = df['close'].rolling(window=20).mean().fillna(0)
     ema40 = df['close'].ewm(span=40, adjust=False).mean()
 
     intersections = find_intersections(ema3, ma20)
-    signals = []
+    signals = {}
 
     for i in intersections:
         if abs(df['open'][i] - df['close'][i]) / df['open'][i] > 0.02:
@@ -35,54 +35,56 @@ def find_signals(df, cushion=0.003):
         signal = None
         if df['close'][i] > ema3[i] and ma20[i] > ema40[i]:
             signal = 'Long'
-            stop_loss = df['low'][i-10:i].min() * (1. + cushion)
+            stop_loss = df['low'][i-10:i].min()
         elif df['close'][i] < ema3[i] and ma20[i] < ema40[i]:
             signal = 'Short'
-            stop_loss = df['high'][i-10:i].max() * (1. - cushion)
+            stop_loss = df['high'][i-10:i].max()
 
         if signal:
             price = df['close'][i]
-            signals.append([i, df['date'][i], signal, round(stop_loss, 8), round(price, 8)])
+            signals[i] = {
+                'date': df['date'][i],
+                'signal': signal,
+                'price': df['close'][i],
+                'stop_loss': stop_loss
+            }
 
-    signals = pd.DataFrame(signals, columns=['index', 'date', 'signal', 'stop_loss', 'price']).set_index('index')
+    signals = pd.DataFrame.from_dict(signals, orient='index')
     return signals
 
 
 # Figure out which TP level is hit
-def determine_TP(df, index, signal, price, cushion):
-    if signal == 'Long':
-        l_bounds = df['low']
-        u_bounds = df['high']
-    else:   # signal == 'Short'
-        l_bounds = -df['high']
-        u_bounds = -df['low']
-        cushion *= -1
-        price *= -1
+def determine_TP(df, signals, cushion):
+    for index, (signal, stop_loss, price) in signals.iterrows():
+        if signal == 'Long':
+            l_bounds = df['low']
+            u_bounds = df['high']
+        else:   # signal == 'Short'
+            l_bounds = -df['high']
+            u_bounds = -df['low']
+            cushion *= -1
+            price *= -1
 
-    stop_loss = min(l_bounds[index-10:index]) * (1 - cushion)
-    diff = price - stop_loss
-    if diff < 0:
-        return None
+        stop_loss *= (1 + cushion)
+        diff = price - stop_loss
+        profit_pct = abs(diff / price)
 
-    profit_pct = abs(diff / price)
+        tp1 = price + diff/2.
+        tp2 = price + diff
+        tp3 = price + diff*2
+        tp4 = price + diff*3
 
-    tp1 = price + diff/2.
-    tp2 = price + diff
-    tp3 = price + diff*2
-    tp4 = price + diff*3
+        tp_targets = [tp1, tp2, tp3, tp4]
+        tp_hit = 0
 
-    tp_targets = [tp1, tp2, tp3, tp4]
-    tp_hit = 0
+        for x in range(index+1, len(df)):
+            if tp_hit > 0:
+                stop_loss = price
+            while tp_hit != 4 and u_bounds[x] > tp_targets[tp_hit]:
+                tp_hit += 1
+            if tp_hit == 4 or stop_loss > l_bounds[x]:
+                break
 
-    for x in range(index+1, len(df)):
-        if tp_hit > 0:
-            stop_loss = price
-        while tp_hit != 4 and u_bounds[x] > tp_targets[tp_hit]:
-            tp_hit += 1
-        if tp_hit == 4 or stop_loss > l_bounds[x]:
-            break
-
-    profit_levels = [-1, 1. + 1/8., 1. + 3/8., 1. + 7/8., 1. + 11/8.]
     return profit_levels[tp_hit] * profit_pct
 
 
