@@ -20,7 +20,7 @@ def find_intersections(line1, line2):
 
 
 # Determine signals from OHLCV dataframe
-def find_signals(df):
+def find_signals(df, gap=None):
     ema3 = df['close'].ewm(span=3, adjust=False).mean()
     ma20 = df['close'].rolling(window=20).mean().fillna(0)
     ema40 = df['close'].ewm(span=40, adjust=False).mean()
@@ -50,7 +50,20 @@ def find_signals(df):
             }
 
     signals = pd.DataFrame.from_dict(signals, orient='index')
-    return signals
+    # return signals
+    return drop_extra_signals(signals, gap)
+
+
+# TODO: conceptually this is very similar to find_intersections().  Is there a
+# reasonable way to combine them into one function?
+def drop_extra_signals(signals, gap=None):
+    last_signal = 0
+    clean_signals = []
+    for signal in signals.index:
+        if signal > last_signal + gap:
+            clean_signals.append(signal)
+        last_signal = signal
+    return signals.drop([i for i in signals.index if i not in clean_signals])
 
 
 # Figure out which TP level is hit
