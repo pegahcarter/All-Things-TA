@@ -20,7 +20,7 @@ def find_intersections(line1, line2):
 
 
 # Determine signals from OHLCV dataframe
-def find_signals(df, gap=None):
+def find_signals(df, gap=0):
     ema3 = df['close'].ewm(span=3, adjust=False).mean()
     ma20 = df['close'].rolling(window=20).mean().fillna(0)
     ema40 = df['close'].ewm(span=40, adjust=False).mean()
@@ -56,7 +56,7 @@ def find_signals(df, gap=None):
 
 # TODO: conceptually this is very similar to find_intersections().  Is there a
 # reasonable way to combine them into one function?
-def drop_extra_signals(signals, gap=None):
+def drop_extra_signals(signals, gap=0):
     last_signal = 0
     clean_signals = []
     for signal in signals.index:
@@ -67,27 +67,27 @@ def drop_extra_signals(signals, gap=None):
 
 
 # Figure out which TP level is hit
-def determine_TP(df, signals, cushion):
+def determine_TP(df, signals, cushion=0):
     tp_lst = []
-    for index, (signal, price, stop_loss) in signals.iterrows():
-        if signal == 'Long':
+    for index, row in signals.iterrows():
+        if row['signal'] == 'Long':
             l_bounds = df['low']
             u_bounds = df['high']
         else:   # signal == 'Short'
             l_bounds = -df['high']
             u_bounds = -df['low']
             cushion *= -1
-            price *= -1
-            stop_loss *= -1
+            row['price'] *= -1
+            row['stop_loss'] *= -1
 
-        stop_loss *= (1 + cushion)
-        diff = price - stop_loss
-        profit_pct = abs(diff / price)
+        row['stop_loss'] *= (1 + cushion)
+        diff = row['price'] - row['stop_loss']
+        profit_pct = abs(diff / row['price'])
 
-        tp1 = price + diff/2.
-        tp2 = price + diff
-        tp3 = price + diff*2
-        tp4 = price + diff*3
+        tp1 = row['price'] + diff/2.
+        tp2 = row['price'] + diff
+        tp3 = row['price'] + diff*2
+        tp4 = row['price'] + diff*3
 
         tp_targets = [tp1, tp2, tp3, tp4]
         tp = 0
@@ -95,10 +95,10 @@ def determine_TP(df, signals, cushion):
         for x in range(index+1, len(df)):
             while tp != 4 and u_bounds[x] > tp_targets[tp]:
                 tp += 1
-            if tp == 4 or l_bounds[x] < stop_loss:
+            if tp == 4 or l_bounds[x] < row['stop_loss']:
                 break
             if tp > 0:
-                stop_loss = price
+                row['stop_loss'] = row['price']
 
         tp_lst.append(tp)
 
