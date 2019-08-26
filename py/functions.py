@@ -83,6 +83,7 @@ def determine_TP(df, signals, cushion=0):
 
         row['stop_loss'] *= (1 + cushion)
         diff = row['price'] - row['stop_loss']
+        # row['stop_loss'] = (row['price'] + row['stop_loss']) / 2
 
         tp1 = row['price'] + diff/2.
         tp2 = row['price'] + diff

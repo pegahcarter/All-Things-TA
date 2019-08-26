@@ -15,6 +15,7 @@ signals['end_pct'] = list(map(lambda x: tp_pcts[x], signals[0]))
 signals['net_profit'] = signals['end_pct'] * signals['profit_pct']
 signals['net_profit'].sum()
 
+signals.groupby(0).count()
 
 
 
