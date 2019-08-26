@@ -46,7 +46,7 @@ def find_signals(df, gap=0):
                 signals[i] = {
                     'date': df['date'][i],
                     'signal': signal,
-                    'price': df['close'][i],
+                    'price': df['open'][i+1],
                     'stop_loss': stop_loss
                 }
 
@@ -82,26 +82,29 @@ def determine_TP(df, signals, cushion=0):
             row['stop_loss'] *= -1
 
         row['stop_loss'] *= (1 + cushion)
-        diff = row['price'] - row['stop_loss']
-        # row['stop_loss'] = (row['price'] + row['stop_loss']) / 2
+        if row['stop_loss'] > row['price']:
+            tp_lst.append(5)
+        else:
+            diff = row['price'] - row['stop_loss']
+            # row['stop_loss'] = (row['price'] + row['stop_loss']) / 2
 
-        tp1 = row['price'] + diff/2.
-        tp2 = row['price'] + diff
-        tp3 = row['price'] + diff*2
-        tp4 = row['price'] + diff*3
+            tp1 = row['price'] + diff/2.
+            tp2 = row['price'] + diff
+            tp3 = row['price'] + diff*2
+            tp4 = row['price'] + diff*3
 
-        tp_targets = [tp1, tp2, tp3, tp4]
-        tp = 0
+            tp_targets = [tp1, tp2, tp3, tp4]
+            tp = 0
 
-        for x in range(index+1, len(df)):
-            while tp != 4 and u_bounds[x] > tp_targets[tp]:
-                tp += 1
-            if tp == 4 or l_bounds[x] < row['stop_loss']:
-                break
-            if tp > 0:
-                row['stop_loss'] = row['price']
+            for x in range(index+1, len(df)):
+                while tp != 4 and u_bounds[x] > tp_targets[tp]:
+                    tp += 1
+                if tp == 4 or l_bounds[x] < row['stop_loss']:
+                    break
+                if tp > 0:
+                    row['stop_loss'] = row['price']
 
-        tp_lst.append(tp)
+            tp_lst.append(tp)
 
     return tp_lst
 
