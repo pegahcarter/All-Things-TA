@@ -101,7 +101,7 @@ def determine_TP(df, signals, cushion=0):
                     tp += 1
                 if tp == 4 or l_bounds[x] < row['stop_loss']:
                     break
-                if tp > 0:
+                if tp > 1:
                     row['stop_loss'] = row['price']
 
             tp_lst.append(tp)

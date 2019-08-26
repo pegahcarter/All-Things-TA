@@ -1,69 +1,16 @@
 # Determine the best SL and TP levels for 3EMA, 20MA, and 40EMA
+from itertools import permutations
 import pandas as pd
 import numpy as np
-from itertools import permutations
-from backtests.determine_tp_hit import determine_SL_and_TP
-import os
+from py.functions import find_signals, determine_TP, drop_extra_signals
 
-df = pd.read_csv('backtests/BTC.csv').drop(['date', 'volume'], axis=1)
-_open, _high, _low, _close = df.T.values
+df = pd.read_csv('backtests/BTC.csv')
+signals = find_signals(df)
+signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
 
-ema3 = df['close'].ewm(span=3, adjust=False).mean()
-ma20 = df['close'].rolling(window=20).mean().fillna(0)
-ema40 = df['close'].ewm(span=40, adjust=False).mean()
-ema3_gt_ma20 = ema3 > ma20
+signals['tp'] = determine_TP(df, signals, cushion=0.003)
+signals = signals.sort_values('profit_pct')
 
-cross_indices = []
-current_val = ema3_gt_ma20[0]
-
-# TODO: instead of this next loop, add it into cross_index loop AND make it easy to read
-# Find the index of each ema3 and ma20 intersection
-for i, val in ema3_gt_ma20[1:].items():
-    if val != current_val:
-        cross_indices.append(i)
-    current_val = val
-
-# Determine which ema3 and ma20 intersections are actually signals
-signals = {}
-for cross_index in cross_indices:
-    for index in range(cross_index, len(df)):
-        rng = set(ema3_gt_ma20[cross_index:index+1])
-        candle_body_pct = abs(_close[index] - _open[index])/_open[index]
-        # End if:
-        #   1. True and False are in this set, ema3 and ma20 had another intersection
-        #   2. Any candle body after cross is > 2% of price
-        if len(rng) == 2 or candle_body_pct > .02:
-            break
-        # True in rng means the ema3 crossed above ma20
-        elif True in rng:
-            if _close[index] > ema3[index]:
-                if ma20[index] > ema40[index]:
-                    signals[index] = 'Long'
-                    break
-        else:   # False in rng means ema3 crossed below ma20
-            if _close[index] < ema3[index]:
-                if ma20[index] < ema40[index]:
-                    signals[index] = 'Short'
-                    break
-
-
-df = []
-for index, signal in signals.items():
-    SL, TP = determine_TP(signal, index, _open, _high, _low, 0.003)
-    df.append([SL, TP])
-    # purchase_price = midrange[index+1]
-    # stop_loss = min(l_bounds[index-10:index]) * cushion
-    # # stop_loss_pct = abs((purchase_price - stop_loss) / purchase_price)
-    # stop_loss_pct = abs(1 - stop_loss / purchase_price)
-    #
-
-    # df.append([stop_loss_pct, tp])
-df
-
-
-df = pd.DataFrame(df, columns=['stop_loss_pct', 'tp'])
-df.groupby('tp').count()
-# df = df[df['tp'] > 0].reset_index(drop=True)
 
 results = {}
 pcts = list(range(10, 71, 10))
@@ -71,30 +18,45 @@ pcts *= 4
 perms = permutations(pcts, 4)
 good_results = [x for x in perms if sum(x) == 100 and len(x) == 4]
 tp_combos = set(good_results)
-for tp_combo in tp_combos:
+tp_combos.add((25, 25, 25, 25))
 
+for tp_combo in tp_combos:
     tp_combo_pct = np.divide(tp_combo, 100)
     tp1_pct = tp_combo_pct[0]/2.
     tp2_pct = tp1_pct + tp_combo_pct[1]
     tp3_pct = tp2_pct + 2. * tp_combo_pct[2]
     tp4_pct = tp3_pct + 3. * tp_combo_pct[3]
-    tp_pcts = [-1, tp1_pct, tp2_pct, tp3_pct, tp4_pct]
+    tp_pcts = [-1, tp1_pct, tp2_pct, tp3_pct, tp4_pct, 0]
 
     col = '-'.join([str(x) for x in tp_combo])
-    df[col] = df['tp'].map(lambda x: tp_pcts[x]) * df['stop_loss_pct']
-    results[col] = df[col].sum()
+    signals[col] = signals['tp'].map(lambda x: tp_pcts[x]) * signals['profit_pct']
+    results[col] = signals[col].sum()
 
 sorted(results.items(), key=lambda x: x[1])
 
+# BTC
+[
+ ('10-10-60-20', 0.5074741123070703),
+ ('10-20-30-40', 0.5112037499560433),
+ ('20-10-10-60', 0.5241633657869483),
+ ('10-10-50-30', 0.5293384422077009),
+ ('10-20-20-50', 0.533068079856674),
+ ('10-10-40-40', 0.5512027721083326),
+ ('10-20-10-60', 0.5549324097573052),
+ ('10-10-30-50', 0.5730671020089633),
+ ('10-10-20-60', 0.594931431909594),
+ ('10-10-10-70', 0.6167957618102251)
+]
 
-
-# 10.  10-20-30-40
-# 9.   10-50-10-30
-# 8.   10-30-20-40
-# 7.   10-10-30-50
-# 6.   10-40-10-40
-# 5.   10-20-20-50
-# 4.   10-30-10-50
-# 3.   10-10-20-60
-# 2.   10-20-10-60
-# 1.   10-10-10-70
+# ETH
+]
+ ('10-20-30-40', 0.9019411632437655),
+ ('10-30-10-50', 0.909113738049395),
+ ('20-10-10-60', 0.9268115422443439),
+ ('10-10-40-40', 0.9332487030130023),
+ ('10-20-20-50', 0.9404212778186314),
+ ('10-10-30-50', 0.971728817587868),
+ ('10-20-10-60', 0.9789013923934978),
+ ('10-10-20-60', 1.0102089321627337),
+ ('10-10-10-70', 1.0486890467376)
+]
