@@ -42,12 +42,13 @@ def find_signals(df, gap=0):
 
         if signal:
             price = df['close'][i]
-            signals[i] = {
-                'date': df['date'][i],
-                'signal': signal,
-                'price': df['close'][i],
-                'stop_loss': stop_loss
-            }
+            if abs(1 - price/stop_loss) < .04:
+                signals[i] = {
+                    'date': df['date'][i],
+                    'signal': signal,
+                    'price': df['close'][i],
+                    'stop_loss': stop_loss
+                }
 
     signals = pd.DataFrame.from_dict(signals, orient='index')
     return signals

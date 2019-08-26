@@ -5,16 +5,18 @@ from py.functions import find_signals, determine_TP, drop_extra_signals
 df = pd.read_csv('backtests/BTC.csv')
 signals = find_signals(df)
 signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
-signals['stop_loss'] = (signals['stop_loss'] + signals['price']) / 2.
+# signals['stop_loss'] = (signals['stop_loss'] + signals['price']) / 2.
 
 signals[0] = determine_TP(df, signals)
-signals.groupby(0).count()
+signals = signals.sort_values('profit_pct')
 
 tp_pcts = [-1, 0.125, 0.375, 0.875, 1.375]
-signals['end_pct'] = map(lambda x: tp_pcts[x], signals[0])
+signals['end_pct'] = list(map(lambda x: tp_pcts[x], signals[0]))
 signals['net_profit'] = signals['end_pct'] * signals['profit_pct']
-
 signals['net_profit'].sum()
+
+
+
 
 
 
