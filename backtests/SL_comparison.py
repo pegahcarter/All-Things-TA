@@ -1,31 +1,20 @@
 # Determine the best SL and TP levels for 3EMA, 20MA, and 40EMA
 import pandas as pd
-from py.functions import find_signals, determine_TP
+from py.functions import find_signals, determine_TP, drop_extra_signals
 
 df = pd.read_csv('backtests/BTC.csv')
-signals = find_signals(df).drop(['date'], axis=1)
-signals.head()
-cushion = 5. / 10000
-x = determine_TP(df, signals, cushion)
+signals = find_signals(df)
+signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
+signals['stop_loss'] = (signals['stop_loss'] + signals['price']) / 2.
 
-myDict = {0: 0, 1:0, 2:0, 3:0, 4:0}
+signals[0] = determine_TP(df, signals)
+signals.groupby(0).count()
 
-for y in x:
-    myDict[y] += 1
-myDict
+tp_pcts = [-1, 0.125, 0.375, 0.875, 1.375]
+signals['end_pct'] = map(lambda x: tp_pcts[x], signals[0])
+signals['net_profit'] = signals['end_pct'] * signals['profit_pct']
 
-
-test = signals[:5]
-
-test
-
-for index, (signal, stop_loss, price) in test.iterrows():
-    print(stop_loss)
-
-
-
-
-
+signals['net_profit'].sum()
 
 
 

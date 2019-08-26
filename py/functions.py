@@ -50,8 +50,8 @@ def find_signals(df, gap=0):
             }
 
     signals = pd.DataFrame.from_dict(signals, orient='index')
-    # return signals
-    return drop_extra_signals(signals, gap)
+    return signals
+    # return drop_extra_signals(signals, gap)
 
 
 # TODO: conceptually this is very similar to find_intersections().  Is there a
@@ -82,7 +82,6 @@ def determine_TP(df, signals, cushion=0):
 
         row['stop_loss'] *= (1 + cushion)
         diff = row['price'] - row['stop_loss']
-        profit_pct = abs(diff / row['price'])
 
         tp1 = row['price'] + diff/2.
         tp2 = row['price'] + diff
