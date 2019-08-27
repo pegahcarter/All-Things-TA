@@ -108,6 +108,13 @@ def determine_TP(df, signals, cushion=0):
     return tp_lst
 
 
+# TODO
+# Return outcome of TP in %
+# def net_profit_pct(tp_pcts, tps_hit, prices, stop_losses):
+#     profit_pct = abs(prices - stop_losses) / prices
+#     end_pct = list(map(lambda x: tp_pcts[x], tps_hit))
+#     return profit_pct * end_pct
+
 
 # ------------------------------------------------------------------------------
 # Old functions
