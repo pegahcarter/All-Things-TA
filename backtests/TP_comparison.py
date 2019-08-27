@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from py.functions import find_signals, determine_TP, drop_extra_signals
 
-df = pd.read_csv('backtests/BTC.csv')
+df = pd.read_csv('ohlcv/BTC.csv')
 signals = find_signals(df)
 signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
 
