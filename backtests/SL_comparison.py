@@ -5,19 +5,19 @@ from py.functions import find_signals, determine_TP, drop_extra_signals
 df = pd.read_csv('backtests/BTC.csv')
 signals = find_signals(df)
 signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
-# signals['stop_loss'] = (signals['stop_loss'] + signals['price']) / 2.
 
-signals[0] = determine_TP(df, signals)
+signals[0] = determine_TP(df, signals, cushion=0.003)
 signals = signals.sort_values('profit_pct')
 
 tp_pcts = [-1, 0.125, 0.375, 0.875, 1.375, 0]
+# tp_pcts = [-1, -0.625, 0.375, 0.875, 1.375, 0]
 signals['end_pct'] = list(map(lambda x: tp_pcts[x], signals[0]))
 signals['net_profit'] = signals['end_pct'] * signals['profit_pct']
 
 for cushion in range(0, 51, 5):
     cushion /= 10000
-    tps = determine_TP(df, signals, cushion)
-    end_pct = list(map(lambda x: tp_pcts[x], tps))
+    tps_hit = determine_TP(df, signals, cushion)
+    end_pct = list(map(lambda x: tp_pcts[x], tps_hit))
     profit_pct = signals['profit_pct'] * (1 - cushion)
     signals[cushion] = end_pct * profit_pct
 

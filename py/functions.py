@@ -81,12 +81,11 @@ def determine_TP(df, signals, cushion=0):
             row['price'] *= -1
             row['stop_loss'] *= -1
 
-        row['stop_loss'] *= (1 + cushion)
+        row['stop_loss'] *= (1. + cushion)
         if row['stop_loss'] > row['price']:
             tp_lst.append(5)
         else:
             diff = row['price'] - row['stop_loss']
-            # row['stop_loss'] = (row['price'] + row['stop_loss']) / 2
 
             tp1 = row['price'] + diff/2.
             tp2 = row['price'] + diff
@@ -101,10 +100,10 @@ def determine_TP(df, signals, cushion=0):
                     tp += 1
                 if tp == 4 or l_bounds[x] < row['stop_loss']:
                     break
-                if tp > 1:
+                if tp > 0:
                     row['stop_loss'] = row['price']
 
-            tp_lst.append(tp)
+            tp_lst.append(int(tp))
 
     return tp_lst
 

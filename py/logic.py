@@ -34,8 +34,7 @@ def run(candle_abv):
 
 
 def send_signal(row, candle_string):
-    if candle_string in ['LTC/BTC', 'BCH/BTC']:
-        return
+
     if candle_string == 'Hourly':
         date = row['date'].strftime('%m/%d %I:%M %p')
         leverage = '10x'
@@ -64,9 +63,9 @@ def send_signal(row, candle_string):
             decimals = '.7f'
         elif row['ticker'] == 'LTC/BTC':
             decimals = '.6f'
-        elif row['ticker'] == 'BCH/BTC':
+        elif row['ticker'] in ['BCH/BTC', 'ETH/BTC']:
             decimals = '.5f'
-        elif row['ticker'] in ['XRP/USD', 'EOS/USD', 'ETH/BTC']:
+        elif row['ticker'] in ['XRP/USD', 'EOS/USD']:
             decimals = '.4f'
         else:
             decimals = '.2f'
