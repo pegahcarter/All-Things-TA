@@ -46,7 +46,7 @@ def find_signals(df, gap=0):
                 signals[i] = {
                     'date': df['date'][i],
                     'signal': signal,
-                    'price': df['open'][i+1],
+                    'price': df['close'][i],
                     'stop_loss': stop_loss
                 }
 
