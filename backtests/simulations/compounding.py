@@ -6,17 +6,16 @@ import numpy as np
 import pandas as pd
 from py.functions import *
 
-df = pd.read_csv('ohlcv/BTC.csv')
+df = pd.read_csv('ohlcv/ETH.csv')
 signals = find_signals(df)
 
 # Step 1: figure out how long the position is open
-tp, index_tp_hit = determine_TP(df, signals, cushion=0.003, compound=True)
+tp, index_tp_hit = determine_TP(df, signals, compound=True)
+signals = signals.reset_index()
+
 signals['tp'] = tp
-signals['index_tp_hit'] = index_tp_hit
+signals['hrs_position_open'] = np.subtract(index_tp_hit, signals['index'])
 
-signals['hrs_position_open'] = np.subtract(index_tp_hit, signals.index)
 
-signals.head()
-
-portfolio_value = 1000.
-trade_size = .05
+# Step 2: figure out the most # of positions open at one time
+signals['total_positions_open'] = [sum(signals['index'][i] + signals['hrs_position_open'][i] > signals['index'][i:]) for i in signals.index]
