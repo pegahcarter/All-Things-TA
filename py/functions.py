@@ -29,17 +29,19 @@ def find_signals(df, gap=0):
     signals = {}
 
     for i in intersections:
-        if abs(df['open'][i] - df['close'][i]) / df['open'][i] > 0.02:
+        if abs(df['high'][i] - df['low'][i]) / df['high'][i] > 0.02:
             continue
 
         signal = None
+        stop_loss_low = df['low'][i-10:i].min()
+        stop_loss_high = df['high'][i-10:i].max()
+
         if df['close'][i] > ema3[i] and ma20[i] > ema40[i]:
             signal = 'Long'
-            stop_loss = df['low'][i-10:i].min()
+            stop_loss = stop_loss_low
         elif df['close'][i] < ema3[i] and ma20[i] < ema40[i]:
             signal = 'Short'
-            stop_loss = df['high'][i-10:i].max()
-
+            stop_loss = stop_loss_high
         if signal:
             price = df['close'][i]
             if abs(1 - price/stop_loss) < .04:
@@ -68,8 +70,9 @@ def drop_extra_signals(signals, gap=0):
 
 
 # Figure out which TP level is hit
-def determine_TP(df, signals, cushion=0):
+def determine_TP(df, signals, cushion=0, compound=False):
     tp_lst = []
+    position_closed_lst = []
     for index, row in signals.iterrows():
         if row['signal'] == 'Long':
             l_bounds = df['low']
@@ -84,6 +87,7 @@ def determine_TP(df, signals, cushion=0):
         row['stop_loss'] *= (1. + cushion)
         if row['stop_loss'] > row['price']:
             tp_lst.append(5)
+            position_closed_lst.append(index)
         else:
             diff = row['price'] - row['stop_loss']
 
@@ -104,8 +108,13 @@ def determine_TP(df, signals, cushion=0):
                     row['stop_loss'] = row['price']
 
             tp_lst.append(int(tp))
+            position_closed_lst.append(int(x))
 
-    return tp_lst
+    if compound:
+        return tp_lst, position_closed_lst
+    else:
+        return tp_lst
+
 
 
 # TODO

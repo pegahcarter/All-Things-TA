@@ -42,6 +42,9 @@ def send_signal(row, candle_string):
         date = row['date'].strftime('%m/%d')
         leverage = '3x'
 
+    low_price = row['price'] * .999
+    high_price = row['price'] * 1.001
+
     diff = row['price'] - row['stop_loss']
     tp1 = row['price'] + diff/2.
     tp2 = row['price'] + diff
@@ -50,7 +53,9 @@ def send_signal(row, candle_string):
 
     if row['ticker'] == 'BTC/USD':
         row['ticker'] = 'XBT/USD'
-        row['price'] = int(row['price'])
+        # row['price'] = int(row['price'])
+        low_price = int(low_price)
+        high_price = int(high_price)
         row['stop_loss'] = int(row['stop_loss'])
         tp1 = int(tp1)
         tp2 = int(tp2)
@@ -69,7 +74,9 @@ def send_signal(row, candle_string):
             decimals = '.4f'
         else:
             decimals = '.2f'
-        row['price'] = format(row['price'], decimals)
+        # row['price'] = format(row['price'], decimals)
+        low_price = format(low_price, decimals)
+        high_price = format(high_price, decimals)
         row['stop_loss'] = format(row['stop_loss'], decimals)
         tp1 = format(tp1, decimals)
         tp2 = format(tp2, decimals)
@@ -83,15 +90,17 @@ def send_signal(row, candle_string):
     text += candle_string + '\n'
     text += row['ticker'] + '\n'
     text += 'BitMEX\n'
-    text += row['signal'] + ' ' + str(row['price']) + '\n'
+    text += row['signal'] + ' zone ' + str(low_price) + '-' + str(high_price) + '\n'
     text += 'Take profit ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n'
     text += 'Leverage ' + leverage +  '\n'
     text += 'Stop loss ' + str(row['stop_loss']) + '\n\n'
     text += '🚨🚨🚨'
 
 
-    if row['ticker'] in ['XBT/USD', 'ETH/USD', 'ETH/BTC']:
+    # if row['ticker'] in ['XBT/USD', 'ETH/USD', 'ETH/BTC']:
+    if row['ticker'] in ['BCH/USD', 'EOS/USD', 'XRP/USD', 'LTC/USD']:
+        requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
+    else:
+        requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
         requests.get(url + urlencode({'chat_id': signal_chat_id, 'text': text}))
-
-    requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
-    requests.get(url + urlencode({'chat_id': signal_members_chat_id, 'text': text}))
+        requests.get(url + urlencode({'chat_id': signal_members_chat_id, 'text': text}))
