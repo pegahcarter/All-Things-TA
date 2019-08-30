@@ -35,16 +35,16 @@ def find_signals(df, gap=0):
         signal = None
         stop_loss_low = df['low'][i-10:i].min()
         stop_loss_high = df['high'][i-10:i].max()
+        price = df['close'][i]
 
-        if df['close'][i] > ema3[i] and ma20[i] > ema40[i]:
+        if price > ema3[i] and ma20[i] > ema40[i]:
             signal = 'Long'
             stop_loss = stop_loss_low
-        elif df['close'][i] < ema3[i] and ma20[i] < ema40[i]:
+        elif price < ema3[i] and ma20[i] < ema40[i]:
             signal = 'Short'
             stop_loss = stop_loss_high
         if signal:
-            price = df['close'][i]
-            if abs(1 - price/stop_loss) < .04:
+            if 1 - stop_loss_low/price < .05 and stop_loss_high/price - 1 < .05:
                 signals[i] = {
                     'date': df['date'][i],
                     'signal': signal,

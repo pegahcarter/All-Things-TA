@@ -6,13 +6,17 @@ df = pd.read_csv('ohlcv/BTC.csv')
 signals = find_signals(df)
 signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
 
-signals[0] = determine_TP(df, signals, cushion=0.003)
+signals[0] = determine_TP(df, signals)
 signals = signals.sort_values('profit_pct')
 
-tp_pcts = [-1, 0.125, 0.375, 0.875, 1.375, 0]
+tp_pcts = [-1, 0.05, 0.15, 0.35, 2.45, 0]
 # tp_pcts = [-1, -0.625, 0.375, 0.875, 1.375, 0]
 signals['end_pct'] = list(map(lambda x: tp_pcts[x], signals[0]))
 signals['net_profit'] = signals['end_pct'] * signals['profit_pct']
+
+signals.groupby(0).count()['signal']
+signals['net_profit'].sum()
+
 
 for cushion in range(0, 51, 5):
     cushion /= 10000
@@ -27,16 +31,18 @@ for col in signals.drop(['date', 'signal', 'price', 'stop_loss', 'profit_pct', '
 
 summary
 
-'''{
- 0: 0.2297598448773858,
- 0.0005: 0.26016622740659945,
- 0.001: 0.19741595926986252,
- 0.0015: 0.24263105736006668,
- 0.002: 0.2561520884225171,
- 0.0025: 0.32029263384297646,
- 0.003: 0.36954038118571375,
- 0.0035: 0.3243062764494977,
- 0.004: 0.3391283021998393,
- 0.0045: 0.298829787977541,
- 0.005: 0.2665775667329772
-}'''
+'''
+{
+ 0: 0.561123106592167,
+ 0.0005: 0.5241086750042334,
+ 0.001: 0.4023262039416227,
+ 0.0015: 0.32273125450471796,
+ 0.002: 0.2925154041116961,
+ 0.0025: 0.3402056778481956,
+ 0.003: 0.2866719477718518,
+ 0.0035: 0.26716574848959107,
+ 0.004: 0.3167414860455944,
+ 0.0045: 0.240843386795134,
+ 0.005: 0.2261518376295055
+}
+'''
