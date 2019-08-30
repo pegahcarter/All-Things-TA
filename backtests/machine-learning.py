@@ -44,40 +44,47 @@ for coin in coins:
 
 
 
-tree = RandomForestClassifier()
-x = signals[['ema40_slope', 'ma20_slope', 'ma20_ema40_diff']]
-y = signals['tp'] == 4
-
-tree.fit(x, y)
-feature_importance = tree.feature_importances_
-feature_importance = 100 * (feature_importance / max(feature_importance))
-feature_sorted = np.argsort(feature_importance)
-pos = np.arange(feature_sorted.shape[0]) + .5
-plt.barh(pos, feature_importance[feature_sorted], align='center', color='crimson')
-plt.title('Variable Importance')
-plt.xlabel('Relative Importance of Variable')
-plt.yticks(pos, x.columns[feature_sorted])
-plt.show()
+# tree = RandomForestClassifier()
+# x = signals[['ema40_slope', 'ma20_slope', 'ma20_ema40_diff']]
+# y = signals['tp'] == 4
+#
+# tree.fit(x, y)
+# feature_importance = tree.feature_importances_
+# feature_importance = 100 * (feature_importance / max(feature_importance))
+# feature_sorted = np.argsort(feature_importance)
+# pos = np.arange(feature_sorted.shape[0]) + .5
+# plt.barh(pos, feature_importance[feature_sorted], align='center', color='crimson')
+# plt.title('Variable Importance')
+# plt.xlabel('Relative Importance of Variable')
+# plt.yticks(pos, x.columns[feature_sorted])
+# plt.show()
 
 
 
 # ------------------------------------------------------------------------------
 
 # Testing out eliminating trades based on slope
-signals
+signals = signals[signals['tp'] < 5]
 signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
 signals['end_pct'] = list(map(lambda x: tp_pcts[x], signals['tp']))
 signals['net_profit'] = signals['end_pct'] * signals['profit_pct']
 signals['net_profit'].sum()
+# W/ only 4% limit on SL
+# 6.835608249537152
+
+# W/ 5% limit on SL and high compared to price
+# 8.189711112781826
 
 signals.groupby('tp')['tp'].count()
+len(signals)
+
 
 
 plt.hist(signals['ma20_slope'], bins=50)
 plt.show()
 
 signals[signals['ma20_slope'] > .1]['net_profit'].sum()
-test = signals[(.0001 > signals['ma20_slope']) & (-.0001 < signals['ma20_slope'])]
+test = signals[(.0005 > signals['ma20_slope']) & (-.0005 < signals['ma20_slope'])]
 test['net_profit'].sum()
 
 
@@ -90,14 +97,8 @@ plt.show()
 signals['slope'] = abs(signals['ma20_slope'] - signals['ema40_slope'])
 plt.hist(signals['slope'], bins=40)
 plt.show()
-
-
 signals[signals['slope'] < .3]['net_profit'].sum()
-signals[signals['slope'] > .2]['net_profit'].sum()
-
-
-
-
+signals[signals['slope'] > .3]['net_profit'].sum()
 
 
 slope = []
@@ -117,15 +118,12 @@ test['net_profit'].sum()
 
 plt.hist(signals['ma20_ema40_diff'], bins=50)
 plt.show()
-
 test = signals[(.0001 > signals['ma20_ema40_diff']) & (-.0001 < signals['ma20_ema40_diff'])]
-
 test.groupby('tp')['tp'].count()
-
 test['net_profit'].sum()
 
-
-
+x = signals[signals['tp'] == 0]
+y = signals[signals['tp'] > 0]
 
 
 
@@ -144,6 +142,10 @@ df['ema40_slope'] = np.subtract(df['ema40'][1:], df['ema40'][:-1]) / df['ema40']
 df['ema40_slope_direction'] = df['ema40_slope'] > 0
 df['ma20_ema40_same_direction'] = df['ma20_slope_direction'] == df['ema40_slope_direction']
 df['ma20_ema40_diff'] = np.subtract(df['ma20'], df['ema40']) / df['ma20']
+
+
+'hours_since_last_signal'
+
 
 signals = find_signals(df)
 signals['tp'] = determine_TP(df, signals, cushion=0.003)
