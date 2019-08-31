@@ -44,7 +44,9 @@ def find_signals(df, gap=0):
             signal = 'Short'
             stop_loss = stop_loss_high
         if signal:
-            if 1 - stop_loss_low/price < .05 and stop_loss_high/price - 1 < .05:
+            if 1 - stop_loss_low/price < .05 \
+            and stop_loss_high/price - 1 < .05 \
+            and abs(price - stop_loss) / price > 0.0075:
                 signals[i] = {
                     'date': df['date'][i],
                     'signal': signal,

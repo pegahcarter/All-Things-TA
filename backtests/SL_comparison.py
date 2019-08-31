@@ -6,17 +6,13 @@ df = pd.read_csv('ohlcv/BTC.csv')
 signals = find_signals(df)
 signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
 
-signals[0] = determine_TP(df, signals)
+signals['tp'] = determine_TP(df, signals)
 signals = signals.sort_values('profit_pct')
 
 tp_pcts = [-1, 0.05, 0.15, 0.35, 2.45, 0]
 # tp_pcts = [-1, -0.625, 0.375, 0.875, 1.375, 0]
-signals['end_pct'] = list(map(lambda x: tp_pcts[x], signals[0]))
+signals['end_pct'] = list(map(lambda x: tp_pcts[x], signals['tp']))
 signals['net_profit'] = signals['end_pct'] * signals['profit_pct']
-
-signals.groupby(0).count()['signal']
-signals['net_profit'].sum()
-
 
 for cushion in range(0, 51, 5):
     cushion /= 10000
