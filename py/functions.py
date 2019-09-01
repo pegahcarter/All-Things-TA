@@ -24,6 +24,7 @@ def find_signals(df, gap=0):
     ema3 = df['close'].ewm(span=3, adjust=False).mean()
     ma20 = df['close'].rolling(window=20).mean().fillna(0)
     ema40 = df['close'].ewm(span=40, adjust=False).mean()
+    ma20_ema40_diff = abs(np.subtract(ma20, ema40)) / ma20
 
     intersections = find_intersections(ema3, ma20)
     signals = {}
@@ -46,7 +47,8 @@ def find_signals(df, gap=0):
         if signal:
             if 1 - stop_loss_low/price < .05 \
             and stop_loss_high/price - 1 < .05 \
-            and abs(price - stop_loss) / price > 0.0075:
+            and abs(price - stop_loss) / price > 0.0075 \
+            and ma20_ema40_diff[i] > .001:
                 signals[i] = {
                     'date': df['date'][i],
                     'signal': signal,
