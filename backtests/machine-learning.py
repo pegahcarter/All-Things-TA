@@ -6,44 +6,46 @@ import matplotlib.pyplot as plt
 
 btc = pd.read_csv('ohlcv/BTC.csv')
 signals = pd.DataFrame()
-coins = ['BTC', 'BCH', 'BNB', 'EOS', 'ETH', 'LTC', 'XRP']
+coins = ['BTC', 'BCH', 'ETH', 'LTC', 'XRP']
 features = [ 'ma20_slope', 'ma20_slope_direction', 'ema40_slope', 'ema40_slope_direction', 'ma20_ema40_same_direction', 'ma20_ema40_diff']
 tp_pcts = [-1, 0.05, 0.15, 0.35, 2.45, 0]
 
 for coin in coins:
-    # for price in ['USD', 'BTC']:
-    df = pd.read_csv('ohlcv/' + coin + '.csv')
-    # if coin == 'BTC' and price == 'BTC':
-    #     continue
-    # elif price == 'BTC':
-    #     for col in ['open', 'high', 'low', 'close']:
-    #         df[col] /= btc[col]
+    for price in ['USD', 'BTC']:
+        df = pd.read_csv('ohlcv/' + coin + '.csv')
 
-    df['ma20'] = df['close'].rolling(window=20).mean().fillna(0)
-    df['ema40'] = df['close'].ewm(span=40, adjust=False).mean()
+        if coin == 'BTC' and price == 'BTC':
+            continue
+        elif price == 'BTC':
+            btc_slice = btc[btc['date'] >= df['date'][0]]
+            for col in ['open', 'high', 'low', 'close']:
+                df[col] /= btc_slice[col]
 
-    df['ma20_slope'] = np.subtract(df['ma20'][1:], df['ma20'][:-1]) / df['ma20'][:-1] * 100
-    df['ma20_slope_direction'] = df['ma20_slope'] > 0
-    df['ema40_slope'] = np.subtract(df['ema40'][1:], df['ema40'][:-1]) / df['ema40'][:-1] * 100
-    df['ema40_slope_direction'] = df['ema40_slope'] > 0
-    df['ma20_ema40_same_direction'] = df['ma20_slope_direction'] == df['ema40_slope_direction']
-    df['ma20_ema40_diff'] = np.subtract(df['ma20'], df['ema40']) / df['ma20']
+        df['ma20'] = df['close'].rolling(window=20).mean().fillna(0)
+        df['ema40'] = df['close'].ewm(span=40, adjust=False).mean()
 
-    coin_signals = find_signals(df)
-    coin_signals['tp'] = determine_TP(df, coin_signals, cushion=0.003)
+        df['ma20_slope'] = np.subtract(df['ma20'][1:], df['ma20'][:-1]) / df['ma20'][:-1] * 100
+        df['ma20_slope_direction'] = df['ma20_slope'] > 0
+        df['ema40_slope'] = np.subtract(df['ema40'][1:], df['ema40'][:-1]) / df['ema40'][:-1] * 100
+        df['ema40_slope_direction'] = df['ema40_slope'] > 0
+        df['ma20_ema40_same_direction'] = df['ma20_slope_direction'] == df['ema40_slope_direction']
+        df['ma20_ema40_diff'] = np.subtract(df['ma20'], df['ema40']) / df['ma20']
 
-    for feature in features:
-        coin_signals[feature] = None
+        coin_signals = find_signals(df)
+        coin_signals['tp'] = determine_TP(df, coin_signals)
 
-    for i in coin_signals.index:
-        coin_signals.loc[i, features] = df.loc[i, features]
+        for feature in features:
+            coin_signals[feature] = None
 
-    coin_signals['ticker'] = [coin + '/USD' for i in range(len(coin_signals))]
-    signals = signals.append(coin_signals, ignore_index=True, sort=False)
+        for i in coin_signals.index:
+            coin_signals.loc[i, features] = df.loc[i, features]
+
+        coin_signals['ticker'] = [coin + '/' + price for i in range(len(coin_signals))]
+        signals = signals.append(coin_signals, ignore_index=True, sort=False)
 
 
 # tree = RandomForestClassifier()
-# x = signals[['ema40_slope', 'ma20_slope', 'ma20_ema40_diff']]
+# x = signals[features]
 # y = signals['tp'] == 4
 #
 # tree.fit(x, y)
@@ -58,46 +60,44 @@ for coin in coins:
 # plt.show()
 
 # ------------------------------------------------------------------------------
-
 # Testing out eliminating trades based on slope
-signals = signals[signals['tp'] < 5]
+# signals = signals[signals['tp'] < 5]
 signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
+signals['tp'] = signals['tp'].astype('int')
 signals['end_pct'] = list(map(lambda x: tp_pcts[x], signals['tp']))
 signals['net_profit'] = signals['end_pct'] * signals['profit_pct']
 signals['net_profit'].sum()
-# W/ only 4% limit on SL
-# 6.8356
 
-# W/ 5% limit on SL and high compared to price
-# 8.19
+# 5% on high/low and minimum of .75% SL spread w/o EOS
+# 4.909
 
-# W/ 5% ... & at least .75% between price and SL
-# 7.532
+sl_pct = {}
+for ticker in set(signals['ticker']):
+    df = signals[signals['ticker'] == ticker]
+    # sl_pct[ticker] = len(df[df['tp'] == 0]) / len(df)
+    sl_pct[ticker] = round(df['net_profit'].sum(), 3)
 
-signals.groupby('tp')['tp'].count()
-len(signals)
-
+sorted(sl_pct.items(), key=lambda x: x[1])
+[('BCH/USD', -0.117),
+ ('XRP/USD', -0.001),
+ ('BTC/USD', 0.541),
+ ('LTC/BTC', 0.647),
+ ('ETH/BTC', 0.673),
+ ('LTC/USD', 0.964),
+ ('XRP/BTC', 1.011),
+ ('ETH/USD', 1.191)]
 
 
 plt.hist(signals['ma20_slope'], bins=50)
 plt.show()
 
-signals[signals['ma20_slope'] > .1]['net_profit'].sum()
-test = signals[(.0005 > signals['ma20_slope']) & (-.0005 < signals['ma20_slope'])]
-test['net_profit'].sum()
-
-
-
 plt.hist(signals['ema40_slope'], bins=40)
 plt.show()
-
 
 # Slope difference between averages
 signals['slope'] = abs(signals['ma20_slope'] - signals['ema40_slope'])
 plt.hist(signals['slope'], bins=40)
 plt.show()
-signals[signals['slope'] < .3]['net_profit'].sum()
-signals[signals['slope'] > .3]['net_profit'].sum()
 
 
 slope = []
@@ -117,12 +117,10 @@ test['net_profit'].sum()
 
 plt.hist(signals['ma20_ema40_diff'], bins=50)
 plt.show()
-test = signals[(.0001 > signals['ma20_ema40_diff']) & (-.0001 < signals['ma20_ema40_diff'])]
-test.groupby('tp')['tp'].count()
-test['net_profit'].sum()
 
-x = signals[signals['tp'] == 0]
-y = signals[signals['tp'] > 0]
+
+
+
 
 
 
