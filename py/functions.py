@@ -30,29 +30,30 @@ def find_signals(df, gap=0):
     signals = {}
 
     for i in intersections:
-        if abs(df['high'][i] - df['low'][i]) / df['high'][i] > 0.02:
+        if abs(df.at[i, 'high'] - df.at[i, 'low']) / df.at[i, 'high'] > 0.02:
             continue
 
         signal = None
         stop_loss_low = df['low'][i-10:i].min()
         stop_loss_high = df['high'][i-10:i].max()
-        price = df['close'][i]
+        price = df.at[i, 'close']
 
         if price > ema3[i] and ma20[i] > ema40[i]:
             signal = 'Long'
             stop_loss = stop_loss_low
+            pct_from_high = stop_loss_high/price - 1
         elif price < ema3[i] and ma20[i] < ema40[i]:
             signal = 'Short'
             stop_loss = stop_loss_high
+            pct_from_high = 1 - stop_loss_low/price
         if signal:
-            if 1 - stop_loss_low/price < .05 \
-            and stop_loss_high/price - 1 < .05 \
-            and abs(price - stop_loss) / price > 0.0075 \
+            if 0.0075 < abs(1 - stop_loss/price) \
+            and pct_from_high < .04 \
             and ma20_ema40_diff[i] > .001:
                 signals[i] = {
-                    'date': df['date'][i],
+                    'date': df.at[i, 'date'],
                     'signal': signal,
-                    'price': df['close'][i],
+                    'price': price,
                     'stop_loss': stop_loss
                 }
 
@@ -181,9 +182,9 @@ def calc_macd(_close, fast=12, slow=26):
     signal line = 9ema of macd line
     histogram = macd line - signal line
     '''
-    ema_fast = _close.ewm(window=fast, adjust=False).mean()
-    ema_slow = _close.ewm(window=slow, adjust=False).mean()
-    return ema_fast - ema_slow
+    ema_fast = _close.ewm(span=fast, adjust=False).mean()
+    ema_slow = _close.ewm(span=slow, adjust=False).mean()
+    return abs(ema_slow/ema_fast - 1)*100
 
 
 def calc_rsi(_close):
