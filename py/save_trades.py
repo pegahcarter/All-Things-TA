@@ -3,17 +3,9 @@ from py.functions import *
 
 btc = pd.read_csv('ohlcv/BTC.csv')
 signals = pd.DataFrame()
-tickers = {
-    'BTC/USD': 5,
-    'ETH/USD': 7,
-    'ETH/BTC': 3,
-    'LTC/BTC': 4,
-    'EOS/BTC': 1,
-    'XRP/BTC': 6,
-    'ADA/BTC': 2
-}
 
-for ticker in tickers.keys():
+
+for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC', 'ADA/BTC']:
     coin = ticker[:ticker.find('/')]
     df = pd.read_csv('ohlcv/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
 
@@ -22,9 +14,12 @@ for ticker in tickers.keys():
             df[col] /= btc['close']
 
     coin_signals = find_signals(df)
-    coin_signals['tp'] = determine_TP(df, coin_signals)
+    tp, index_closed = determine_TP(df, coin_signals, compound=True)
+    coin_signals['tp'] = tp
+    coin_signals['index_closed'] = index_closed
 
-    coin_signals['ticker'] = [tickers[ticker] for i in range(len(coin_signals))]
+    coin_signals['ticker'] = [ticker for i in range(len(coin_signals))]
+    coin_signals = coin_signals.reset_index()
 
     signals = signals.append(coin_signals, ignore_index=True, sort=False)
 
@@ -35,7 +30,8 @@ signals['tp'] = signals['tp'].astype('int')
 end_pct = list(map(lambda x: tp_pcts[x], signals['tp']))
 signals['net_profit'] = end_pct * profit_pct
 
-signals['stop_loss'] /= signals['price']
-signals['price'] = 1
 signals = signals.sort_values('date')
+signals['hrs_open'] = signals['index_closed'] - signals['index']
+signals = signals.drop(['index', 'index_closed'], axis=1)
+
 signals.to_csv('ohlcv/WORLD CLASS TRADERS BACKTEST RESULTS.csv', index=False)

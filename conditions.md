@@ -1,3 +1,7 @@
+World class Elite: all signals
+World class normal: Only ETH and BTC
+
+
 2019.08.31
 
 Bot Trading Conditions

@@ -25,7 +25,7 @@ for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC',
 
     df['rsi'] = calc_rsi(df['close'])
     df['macd'] = calc_macd(df['close'])
-    # df['ma20_slope'] = np.subtract(df['ma20'][1:], df['ma20'][:-1]) / df['ma20'][:-1] * 100
+    df['ma20_slope'] = np.subtract(df['ma20'][1:], df['ma20'][:-1]) / df['ma20'][:-1] * 100
     df['ma20_slope_direction'] = df['ma20_slope'] > 0
     # df['ema40_slope'] = np.subtract(df['ema40'][1:], df['ema40'][:-1]) / df['ema40'][:-1] * 100
     # df['ema40_slope_direction'] = df['ema40_slope'] > 0
@@ -36,7 +36,8 @@ for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC',
     tp, index_closed = determine_TP(df, coin_signals, compound=True)
     coin_signals['tp'] = tp
     coin_signals['index_closed'] = index_closed
-
+    coin_signals['ma20_slope_direction'] = df.iloc[coin_signals.index]['ma20_slope_direction']
+    coin_signals['ma20_ema40_diff'] = df.iloc[coin_signals.index]['ma20_ema40_diff']
 
     # for feature in features:
     #     coin_signals[feature] = None
