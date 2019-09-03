@@ -29,14 +29,13 @@ for ticker in tickers.keys():
     signals = signals.append(coin_signals, ignore_index=True, sort=False)
 
 
-len(signals)
 tp_pcts = [-1, .05, .15, .35, 2.45]
 profit_pct = abs(signals['price'] - signals['stop_loss']) / signals['price']
 signals['tp'] = signals['tp'].astype('int')
 end_pct = list(map(lambda x: tp_pcts[x], signals['tp']))
 signals['net_profit'] = end_pct * profit_pct
 
-signals['stop_loss'] /= t['price']
+signals['stop_loss'] /= signals['price']
 signals['price'] = 1
 signals = signals.sort_values('date')
-signals.to_csv('ohlcv/WORLD CLASS BACKTEST RESULTS.csv', index=False)
+signals.to_csv('ohlcv/WORLD CLASS TRADERS BACKTEST RESULTS.csv', index=False)
