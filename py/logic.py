@@ -97,10 +97,10 @@ def send_signal(row, candle_string):
     text += '🚨🚨🚨'
 
 
-    # if row['ticker'] in ['XBT/USD', 'ETH/USD', 'ETH/BTC']:
-    if row['ticker'] in ['BCH/USD', 'EOS/USD', 'XRP/USD', 'LTC/USD']:
-        requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
-    else:
-        requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
+    if row['ticker'] in ['BTC/USD', 'ETH/USD', 'ETH/U19']:
         requests.get(url + urlencode({'chat_id': signal_chat_id, 'text': text}))
         requests.get(url + urlencode({'chat_id': signal_members_chat_id, 'text': text}))
+    elif row['ticker'] not in ['BCH/USD', 'EOS/USD', 'XRP/USD', 'LTC/USD']:
+        requests.get(url + urlencode({'chat_id': signal_members_chat_id, 'text': text}))
+
+    requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
