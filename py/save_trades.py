@@ -39,4 +39,4 @@ signals['net_profit'] = end_pct * profit_pct
 signals['stop_loss'] /= t['price']
 signals['price'] = 1
 signals = signals.sort_values('date')
-signals.to_csv('ohlcv/results.csv', index=False)
+signals.to_csv('ohlcv/WORLD CLASS BACKTEST RESULTS.csv', index=False)
