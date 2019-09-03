@@ -15,9 +15,8 @@ for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC',
     df = pd.read_csv('ohlcv/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
 
     if '/BTC' in ticker:
-        btc_slice = btc[btc['date'] >= df['date'][0]]
         for col in ['open', 'high', 'low', 'close']:
-            df[col] /= btc_slice['close']
+            df[col] /= btc['close']
 
     coin_signals = find_signals(df)
     tp, index_closed = determine_TP(df, coin_signals, compound=True)
@@ -34,6 +33,8 @@ profit_pct = abs(signals['price'] - signals['stop_loss']) / signals['price']
 signals['tp'] = signals['tp'].astype('int')
 end_pct = list(map(lambda x: tp_pcts[x], signals['tp']))
 signals['net_profit'] = end_pct * profit_pct
+signals['net_profit'].sum()
+
 
 # Sort signals by date
 signals = signals.sort_values('date').reset_index()

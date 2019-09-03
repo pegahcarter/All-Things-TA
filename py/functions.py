@@ -47,9 +47,9 @@ def find_signals(df, gap=0):
             stop_loss = stop_loss_high
             pct_from_high = 1 - stop_loss_low/price
         if signal:
-            if 0.0075 < abs(1 - stop_loss/price) \
-            and pct_from_high < .04 \
+            if 0.0075 < abs(1 - stop_loss/price) < .05 \
             and ma20_ema40_diff[i] > .001:
+            # and pct_from_high < .04 \
                 signals[i] = {
                     'date': df.at[i, 'date'],
                     'signal': signal,
