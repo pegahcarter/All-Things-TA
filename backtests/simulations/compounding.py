@@ -7,55 +7,64 @@ import pandas as pd
 from py.functions import *
 from backtests.simulations.portfolio import Portfolio
 
-tp_pcts = [-1, .05, .15, .35, 2.45]
+btc = pd.read_csv('ohlcv/BTC.csv')
 signals = pd.DataFrame()
 
+for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC', 'ADA/BTC']:
+    coin = ticker[:ticker.find('/')]
+    df = pd.read_csv('ohlcv/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
 
-for coin in ['BTC', 'ETH', 'LTC']:
-    ticker = coin + '/USD'
-    df = pd.read_csv('ohlcv/' + coin + '.csv')
+    if '/BTC' in ticker:
+        btc_slice = btc[btc['date'] >= df['date'][0]]
+        for col in ['open', 'high', 'low', 'close']:
+            df[col] /= btc_slice['close']
+
     coin_signals = find_signals(df)
-    tp, index_tp_hit = determine_TP(df, coin_signals, compound=True)
-    coin_signals['tp'] = tp
-    coin_signals['index_tp_hit'] = index_tp_hit
-    coin_signals['ticker'] = [coin + '/USD' for i in range(len(coin_signals))]
-    coin_signals = coin_signals.reset_index()
+    tp, index_closed = determine_TP(df, coin_signals, compound=True)
 
-    profit_pct = abs(coin_signals['price'] - coin_signals['stop_loss']) / coin_signals['price']
-    end_pct = list(map(lambda x: tp_pcts[x], coin_signals['tp']))
-    coin_signals['net_profit'] = profit_pct * end_pct
+    coin_signals['tp'] = tp
+    coin_signals['index_closed'] = index_closed
+    coin_signals['ticker'] = [ticker for i in range(len(coin_signals))]
 
     signals = signals.append(coin_signals, ignore_index=True, sort=False)
 
+
+tp_pcts = [-1, .05, .15, .35, 2.45]
+profit_pct = abs(signals['price'] - signals['stop_loss']) / signals['price']
+signals['tp'] = signals['tp'].astype('int')
+end_pct = list(map(lambda x: tp_pcts[x], signals['tp']))
+signals['net_profit'] = end_pct * profit_pct
+
 # Sort signals by date
-signals = signals.sort_values('date').reset_index(drop=True)
-
-# Step 2: figure out the most # of positions open at one time
-signals['hrs_position_open'] = np.subtract(signals['index_tp_hit'], signals['index'])
-signals['total_positions_open'] = [sum(signals['index'][i] + signals['hrs_position_open'][i] > signals['index'][i:]) for i in signals.index]
-# list(signals['total_positions_open']).index(signals['total_positions_open'].max())
-
+signals = signals.sort_values('date').reset_index()
 portfolio = Portfolio()
-for i in range(len(df)):
-    if i in signals['index']:
-        for _, position in signals[signals['index'] == i].iterrows():
-            portfolio.open_position(**position)
-    elif len(portfolio.positions) == 0:
-        continue
 
-    if i in map(lambda x: x['index_tp_hit'], portfolio.positions):
-        for position in list(filter(lambda x: x['index_tp_hit'] == i, portfolio.positions)):
-            portfolio.close_position(position)
+for i, date in enumerate(btc['date']):
 
+    if sum(signals['date'] == date):
+        for _, position in signals[signals['date'] == date].iterrows():
+            portfolio.open_position(pct_capital=.10, **position)
 
-len(df)
+    # if len(portfolio.positions) == 0:
+    #     continue
 
-signals[10:20]
-
-signals['index'][15] in range(0, 1200)
+    if sum(signals['index_closed'] == i):
+        for position in list(filter(lambda x: x['index_closed'] == i, portfolio.positions)):
+            portfolio.close_position(x_leverage=10, **position)
 
 
-i
-portfolio.positions
-portfolio.available_capital
+for position in portfolio.positions:
+    portfolio.close_position(x_leverage=10, **position)
+
 portfolio.num_positions
+
+portfolio.available_capital
+
+
+
+
+
+
+btc['date'][57] in signals['date']
+signals['date'][0] == btc['date'][57]
+btc['date'][57] in signals['date']

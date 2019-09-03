@@ -11,15 +11,15 @@ class Portfolio:
         self.positions = []
 
 
-    def open_position(self, **kwargs):
+    def open_position(self, pct_capital, **position):
         self.num_positions += 1
-        kwargs['d_amt'] = self.available_capital * .01
-        self.available_capital -= kwargs['d_amt']
+        position['d_amt'] = self.available_capital * pct_capital
+        self.available_capital -= position['d_amt']
         self.positions.append(
-            kwargs
+            position
         )
 
 
-    def close_position(self, position):
-        self.available_capital += position['d_amt']*(position['net_profit']*10) + position['d_amt']
-        # return self.positions.pop(self.positions.index(position))
+    def close_position(self, x_leverage, **position):
+        self.available_capital += position['d_amt'] * (1 + position['net_profit'] * x_leverage)
+        return self.positions.pop(self.positions.index(position))
