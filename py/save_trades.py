@@ -32,6 +32,5 @@ signals['net_profit'] = end_pct * profit_pct
 
 signals = signals.sort_values('date')
 signals['hrs_open'] = signals['index_closed'] - signals['index']
-signals = signals.drop(['index', 'index_closed'], axis=1)
 
 signals.to_csv('ohlcv/WORLD CLASS TRADERS BACKTEST RESULTS.csv', index=False)

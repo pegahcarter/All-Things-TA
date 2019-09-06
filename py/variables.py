@@ -19,15 +19,4 @@ test_chat_id = '-1001192596591'
 signal_chat_id = '-1001350840772'
 signal_members_chat_id = '-1001229157672'
 
-# Google docs
-gc = pygsheets.authorize(service_file='C:/Users/carter/Documents/crypto/peter-signal/credentials.json')
-g_doc = gc.open_by_key('1T67gVealvVutn_VuiedbH7ViK8_OIBWOmoDIMq82oQE')
-
-tick_sheet = g_doc.worksheet_by_title('Tickers')
-tickers = [str(ticker) for ticker in tick_sheet.get_col(2) if len(ticker) > 0 and ticker != 'Tickers']
-
-def get_gsheet(candle_string):
-    return g_doc.worksheet_by_title(candle_string).get_as_df()
-
-def save_gsheet(candle_string, df):
-    return g_doc.worksheet_by_title(candle_string).set_dataframe(df, (1,1))
+tickers = ['BTC/USD','ETH/USD','ETH/BTC','BCH/BTC','LTC/BTC','XRP/USD','XRP/BTC','BCH/USD','LTC/USD','EOS/USD','EOS/BTC']

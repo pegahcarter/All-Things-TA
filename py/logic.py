@@ -1,5 +1,5 @@
 from variables import *
-from functions import find_signals
+from functions import *
 import pandas as pd
 import numpy as np
 import requests
@@ -87,7 +87,6 @@ def send_signal(row, candle_string):
         row['ticker'] = row['ticker'][:3] + '/U19'
 
     text = '🚨🚨🚨\n\n'
-    text += candle_string + '\n'
     text += row['ticker'] + '\n'
     text += 'BitMEX\n'
     text += row['signal'] + ' zone ' + str(low_price) + '-' + str(high_price) + '\n'

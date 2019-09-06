@@ -5,20 +5,20 @@ import ccxt
 from datetime import datetime, timedelta
 import time
 
-binance = ccxt.binance()
+bitfinex = ccxt.bitfinex()
 
 btc = pd.read_csv('ohlcv/BTC.csv')
 start = datetime.strptime(btc['date'].iat[-1], '%Y-%m-%d %H:%M:%S')
 start_date = start
 
 
-for ticker in ['BTC/USDT', 'ADA/BTC', 'EOS/BTC', 'ETH/BTC', 'LTC/BTC', 'XRP/BTC']:
+for ticker in ['BTC/USDT', 'EOS/BTC', 'ETH/BTC', 'LTC/BTC', 'XRP/BTC']:
     coin = ticker[:ticker.find('/')]
     start_date = start
     df = []
 
     while start_date < datetime.now():
-        data = binance.fetch_ohlcv(ticker, '1h', limit=500, since=int(time.mktime(start_date.timetuple())*1000))
+        data = bitfinex.fetch_ohlcv(ticker, '1h', limit=500, since=int(time.mktime(start_date.timetuple())*1000))
         df += data
         start_date += timedelta(hours=len(data))
         time.sleep(1)
