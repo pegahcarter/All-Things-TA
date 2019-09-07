@@ -10,7 +10,6 @@ def main():
             break
 
         signal_df = logic.run(candle_abv)
-        signal_df.reset_index(drop=True, inplace=True)
         # signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv', index=False)
 
         old_signal_df = pd.read_csv('C:/Users/carter/Documents/crypto/peter-signal/signals/' + candle_string + '.csv')

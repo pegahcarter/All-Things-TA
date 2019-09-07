@@ -30,13 +30,23 @@ def find_signals(df, gap=0):
     signals = {}
 
     for i in intersections:
-        if abs(df.at[i, 'high'] - df.at[i, 'low']) / df.at[i, 'high'] > 0.02:
+        high_1 = df['high'][i]
+        low_1 = df['low'][i]
+        if (high_1 - low_1) / high_1 > 0.02:
             continue
+
+        try:
+            price = df['close'].iat[i+1]
+            high_2 = df['high'][i+1]
+            low_2 = df['low'][i+1]
+            if (high_2 - low_2) / high_2 > 0.02:
+                continue
+        except:
+            price = df['close'].iat[i]
 
         signal = None
         stop_loss_low = df['low'][i-10:i].min()
         stop_loss_high = df['high'][i-10:i].max()
-        price = df.at[i, 'close']
 
         if price > ema3[i] and ma20[i] > ema40[i]:
             signal = 'Long'
@@ -47,11 +57,10 @@ def find_signals(df, gap=0):
             stop_loss = stop_loss_high
             pct_from_high = 1 - stop_loss_low/price
         if signal:
-            if 0.0075 < abs(1 - stop_loss/price) < .05 \
+            if 0.0075 < abs(1 - stop_loss/price) < .04 \
             and ma20_ema40_diff[i] > .001:
-            # and pct_from_high < .04 \
                 signals[i] = {
-                    'date': df.at[i, 'date'],
+                    'date': df['date'].iat[i],
                     'signal': signal,
                     'price': price,
                     'stop_loss': stop_loss
