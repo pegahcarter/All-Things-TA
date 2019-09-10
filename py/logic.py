@@ -35,11 +35,15 @@ def run(candle_abv):
 
 def send_signal(row, candle_string):
 
+    if row['ticker'] == 'BTC/USD':
+        row['ticker'] = 'XBT/USD'
+    elif '/BTC' in row['ticker'] and row['ticker'] != 'ETH/BTC':
+        row['ticker'] = row['ticker'][:3] + '/U19'
+
+
     if candle_string == 'Hourly':
-        date = row['date'].strftime('%m/%d %I:%M %p')
         leverage = '10x'
     else:   # candle_string == 'Daily'
-        date = row['date'].strftime('%m/%d')
         leverage = '3x'
 
     low_price = row['price'] * .999
@@ -51,9 +55,7 @@ def send_signal(row, candle_string):
     tp3 = row['price'] + diff*2
     tp4 = row['price'] + diff*3
 
-    if row['ticker'] == 'BTC/USD':
-        row['ticker'] = 'XBT/USD'
-        # row['price'] = int(row['price'])
+    if row['ticker'] == 'XBT/USD':
         low_price = int(low_price)
         high_price = int(high_price)
         row['stop_loss'] = int(row['stop_loss'])
@@ -95,11 +97,42 @@ def send_signal(row, candle_string):
     text += 'Stop loss ' + str(row['stop_loss']) + '\n\n'
     text += '🚨🚨🚨'
 
-
-    if row['ticker'] in ['BTC/USD', 'ETH/USD', 'ETH/U19']:
+    if row['ticker'] in ['XBT/USD', 'ETH/BTC']:
+        # ATTA insiders
+        # msg_atta(row, tp1, tp2, tp3, tp4)
+        # WC elite
+        requests.get(url + urlencode({'chat_id': world_class_elite, 'text': text}))
+    elif row['ticker'] == ['ETH/USD']:
+        # WC4P
         requests.get(url + urlencode({'chat_id': world_class, 'text': text}))
-        requests.get(url + urlencode({'chat_id': world_class_elite, 'text': text}))
-    elif row['ticker'] not in ['BCH/USD', 'EOS/USD', 'XRP/USD', 'LTC/USD']:
+    elif '/USD' not in row['ticker']:
+        # WC elite
         requests.get(url + urlencode({'chat_id': world_class_elite, 'text': text}))
 
+    # test bot
     requests.get(url + urlencode({'chat_id': test_chat_id, 'text': text}))
+
+
+def msg_atta(row, tp1, tp2, tp3, tp4):
+
+    if row['ticker'] == 'ETH/BTC':
+        row['ticker'] = 'ETH/U19'
+        row['stop_loss'] = int(row['stop_loss'] * 100000)
+        tp1 = int(tp1 * 100000)
+        tp2 = int(tp2 * 100000)
+        tp3 = int(tp3 * 100000)
+        tp4 = int(tp4 * 100000)
+
+    low_price = int(row['stop_loss'] * .9982)
+    high_price = int(row['stop_loss'] * 1.0018)
+
+    msg = '🚀🚀' + row['ticker'] + '🚀🚀' + '\n\n'
+    msg += 'BitMEX' + '\n\n'
+    msg += 'Short ' + str(low_price) + ' - ' + str(high_price) + '\n\n'
+    msg += 'Sell ' + str(tp1) + ', ' + str(tp2) + ', ' + str(tp3) + ', ' + str(tp4) + '\n\n'
+    msg += 'Leverage 5x' + '\n\n'
+    msg += 'Stop Loss: ' + str(row['stop_loss'])  + '\n\n'
+    msg += '*Disclaimer: Please consult a financial advisor before investing/trading.  This is not financial advice🚀🚀' + '\n\n'
+    msg += '💰💰' + '@Allthingstaadmin' + '💰💰'
+
+    # requests.get(url + urlencode({'chat_id': atta_insiders, 'text': msg}))

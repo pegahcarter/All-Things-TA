@@ -56,6 +56,7 @@ signals['net_profit'] = end_pct * profit_pct
 signals['net_profit'].sum()  # 5.03
 
 
+
 # How many positions do we have open when we take the trade?
 x = signals[signals['ticker'] == 'BTC/USD'].drop(['price', 'stop_loss', 'ticker'], axis=1)
 x.head()
@@ -158,20 +159,20 @@ test['net_profit'].sum()
 
 # Random Forest
 
-# tree = RandomForestClassifier()
-# x = signals[features]
-# y = signals['tp'] == 4
-#
-# tree.fit(x, y)
-# feature_importance = tree.feature_importances_
-# feature_importance = 100 * (feature_importance / max(feature_importance))
-# feature_sorted = np.argsort(feature_importance)
-# pos = np.arange(feature_sorted.shape[0]) + .5
-# plt.barh(pos, feature_importance[feature_sorted], align='center', color='crimson')
-# plt.title('Variable Importance')
-# plt.xlabel('Relative Importance of Variable')
-# plt.yticks(pos, x.columns[feature_sorted])
-# plt.show()
+tree = RandomForestClassifier()
+x = signals[features]
+y = signals['tp'] == 4
+
+tree.fit(x, y)
+feature_importance = tree.feature_importances_
+feature_importance = 100 * (feature_importance / max(feature_importance))
+feature_sorted = np.argsort(feature_importance)
+pos = np.arange(feature_sorted.shape[0]) + .5
+plt.barh(pos, feature_importance[feature_sorted], align='center', color='crimson')
+plt.title('Variable Importance')
+plt.xlabel('Relative Importance of Variable')
+plt.yticks(pos, x.columns[feature_sorted])
+plt.show()
 
 # ------------------------------------------------------------------------------
 

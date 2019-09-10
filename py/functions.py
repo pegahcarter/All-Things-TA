@@ -30,19 +30,19 @@ def find_signals(df, gap=0):
     signals = {}
 
     for i in intersections:
+        price = df['close'][i]
         high_1 = df['high'][i]
         low_1 = df['low'][i]
         if (high_1 - low_1) / high_1 > 0.02:
             continue
 
         try:
-            price = df['close'].iat[i+1]
             high_2 = df['high'][i+1]
             low_2 = df['low'][i+1]
             if (high_2 - low_2) / high_2 > 0.02:
                 continue
         except:
-            price = df['close'].iat[i]
+            pass
 
         signal = None
         stop_loss_low = df['low'][i-10:i].min()
