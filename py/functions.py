@@ -173,16 +173,19 @@ def refresh_ohlcv(file, offline=False):
 
 
 # Group hourly candle into candle intervals
-def group_candles(candles):
-    candles = np.array(candles)
-    return ([
-        candles[0, 0],         # date
-        candles[0, 1],         # open
-        candles[:, 2].max(),   # high
-        candles[:, 3].min(),   # low
-        candles[-1, 4],        # close
-        candles[:, 5].sum()    # volume
-    ])
+def group_candles(df, period):
+    candles = np.array(df)
+    results = []
+    for i in range(0, len(df)-period, period):
+        results.append([
+            candles[i, 0],                  # date
+            candles[i, 1],                  # open
+            candles[i:i+period, 2].max(),   # high
+            candles[i:i+period, 3].min(),   # low
+            candles[i+period, 4],           # close
+            candles[i:i+period, 5].sum()    # volume
+        ])
+    return pd.DataFrame(results, columns=df.columns)
 
 
 def calc_macd(_close, fast=12, slow=26):

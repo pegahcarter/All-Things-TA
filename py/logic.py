@@ -78,9 +78,9 @@ def send_signal(row, candle_string):
     tp4 = price + diff*3
 
     tp1 = format(tp1, decimals)
-    tp2 = format(tp1, decimals)
-    tp3 = format(tp1, decimals)
-    tp4 = format(tp1, decimals)
+    tp2 = format(tp2, decimals)
+    tp3 = format(tp3, decimals)
+    tp4 = format(tp4, decimals)
 
     stop_loss = format(stop_loss, decimals)
 
@@ -97,7 +97,9 @@ def send_signal(row, candle_string):
         msg_atta(ticker, signal, stop_loss, tp1, tp2, tp3, tp4)
         # WC elite
         requests.get(url + urlencode({'chat_id': world_class_elite, 'text': msg}))
-    elif row['ticker'] == ['ETH/USD']:
+    elif row['ticker'] == 'ETH/USD':
+        # WC elite
+        requests.get(url + urlencode({'chat_id': world_class_elite, 'text': msg}))
         # WC4P
         requests.get(url + urlencode({'chat_id': world_class, 'text': msg}))
     elif '/USD' not in row['ticker']:
