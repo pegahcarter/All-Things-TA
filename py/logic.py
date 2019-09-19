@@ -92,19 +92,16 @@ def send_signal(row, candle_string):
     msg += 'Stop loss {}\n\n'.format(stop_loss)
     msg += '🚨🚨🚨'
 
-    if row['ticker'] in ['XBT/USD', 'ETH/BTC']:
-        # ATTA insiders
-        msg_atta(ticker, signal, stop_loss, tp1, tp2, tp3, tp4)
+    if ticker in ['XBT/USD', 'ETH/BTC', 'ETH/USD']:
         # WC elite
         requests.get(url + urlencode({'chat_id': world_class_elite, 'text': msg}))
-    elif row['ticker'] == 'ETH/USD':
+        # ATTA insiders
+        msg_atta(ticker, signal, stop_loss, tp1, tp2, tp3, tp4)
+    elif '/USD' not in ticker:
         # WC elite
         requests.get(url + urlencode({'chat_id': world_class_elite, 'text': msg}))
         # WC4P
         requests.get(url + urlencode({'chat_id': world_class, 'text': msg}))
-    elif '/USD' not in row['ticker']:
-        # WC elite
-        requests.get(url + urlencode({'chat_id': world_class_elite, 'text': msg}))
 
     # test bot
     requests.get(url + urlencode({'chat_id': test_chat_id, 'text': msg}))
@@ -132,4 +129,4 @@ def msg_atta(ticker, signal, stop_loss, tp1, tp2, tp3, tp4):
     msg += '*Disclaimer: Please consult a financial advisor before investing/trading.  This is not financial advice🚀🚀\n\n'
     msg += '💰💰@Allthingstaadmin💰💰'
 
-    # requests.get(url + urlencode({'chat_id': atta_insiders, 'text': msg}))
+    requests.get(url + urlencode({'chat_id': atta_insiders, 'text': msg}))
