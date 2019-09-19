@@ -70,3 +70,25 @@ test3_b = pd.DataFrame([])
 # url = 'https://api.telegram.org/bot' + API_KEY + '/sendMessage?'
 # mydict = {'chat_id': CHAT_ID, 'text': 'Hello'}
 # url + urlencode(mydict)
+
+
+import requests
+data = requests.get('https://api.telegram.org/bot862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8/getUpdates').json()
+data = data['result']
+data[-1]
+
+
+
+
+
+
+
+
+
+messages = list(filter(lambda x: 'channel_post' in x.keys(), data))
+messages
+
+url = 'https://api.telegram.org/bot862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8/sendMessage?'
+
+
+requests.get(url + urlencode({'chat_id': '@worldclasstrader', 'text': 'Test'}))

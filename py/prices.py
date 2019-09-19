@@ -12,7 +12,7 @@ start = datetime.strptime(btc['date'].iat[-1], '%Y-%m-%d %H:%M:%S')
 start_date = start
 
 
-for ticker in ['BTC/USDT', 'EOS/BTC', 'ETH/BTC', 'LTC/BTC', 'XRP/BTC']:
+for ticker in ['BTC/USDT', 'EOS/BTC', 'ETH/BTC', 'LTC/BTC', 'XRP/BTC', 'ADA/BTC']:
     coin = ticker[:ticker.find('/')]
     start_date = start
     df = []
