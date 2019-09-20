@@ -33,100 +33,106 @@ def run(candle_abv):
     return signal_df
 
 
-def send_signal(row, candle_string):
-    ticker = row['ticker']
-    signal = row['signal']
-    price = row['price']
-    stop_loss = row['stop_loss']
 
-    if ticker == 'BTC/USD':
-        ticker = 'XBT/USD'
-    elif '/BTC' in ticker and ticker != 'ETH/BTC':
-        ticker = ticker[:3] + '/U19'
+def send_signal(row, candle_string):
+
+    if row['ticker'] == 'BTC/USD':
+        row['ticker'] = 'XBT/USD'
+
+    diff = row['price'] - row['stop_loss']
+
+    tp1 = row['price'] + diff/2.
+    tp2 = row['price'] + diff
+    tp3 = row['price'] + diff*2
+    tp4 = row['price'] + diff*3
+
+    if row['ticker'] in ['XBT/USD', 'ETH/USD', 'ETH/BTC']:
+        msg_wc(row, candle_string, world_class_elite, tp1, tp2, tp3, tp4)
+        msg_atta(row, tp1, tp2, tp3, tp4)
+    elif '/USD' not in row['ticker']:
+        msg_wc(row, candle_string, world_class_elite, tp1, tp2, tp3, tp4)
+        msg_wc(row, candle_string, world_class, tp1, tp2, tp3, tp4)
+
+    # test bot
+    msg_wc(row, candle_string, test_chat_id, tp1, tp2, tp3, tp4)
+
+
+def msg_wc(row, candle_string, chat_id, *tps):
 
     if candle_string == 'Hourly':
         leverage = '10x'
     else:   # candle_string == 'Daily'
         leverage = '3x'
 
-    if ticker == 'XBT/USD':
+    if '/BTC' in row['ticker'] and row['ticker'] != 'ETH/BTC':
+        row['ticker'] = row['ticker'][:3] + '/U19'
+
+    if row['ticker'] == 'XBT/USD':
         decimals = '0.0f'
-    elif ticker == 'XRP/U19':
+    elif row['ticker'] == 'XRP/U19':
         decimals = '.8f'
-    elif ticker == 'EOS/U19':
+    elif row['ticker'] == 'EOS/U19':
         decimals = '.7f'
-    elif ticker == 'LTC/U19':
+    elif row['ticker'] == 'LTC/U19':
         decimals = '.6f'
-    elif ticker in ['BCH/U19', 'ETH/BTC']:
+    elif row['ticker'] in ['BCH/U19', 'ETH/BTC']:
         decimals = '.5f'
-    elif ticker in ['XRP/USD', 'EOS/USD']:
+    elif row['ticker'] in ['XRP/USD', 'EOS/USD']:
         decimals = '.4f'
     else:
         decimals = '.2f'
 
-    low_price = price * .999
-    high_price = price * 1.001
+    low_price, high_price = buy_range(row['price'], .001)
 
     low_price = format(low_price, decimals)
     high_price = format(high_price, decimals)
-
-    diff = price - stop_loss
-
-    tp1 = price + diff/2.
-    tp2 = price + diff
-    tp3 = price + diff*2
-    tp4 = price + diff*3
-
-    tp1 = format(tp1, decimals)
-    tp2 = format(tp2, decimals)
-    tp3 = format(tp3, decimals)
-    tp4 = format(tp4, decimals)
-
-    stop_loss = format(stop_loss, decimals)
+    tps = [format(tp, decimals) for tp in tps]
+    stop_loss = format(row['stop_loss'], decimals)
 
     msg = '🚨🚨🚨\n\n'
-    msg += '{}\nBitMEX\n'.format(ticker)
-    msg += '{} zone {}-{}\n'.format(signal, low_price, high_price)
-    msg += 'Take profit {}, {}, {}, {}\n'.format(tp1, tp2, tp3, tp4)
+    msg += '{}\nBitMEX\n'.format(row['ticker'])
+    msg += '{} zone {}-{}\n'.format(row['signal'], low_price, high_price)
+    msg += 'Take profit {}, {}, {}, {}\n'.format(*tps)
     msg += 'Leverage {}\n'.format(leverage)
     msg += 'Stop loss {}\n\n'.format(stop_loss)
     msg += '🚨🚨🚨'
 
-    if ticker in ['XBT/USD', 'ETH/BTC', 'ETH/USD']:
-        # WC elite
-        requests.get(url + urlencode({'chat_id': world_class_elite, 'text': msg}))
-        # ATTA insiders
-        msg_atta(ticker, signal, stop_loss, tp1, tp2, tp3, tp4)
-    elif '/USD' not in ticker:
-        # WC elite
-        requests.get(url + urlencode({'chat_id': world_class_elite, 'text': msg}))
-        # WC4P
-        requests.get(url + urlencode({'chat_id': world_class, 'text': msg}))
-
-    # test bot
-    requests.get(url + urlencode({'chat_id': test_chat_id, 'text': msg}))
+    requests.get(url + urlencode({'chat_id': chat_id, 'text': msg}))
 
 
-def msg_atta(ticker, signal, stop_loss, tp1, tp2, tp3, tp4):
+def msg_atta(row, *tps):
 
-    if ticker == 'ETH/BTC':
-        ticker = 'ETH/U19'
-        stop_loss *= 100000
-        tp1 *= 100000
-        tp2 *= 100000
-        tp3 *= 100000
-        tp4 *= 100000
+    if row['ticker'] == 'ETH/BTC':
+        row['ticker'] = 'ETH/U19'
+        row['price'] *= 100000
+        row['stop_loss'] *= 100000
+        tps = np.multiply(tps, 100000)
 
-    low_price = stop_loss * .9982
-    high_price = stop_loss * 1.0018
+    if row['ticker'] == 'ETH/USD':
+        decimals = '.2f'
+    else:
+        decimals = '0.0f'
 
-    msg = '🚀🚀{}🚀🚀\n\n'.format(ticker)
-    msg += 'BitMEX' + '\n\n'
-    msg += '{0:.0f} {0:.0f} - {0:.0f}\n\n'.format(signal, low_price, high_price)
-    msg += 'Sell {0:.0f}, {0:.0f}, {0:.0f}, {0:.0f}\n\n'.format(tp1, tp2, tp3, tp4)
+    low_price, high_price = buy_range(row['price'], .0018)
+
+    low_price = format(low_price, decimals)
+    high_price = format(high_price, decimals)
+    tps = [format(tp, decimals) for tp in tps]
+    stop_loss = format(row['stop_loss'], decimals)
+
+    msg = '🚀🚀{}🚀🚀\n\n'.format(row['ticker'])
+    msg += 'BitMEX' + '\n\n{} '.format(row['signal'])
+    msg += '{} - {}\n\n'.format(low_price, high_price)
+    msg += 'Sell {}, {}, {}, {}\n\n'.format(*tps)
     msg += 'Leverage 5x\n\n'
-    msg += 'Stop Loss: {0:.0f}\n\n'.format(stop_loss)
+    msg += 'Stop Loss: {}\n\n'.format(stop_loss)
     msg += '*Disclaimer: Please consult a financial advisor before investing/trading.  This is not financial advice🚀🚀\n\n'
     msg += '💰💰@Allthingstaadmin💰💰'
 
-    requests.get(url + urlencode({'chat_id': atta_insiders, 'text': msg}))
+    requests.get(url + urlencode({'chat_id': test_chat_id, 'text': msg}))
+
+
+def buy_range(price, diff):
+    low_price = price * (1. - diff)
+    high_price = price * (1. + diff)
+    return low_price, high_price
