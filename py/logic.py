@@ -46,12 +46,14 @@ def send_signal(row, candle_string):
     tp3 = row['price'] + diff*2
     tp4 = row['price'] + diff*3
 
-    if row['ticker'] in ['XBT/USD', 'ETH/USD', 'ETH/BTC']:
+    if row['ticker'] in ['XBT/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'XRP/BTC', 'BCH/BTC', 'EOS/BTC']:
         msg_wc(row, candle_string, world_class_elite, tp1, tp2, tp3, tp4)
-        msg_atta(row, tp1, tp2, tp3, tp4)
-    elif '/USD' not in row['ticker']:
-        msg_wc(row, candle_string, world_class_elite, tp1, tp2, tp3, tp4)
+
+    if row['ticker'] in ['XRP/BTC', 'ETH/USD', 'LTC/BTC', 'BCH/BTC']:
         msg_wc(row, candle_string, world_class, tp1, tp2, tp3, tp4)
+
+    if row['ticker'] in ['XBT/USD', 'ETH/BTC']:
+        msg_atta(row, tp1, tp2, tp3, tp4)
 
     # test bot
     msg_wc(row, candle_string, test_chat_id, tp1, tp2, tp3, tp4)
@@ -129,7 +131,7 @@ def msg_atta(row, *tps):
     msg += '*Disclaimer: Please consult a financial advisor before investing/trading.  This is not financial advice🚀🚀\n\n'
     msg += '💰💰@Allthingstaadmin💰💰'
 
-    requests.get(url + urlencode({'chat_id': test_chat_id, 'text': msg}))
+    requests.get(url + urlencode({'chat_id': atta_insiders, 'text': msg}))
 
 
 def buy_range(price, diff):
