@@ -1,8 +1,9 @@
 # Merges real backtest signals with actual sent signals
 import pandas as pd
 
-# NOTE: this takes WORLD CLASS...csv signals as previous signals
-signals = pd.read_csv('ohlcv/WORLD CLASS TRADERS BACKTEST RESULTS.csv')
+# NOTE: this takes backtests.csv signals as previous signals
+# signals = pd.read_csv('ohlcv/WORLD CLASS TRADERS BACKTEST RESULTS.csv')
+signals = pd.read_csv('ohlcv/backtests.csv')
 
 signals_clean = signals.drop(['index', 'tp', 'index_closed', 'net_profit', 'hrs_open'], axis=1)
 
