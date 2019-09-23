@@ -3,7 +3,7 @@ from py.functions import *
 
 
 tp_pcts = [-1, 0.05, 0.15, 0.35, 2.45, 0]
-df = pd.read_csv('ohlcv/XRP.csv')
+df = pd.read_csv('data/bitfinex/XRP.csv')
 df['rsi'] = calc_rsi(df['close'])
 
 signals = find_signals(df)

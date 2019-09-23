@@ -6,7 +6,7 @@ import pandas as pd
 from py.functions import *
 from backtests.simulations.portfolio import Portfolio
 
-btc = pd.read_csv('ohlcv/BTC.csv')
+btc = pd.read_csv('data/bitfinex/BTC.csv')
 signals = pd.read_csv('signals.csv')
 
 portfolio = Portfolio()

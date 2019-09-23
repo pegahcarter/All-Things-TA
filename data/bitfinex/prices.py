@@ -7,7 +7,7 @@ import time
 
 bitfinex = ccxt.bitfinex()
 
-btc = pd.read_csv('ohlcv/BTC.csv')
+btc = pd.read_csv('data/bitfinex/BTC.csv')
 start = datetime.strptime(btc['date'].iat[-1], '%Y-%m-%d %H:%M:%S')
 # start = datetime(year=2019,month=1,day=1,hour=1)  # BCH exception
 start_date = start
@@ -33,7 +33,7 @@ for ticker in ['BTC/USDT', 'EOS/BTC', 'ETH/BTC', 'LTC/BTC', 'XRP/BTC', 'ADA/BTC'
         for col in ['open', 'high', 'low', 'close', 'volume']:
             df[col] *= btc_price
 
-    df_old = pd.read_csv('ohlcv/' + coin + '.csv')
+    df_old = pd.read_csv('data/bitfinex/' + coin + '.csv')
     df_new = df_old.append(df, ignore_index=True, sort=False)
-    df_new.to_csv('ohlcv/' + coin + '.csv', index=False)
-    # df_new.to_csv('ohlcv/' + coin + '.csv', index=False)   # BCH exception
+    df_new.to_csv('data/bitfinex/' + coin + '.csv', index=False)
+    # df_new.to_csv('data/bitfinex/' + coin + '.csv', index=False)   # BCH exception

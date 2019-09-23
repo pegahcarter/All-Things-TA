@@ -3,25 +3,25 @@ import pandas as pd
 from py.functions import *
 from datetime import datetime, timedelta
 
-real_signals = pd.read_csv('signals/Hourly.csv')
-backtest_signals = pd.read_csv('ohlcv/backtests.csv', usecols=real_signals.columns)
+real_signals = pd.read_csv('data/signalsHourly.csv')
+backtest_signals = pd.read_csv('data/bitfinex/backtests.csv', usecols=real_signals.columns)
 
 old_signals = backtest_signals[backtest_signals['date'] < real_signals['date'][0]]
 merged_signals = old_signals.append(real_signals, sort=False).reset_index(drop=True)
 
 # Save merged signals
-merged_signals.to_csv('signals/Hourly-merged.csv', index=False)
+merged_signals.to_csv('data/signalsHourly-merged.csv', index=False)
 merged_signals['tp'] = None
 merged_signals['index_closed'] = None
 
-btc = pd.read_csv('ohlcv/BTC.csv')
+btc = pd.read_csv('data/bitfinex/BTC.csv')
 signals = pd.DataFrame()
 
 
 for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']:
     coin = ticker[:ticker.find('/')]
 
-    df = pd.read_csv('ohlcv/' + coin + '.csv')
+    df = pd.read_csv('data/bitfinex/' + coin + '.csv')
     dates = df['date'].tolist()
 
     coin_signals = merged_signals.loc[merged_signals['ticker'] == ticker]
@@ -55,4 +55,4 @@ signals = signals\
             .drop(['index', 'index_closed'], axis=1)\
             .rename(columns={'date': 'date_opened'})
 
-signals.to_csv('ohlcv/WORLD CLASS TRADERS BACKTEST RESULTS.csv', index=False)
+signals.to_csv('data/bitfinex/WORLD CLASS TRADERS BACKTEST RESULTS.csv', index=False)

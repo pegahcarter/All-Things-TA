@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
 
-btc = pd.read_csv('ohlcv/BTC.csv')
+btc = pd.read_csv('data/bitfinex/BTC.csv')
 signals = pd.DataFrame()
 features = ['rsi', 'macd', 'ma20_ema40_diff', 'ma20_slope_direction']
 tp_pcts = [-1, 0.05, 0.15, 0.35, 2.45, 0]
@@ -15,7 +15,7 @@ ema_slow = 68
 
 for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']:
     coin = ticker[:ticker.find('/')]
-    df = pd.read_csv('ohlcv/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
+    df = pd.read_csv('data/bitfinex/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
 
     if '/BTC' in ticker:
         btc_slice = btc[btc['date'] >= df['date'][0]]
@@ -139,7 +139,7 @@ plt.show()
 
 # Finding new features
 
-df = pd.read_csv('ohlcv/BTC.csv')
+df = pd.read_csv('data/bitfinex/BTC.csv')
 
 df['ma20'] = df['close'].rolling(window=20).mean().fillna(0)
 df['ema40'] = df['close'].ewm(span=40, adjust=False).mean()

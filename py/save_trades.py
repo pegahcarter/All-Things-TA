@@ -2,13 +2,13 @@ import pandas as pd
 from py.functions import *
 from datetime import datetime, timedelta
 
-btc = pd.read_csv('ohlcv/BTC.csv')
+btc = pd.read_csv('data/bitfinex/BTC.csv')
 signals = pd.DataFrame()
 
 
 for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC', 'BCH/BTC']:
     coin = ticker[:ticker.find('/')]
-    df = pd.read_csv('ohlcv/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
+    df = pd.read_csv('data/bitfinex/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
 
     if '/BTC' in ticker and ticker != 'BCH/BTC':
         for col in ['open', 'high', 'low', 'close']:
@@ -38,4 +38,4 @@ signals['date_closed'] = [date + timedelta(seconds=hrs*60*60) for date, hrs in z
 
 signals = signals.sort_values('date').reset_index(drop=True)
 
-signals.to_csv('ohlcv/backtests.csv', index=False)
+signals.to_csv('data/bitfinex/backtests.csv', index=False)

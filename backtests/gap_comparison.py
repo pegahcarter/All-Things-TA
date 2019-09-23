@@ -1,7 +1,7 @@
 import pandas as pd
 from py.functions import *
 
-df = pd.read_csv('ohlcv/BTC.csv')
+df = pd.read_csv('data/bitfinex/BTC.csv')
 signals = find_signals(df)
 # signals = signals.drop('date', axis=1)
 

@@ -14,13 +14,13 @@ len(avgs_combined)
 
 
 
-btc = pd.read_csv('ohlcv/BTC.csv')
+btc = pd.read_csv('data/bitfinex/BTC.csv')
 results = pd.DataFrame(columns=['average'] + tickers)
 results['average'] = avgs_combined
 
 for ticker in tickers:
     coin = ticker[:ticker.find('/')]
-    df = pd.read_csv('ohlcv/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
+    df = pd.read_csv('data/bitfinex/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
 
     if '/BTC' in ticker and ticker != 'BCH/BTC':
         for col in ['open', 'high', 'low', 'close']:
@@ -51,7 +51,7 @@ df['total'] = total_performance
 
 df.sort_values('mean', ascending=False)[61:120]
 
-btc = pd.read_csv('ohlcv/BTC.csv')
+btc = pd.read_csv('data/bitfinex/BTC.csv')
 coin_signals = find_signals(btc, ema_fast=5, ma_mid=8, ema_slow=68)
 
 
