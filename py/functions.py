@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
-import ccxt
+# import ccxt
 import os
 
 
@@ -20,10 +20,10 @@ def find_intersections(line1, line2):
 
 
 # Determine signals from OHLCV dataframe
-def find_signals(df, gap=0):
-    ema3 = df['close'].ewm(span=3, adjust=False).mean()
-    ma20 = df['close'].rolling(window=20).mean().fillna(0)
-    ema40 = df['close'].ewm(span=40, adjust=False).mean()
+def find_signals(df, gap=0, ema_fast=3, ma_mid=20, ema_slow=40):
+    ema3 = df['close'].ewm(span=ema_fast, adjust=False).mean()
+    ma20 = df['close'].rolling(window=ma_mid).mean().fillna(0)
+    ema40 = df['close'].ewm(span=ema_slow, adjust=False).mean()
     ma20_ema40_diff = abs(np.subtract(ma20, ema40)) / ma20
 
     intersections = find_intersections(ema3, ma20)

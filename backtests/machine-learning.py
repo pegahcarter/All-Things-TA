@@ -6,11 +6,14 @@ import matplotlib.pyplot as plt
 
 btc = pd.read_csv('ohlcv/BTC.csv')
 signals = pd.DataFrame()
-# features = ['rsi', 'macd', 'ma20_slope', 'ma20_slope_direction', 'ema40_slope', 'ema40_slope_direction', 'ma20_ema40_same_direction', 'ma20_ema40_diff']
 features = ['rsi', 'macd', 'ma20_ema40_diff', 'ma20_slope_direction']
 tp_pcts = [-1, 0.05, 0.15, 0.35, 2.45, 0]
+ema_fast = 6
+ma_mid = 8
+ema_slow = 68
 
-for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC', 'ADA/BTC']:
+
+for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']:
     coin = ticker[:ticker.find('/')]
     df = pd.read_csv('ohlcv/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
 
@@ -20,29 +23,23 @@ for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC',
             df[col] /= btc_slice['close']
 
 
-    df['ma20'] = df['close'].rolling(window=20).mean().fillna(0)
-    df['ema40'] = df['close'].ewm(span=40, adjust=False).mean()
+    df['ma20'] = df['close'].rolling(window=ma_mid).mean().fillna(0)
+    df['ema40'] = df['close'].ewm(span=ema_slow, adjust=False).mean()
 
     df['rsi'] = calc_rsi(df['close'])
     df['macd'] = calc_macd(df['close'])
     df['ma20_slope'] = np.subtract(df['ma20'][1:], df['ma20'][:-1]) / df['ma20'][:-1] * 100
     df['ma20_slope_direction'] = df['ma20_slope'] > 0
-    # df['ema40_slope'] = np.subtract(df['ema40'][1:], df['ema40'][:-1]) / df['ema40'][:-1] * 100
-    # df['ema40_slope_direction'] = df['ema40_slope'] > 0
-    # df['ma20_ema40_same_direction'] = df['ma20_slope_direction'] == df['ema40_slope_direction']
     df['ma20_ema40_diff'] = abs(np.subtract(df['ma20'], df['ema40'])) / df['ma20']
 
-    coin_signals = find_signals(df)
+    coin_signals = find_signals(df, ema_fast=ema_fast, ma_mid=ma_mid, ema_slow=ema_slow)
     tp, index_closed = determine_TP(df, coin_signals, compound=True)
     coin_signals['tp'] = tp
     coin_signals['index_closed'] = index_closed
+    coin_signals['macd'] = df.iloc[coin_signals.index]['macd']
+    coin_signals['rsi'] = df.iloc[coin_signals.index]['rsi']
     coin_signals['ma20_slope_direction'] = df.iloc[coin_signals.index]['ma20_slope_direction']
     coin_signals['ma20_ema40_diff'] = df.iloc[coin_signals.index]['ma20_ema40_diff']
-
-    # for feature in features:
-    #     coin_signals[feature] = None
-    #
-    # coin_signals[features] = df.iloc[coin_signals.index][features]
 
     coin_signals['ticker'] = [ticker for i in range(len(coin_signals))]
     coin_signals = coin_signals.reset_index()
@@ -56,30 +53,26 @@ signals['net_profit'] = end_pct * profit_pct
 signals['net_profit'].sum()  # 5.03
 
 
-
-# How many positions do we have open when we take the trade?
-x = signals[signals['ticker'] == 'BTC/USD'].drop(['price', 'stop_loss', 'ticker'], axis=1)
-x.head()
-
-test = x[:10]
+bad_calls = signals[signals['tp'] == 0]
+len(bad_calls)
+good_calls = signals[signals['tp'] != 0]
+len(good_calls)
 
 
-row = test.iloc[0]
+bad_calls['net_profit'].sum()
+good_calls['net_profit'].sum()
 
-row_rng = range(row['index'], row['index_closed'])
+test = signals[signals['ma20_ema40_diff'] < .005]
+len(test)
 
-test.iloc[1]['index'] in row_rng
-
-import timeit
-%timeit x = test.at[0, 'index']
-
-%timeit x = test['index'][0]
-
-test.a
+test['net_profit'].sum()
+len(test[test['tp'] == 0])
 
 
-for i, row in test[1:].iterrows():
+signals.groupby('tp')['ma20_ema40_diff'].describe()
 
+
+signals.head()
 
 
 
@@ -108,38 +101,6 @@ sorted(sl_pct.items(), key=lambda x: x[1])
 # sl_pct[ticker] = round(df['net_profit'].sum(), 3)
 [('ETH/BTC', 0.083), ('LTC/BTC', 0.155), ('BTC/USD', 0.594), ('ADA/BTC', 0.865), ('XRP/BTC', 1.004), ('EOS/BTC', 1.048), ('ETH/USD', 1.243)]
 
-slope = []
-for i, row in signals.iterrows():
-    # if row['signal'] == 'Long' and not row['ma20_slope_direction']:
-    #     slope.append(i)
-    if row['signal'] == 'Short' and row['ma20_slope_direction']:
-        slope.append(i)
-
-test = signals.drop([i for i in signals.index if i not in slope])
-
-test.groupby('tp')['tp'].count()
-len(test)
-
-test['net_profit'].sum()
-test[test['ma20_ema40_diff'] < .002][:60]
-
-
-
-
-
-
-
-
-test.sort_values('rsi')
-
-
-
-
-
-
-
-
-
 
 slope = []
 for i, row in signals.iterrows():
@@ -161,7 +122,7 @@ test['net_profit'].sum()
 
 tree = RandomForestClassifier()
 x = signals[features]
-y = signals['tp'] == 4
+y = signals['tp'] != 0
 
 tree.fit(x, y)
 feature_importance = tree.feature_importances_

@@ -18,7 +18,7 @@ btc = pd.read_csv('ohlcv/BTC.csv')
 signals = pd.DataFrame()
 
 
-for ticker in set(merged_signals['ticker']):
+for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']:
     coin = ticker[:ticker.find('/')]
 
     df = pd.read_csv('ohlcv/' + coin + '.csv')
