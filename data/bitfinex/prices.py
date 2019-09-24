@@ -1,4 +1,4 @@
-# Code to create prices.csv
+# Code to create bitfinex prices
 import pandas as pd
 import numpy as np
 import ccxt
