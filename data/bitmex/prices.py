@@ -4,12 +4,13 @@ import numpy as np
 import ccxt
 from datetime import datetime, timedelta
 import time
+from py.variables import tickers
 
 bitmex = ccxt.bitmex()
 start = datetime(year=2019, month=6, day=14, hour=3)
 
 
-for ticker in ['BTC/USD', 'ETH/USD', 'ETHU19', 'LTCU19', 'XRPU19', 'BCHU19', 'ADAU19', 'EOSU19']:
+for ticker in tickers:
     start_date = start
     df = []
 

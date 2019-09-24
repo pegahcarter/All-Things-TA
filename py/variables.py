@@ -4,7 +4,8 @@ import pygsheets
 import ccxt
 import os
 
-exchange = ccxt.bitfinex()
+# exchange = ccxt.bitfinex()
+exchange = ccxt.bitmex()
 
 candle_intervals = {
     '1h': 'Hourly',
@@ -21,4 +22,5 @@ world_class = '@worldclasstrader'
 world_class_elite = '-1001229157672'
 
 
-tickers = ['BTC/USD','ETH/USD','ETH/BTC','BCH/BTC','LTC/BTC','XRP/USD','XRP/BTC','BCH/USD','LTC/USD','EOS/USD','EOS/BTC']
+# tickers = ['BTC/USD','ETH/USD','ETH/BTC','BCH/BTC','LTC/BTC','XRP/USD','XRP/BTC','BCH/USD','LTC/USD','EOS/USD','EOS/BTC']
+tickers = ['BTC/USD', 'ETH/USD', 'ETHU19', 'LTCU19', 'XRPU19', 'BCHU19', 'ADAU19', 'EOSU19']
