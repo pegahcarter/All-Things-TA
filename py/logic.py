@@ -64,7 +64,7 @@ def msg_wc(row, candle_string, chat_id, *tps):
 
     if row['ticker'] == 'BTC/USD':
         decimals = '0.0f'
-    elif row['ticker'] == 'XRP/U19':
+    elif row['ticker'] == 'XRP/U19' or row['ticker'] == 'ADA/U19':
         decimals = '.8f'
     elif row['ticker'] == 'EOS/U19':
         decimals = '.7f'
