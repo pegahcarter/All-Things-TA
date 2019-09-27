@@ -18,19 +18,38 @@ def find_intersections(line1, line2):
 
 
 # Determine signals from OHLCV dataframe
-def find_signals(df, gap=0, ema_fast=3, ma_mid=20, ema_slow=40):
-    ema3 = df['close'].ewm(span=ema_fast, adjust=False).mean()
-    ma20 = df['close'].rolling(window=ma_mid).mean().fillna(0)
-    ema40 = df['close'].ewm(span=ema_slow, adjust=False).mean()
-    ma20_ema40_diff = abs(np.subtract(ma20, ema40)) / ma20
+def find_signals(df, gap=0, window_fast=3, window_mid=20, window_slow=40):
+    emafast = df['close'].ewm(span=window_fast, adjust=False).mean()
+    mamid = df['close'].rolling(window=window_mid).mean().fillna(0)
+    emaslow = df['close'].ewm(span=window_slow, adjust=False).mean()
 
-    intersections = find_intersections(ema3, ma20)
+    mamid_emaslow_diff = abs(np.subtract(mamid, emaslow)) / mamid
+    candle_body = abs(df['close'] - df['open']) / df['open']
+    candle_std = candle_body.rolling(168).std()
+    rsi = calc_rsi(df['close'])
+
+    intersections = find_intersections(emafast, mamid)
     signals = {}
 
     for i in intersections:
+        if i < 48:
+            continue
+
+        body_sorted = sorted(candle_body[i-48:i], reverse=True)
+        candle_48h = body_sorted[0]
+        window_std = candle_std[i-48:i].mean()
+        candle_mean = candle_body[i-48:i].median()
+
         price = df['close'][i]
         high_1 = df['high'][i]
         low_1 = df['low'][i]
+
+        if sum(body_sorted[:3]) - (4*candle_mean) > 12*window_std:
+            continue
+
+        if candle_body[i-12:i].max() > .025:
+            continue
+
         if (high_1 - low_1) / high_1 > 0.02:
             continue
 
@@ -46,17 +65,21 @@ def find_signals(df, gap=0, ema_fast=3, ma_mid=20, ema_slow=40):
         stop_loss_low = df['low'][i-10:i].min()
         stop_loss_high = df['high'][i-10:i].max()
 
-        if price > ema3[i] and ma20[i] > ema40[i]:
+        if price > emafast[i] \
+        and mamid[i] > emaslow[i] \
+        and rsi[i] > 50:
             signal = 'Long'
             stop_loss = stop_loss_low
             pct_from_high = stop_loss_high/price - 1
-        elif price < ema3[i] and ma20[i] < ema40[i]:
+        elif price < emafast[i] \
+        and mamid[i] < emaslow[i] \
+        and rsi[i] < 50:
             signal = 'Short'
             stop_loss = stop_loss_high
             pct_from_high = 1 - stop_loss_low/price
         if signal:
-            if 0.0075 < abs(1 - stop_loss/price) < .04 \
-            and ma20_ema40_diff[i] > .001:
+            if 0.0075 < abs(1 - stop_loss/price) < .04\
+            and mamid_emaslow_diff[i] > .001:
                 signals[i] = {
                     'date': df['date'].iat[i],
                     'signal': signal,
@@ -192,9 +215,9 @@ def calc_macd(_close, fast=12, slow=26):
     signal line = 9ema of macd line
     histogram = macd line - signal line
     '''
-    ema_fast = _close.ewm(span=fast, adjust=False).mean()
-    ema_slow = _close.ewm(span=slow, adjust=False).mean()
-    return abs(ema_slow/ema_fast - 1)*100
+    ema1 = _close.ewm(span=fast, adjust=False).mean()
+    ema2 = _close.ewm(span=slow, adjust=False).mean()
+    return abs(ema2/ema1 - 1)*100
 
 
 def calc_rsi(_close):

@@ -1,3 +1,5 @@
+import requests
+import os
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -5,7 +7,6 @@ import time
 import ccxt
 
 
-import pygsheets
 gc = pygsheets.authorize(service_file='C:/Users/carter/Documents/crypto/peter-signal/credentials.json')
 g_doc = gc.open_by_key('1T67gVealvVutn_VuiedbH7ViK8_OIBWOmoDIMq82oQE')
 
@@ -17,9 +18,6 @@ def get_gsheet(candle_string):
 
 def save_gsheet(candle_string, df):
     return g_doc.worksheet_by_title(candle_string).set_dataframe(df, (1,1))
-
-
-
 
 # ------------------------------------------------------------------------------
 def foo():
@@ -64,31 +62,42 @@ test3_a
 
 test3_b = pd.DataFrame([])
 
-# from py.variables import *
-# from urllib.parse import urlencode
-#
-# url = 'https://api.telegram.org/bot' + API_KEY + '/sendMessage?'
-# mydict = {'chat_id': CHAT_ID, 'text': 'Hello'}
-# url + urlencode(mydict)
-
-
-import requests
-data = requests.get('https://api.telegram.org/bot862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8/getUpdates').json()
-data = data['result']
-data[-1]
-
-
-
-
-
-
-
-
+data = requests.get('https://api.telegram.org/bot862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8/getUpdates').json()['result']
 
 messages = list(filter(lambda x: 'channel_post' in x.keys(), data))
-messages
 
 url = 'https://api.telegram.org/bot862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8/sendMessage?'
-
-
 requests.get(url + urlencode({'chat_id': '@worldclasstrader', 'text': 'Test'}))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+df = pd.read_csv(os.getcwd() + '/data/optimize_moving_avg.csv')
+
+df.head()
+
+df['average'] = df['average'].map(lambda row: row[1:-1].split(', '))
+avgs = [list(map(lambda n: int(n), avg)) for avg in df['average']]
+
+
+
+df['mean'] = df.drop('average', axis=1).mean(axis=1)
+df['sum'] = df.drop('average', axis=1).sum(axis=1)
+
+df2 = df[['average', 'mean', 'sum']]
+df2 = df2.sort_values('sum', ascending=False).reset_index(drop=True)
+df2[:60]
