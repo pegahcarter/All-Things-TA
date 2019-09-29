@@ -24,7 +24,7 @@ def run(candle_abv):
         df = pd.DataFrame(df, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
 
         signals = find_signals(df)
-        if 'U19' in ticker: ticker = ticker[:3] + '/U19'
+        if 'Z19' in ticker: ticker = ticker[:3] + '/Z19'
 
         if len(signals) > 0:
             signals.loc[:, 'ticker'] = ticker
@@ -46,13 +46,13 @@ def send_signal(row, candle_string):
     tp4 = row['price'] + diff*3
 
     msg_wc(row, candle_string, world_class_elite, tp1, tp2, tp3, tp4)
-    if row['ticker'] in ['XRP/U19', 'ETH/USD', 'LTC/U19', 'BCH/U19']:
+    if row['ticker'] in ['XRP/Z19', 'ETH/USD', 'LTC/Z19', 'BCH/Z19']:
         msg_wc(row, candle_string, world_class, tp1, tp2, tp3, tp4)
-    if row['ticker'] in ['BTC/USD', 'ETH/U19']:
+    if row['ticker'] in ['BTC/USD', 'ETH/Z19']:
         msg_atta(row, tp1, tp2, tp3, tp4)
 
     # For testing
-    # msg_wc(row, candle_string, test_chat_id, tp1, tp2, tp3, tp4)
+    msg_wc(row, candle_string, test_chat_id, tp1, tp2, tp3, tp4)
 
 
 def msg_wc(row, candle_string, chat_id, *tps):
@@ -64,13 +64,13 @@ def msg_wc(row, candle_string, chat_id, *tps):
 
     if row['ticker'] == 'BTC/USD':
         decimals = '0.0f'
-    elif row['ticker'] == 'XRP/U19' or row['ticker'] == 'ADA/U19':
+    elif row['ticker'] == 'XRP/Z19' or row['ticker'] == 'ADA/Z19':
         decimals = '.8f'
-    elif row['ticker'] == 'EOS/U19':
+    elif row['ticker'] == 'EOS/Z19':
         decimals = '.7f'
-    elif row['ticker'] == 'LTC/U19':
+    elif row['ticker'] == 'LTC/Z19':
         decimals = '.6f'
-    elif row['ticker'] in ['BCH/U19', 'ETH/U19']:
+    elif row['ticker'] in ['BCH/Z19', 'ETH/Z19']:
         decimals = '.5f'
     else:
         decimals = '.2f'
@@ -90,11 +90,12 @@ def msg_wc(row, candle_string, chat_id, *tps):
     msg += 'Stop loss {}\n\n'.format(stop_loss)
     msg += '🚨🚨🚨'
 
+    print(msg)
     requests.get(url + urlencode({'chat_id': chat_id, 'text': msg}))
 
 
 def msg_atta(row, *tps):
-    if row['ticker'] == 'ETH/U19':
+    if row['ticker'] == 'ETH/Z19':
         row['price'] *= 100000
         row['stop_loss'] *= 100000
         tps = np.multiply(tps, 100000)
