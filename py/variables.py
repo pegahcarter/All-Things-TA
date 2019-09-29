@@ -22,4 +22,4 @@ world_class_elite = '-1001229157672'
 
 
 # tickers = ['BTC/USD','ETH/USD','ETH/BTC','BCH/BTC','LTC/BTC','XRP/USD','XRP/BTC','BCH/USD','LTC/USD','EOS/USD','EOS/BTC']
-tickers = ['BTC/USD', 'ETH/USD', 'ETHU19', 'LTCU19', 'XRPU19', 'BCHU19', 'ADAU19', 'EOSU19']
+tickers = ['BTC/USD', 'ETH/USD', 'ETHZ19', 'LTCZ19', 'XRPZ19', 'BCHZ19', 'ADAZ19', 'EOSZ19']
