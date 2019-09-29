@@ -90,6 +90,7 @@ def msg_wc(row, candle_string, chat_id, *tps):
     msg += 'Stop loss {}\n\n'.format(stop_loss)
     msg += '🚨🚨🚨'
 
+    print(msg)
     requests.get(url + urlencode({'chat_id': chat_id, 'text': msg}))
 
 
