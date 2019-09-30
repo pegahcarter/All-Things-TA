@@ -1,6 +1,7 @@
 # file to calculate area inside a polygon
 import pandas as pd
 import numpy as np
+import timeit
 import random
 import matplotlib.pyplot as plt
 
@@ -121,7 +122,7 @@ b = line4[1]
 
 a + x*(b - a)
 
-# ------------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Step 6. Figure out less repeated calculations
 
 line3_diff = line3[1] - line3[0]
@@ -143,9 +144,44 @@ y = line4_diff * x + line4[0]
 
 intercept = [x, y]
 
+# -------------------------------------------------------------------------
+# 7. Create list of intersections
+avg1 = pd.Series([0, 5, 8, 3])
+avg2 = pd.Series([7, 6, 2, 5])
+
+cross_indices = crossover(avg1, avg2)
+
+tuple_lst = ((avg1[i-1], avg1[i], avg2[i-1], avg2[i]) for i in cross_indices)
+
+# Dict of intersections with relative x and y position
+results = {index: intersection(*x) for index, x in zip(cross_indices, tuple_lst)}
+
+# -------------------------------------------------------------------------
+# 8. Find area between points
+
+# Add 0 to cross_indices
+cross_indices.insert(0, 0)
+
+# Add length of series to end of cross_indices
+cross_indices.append(len(avg1))
+
+
+for i in range(0, len(cross_indices)+1, 2):
+    print(i)
 
 
 
+
+
+
+
+
+
+
+
+
+
+# -------------------------------------------------------------------------
 
 
 def crossover(x1, x2):
@@ -159,16 +195,17 @@ def crossover(x1, x2):
     return crossovers
 
 
-def intersection(line3, line4):
-    da = np.subtract(a2, a1)
-    db = np.subtract(b2, b1)
-    dp = np.subtract(a1, b1)
+def intersection(a0, a1, b0, b1):
+    a_diff = a1 - a0
+    b_diff = b1 - b0
 
-    dap = np.array([-da[1], da[0]])
+    pos0_diff = float(a0 - b0)
 
-    denom = dap.dot(db)
-    num = dap.dot(dp)
-    return (float(num) / denom)*db + b1
+    x = pos0_diff / (b_diff - a_diff)
+    y = b_diff*x + b0
+
+    return x, y
+
 
 
 def area_between(line1, line2):
