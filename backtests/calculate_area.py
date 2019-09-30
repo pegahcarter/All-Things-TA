@@ -146,8 +146,8 @@ intercept = [x, y]
 
 # -------------------------------------------------------------------------
 # 7. Create list of intersections
-avg1 = pd.Series([0, 5, 8, 3])
-avg2 = pd.Series([7, 6, 2, 5])
+avg1 = pd.Series([0, 8, 8, 3, 3.5, 4])
+avg2 = pd.Series([7, 2, 2, 5, 5, 4])
 
 cross_indices = crossover(avg1, avg2)
 
@@ -155,19 +155,14 @@ tuple_lst = ((avg1[i-1], avg1[i], avg2[i-1], avg2[i]) for i in cross_indices)
 
 # Dict of intersections with relative x and y position
 results = {index: intersection(*x) for index, x in zip(cross_indices, tuple_lst)}
-
 # -------------------------------------------------------------------------
-# 8. Find area between points
+# 8. Find area between points that don't have a normal interval
 
-# Add 0 to cross_indices
-cross_indices.insert(0, 0)
+area_between(line1, line2)
 
-# Add length of series to end of cross_indices
-cross_indices.append(len(avg1))
+[area_between(avg1[start:end], avg2[start:end]) for start, end in zip(cross_indices[:-1], cross_indices[1:])]
 
 
-for i in range(0, len(cross_indices)+1, 2):
-    print(i)
 
 
 
@@ -182,11 +177,13 @@ for i in range(0, len(cross_indices)+1, 2):
 
 
 # -------------------------------------------------------------------------
-
+for start, end in zip(cross_indices, cross_indices[1:])[:1]:
+    print(start + results[start][0])
+    print(end + results[end][0])
 
 def crossover(x1, x2):
     crossovers = []
-    x1_gt_x2 = list(np.array(x1) > np.array(x2))
+    x1_gt_x2 = list(np.array(x1) >= np.array(x2))
     current_val = x1_gt_x2[0]
     for index, val in enumerate(x1_gt_x2[1:]):
         if val != current_val:
@@ -196,6 +193,7 @@ def crossover(x1, x2):
 
 
 def intersection(a0, a1, b0, b1):
+    ''' Return the x and y coordinates '''
     a_diff = a1 - a0
     b_diff = b1 - b0
 
@@ -207,14 +205,23 @@ def intersection(a0, a1, b0, b1):
     return x, y
 
 
-
 def area_between(line1, line2):
-    ''' Return the area between line1 and line2 '''
+    ''' Return the area between line1 and line2
+    Assumptions:
+        - line1 and line2 have values at a regular interval
+    '''
+    if not isinstance(line1, list) or not isinstance(line2, list):
+        line1 = list(line1)
+        line2 = list(line2)
+
     diff = np.subtract(line1, line2)
     x1 = diff[:-1]
     x2 = diff[1:]
 
-    triangle_area = abs(x2 - x1) * .5
+    triangle_area = np.abs(x2 - x1) * .5
     square_area = np.amin(zip(x1, x2), axis=1)
 
-    return np.sum([triangle_area, square_area])
+    return np.abs(np.sum([triangle_area, square_area]))
+
+
+# TODO: Test to figure out area between for midpoints
