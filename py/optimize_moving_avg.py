@@ -1,6 +1,4 @@
 from py.functions import *
-import numpy as np
-import pandas as pd
 
 tickers = ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']
 tp_pcts = [-1, .05, .15, .35, 2.45]

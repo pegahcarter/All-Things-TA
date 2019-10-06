@@ -1,7 +1,5 @@
 # Merges real backtest signals with actual sent signals
-import pandas as pd
 from py.functions import *
-from datetime import datetime, timedelta
 
 real_signals = pd.read_csv('data/signalsHourly.csv')
 backtest_signals = pd.read_csv('data/bitfinex/backtests.csv', usecols=real_signals.columns)

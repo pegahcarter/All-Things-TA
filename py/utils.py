@@ -2,7 +2,13 @@
 import pandas as pd
 import numpy as np
 import timeit
+import requests
+import time
+import ccxt
+import os
+from urllib.parse import urlencode
 from datetime import datetime, timedelta
+from variables import *
 
 
 def group_candles(df, interval):

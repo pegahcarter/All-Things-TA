@@ -1,11 +1,4 @@
-from variables import *
 from functions import *
-import pandas as pd
-import numpy as np
-import requests
-from urllib.parse import urlencode
-from datetime import datetime, timedelta
-import time
 
 
 def run(candle_abv):

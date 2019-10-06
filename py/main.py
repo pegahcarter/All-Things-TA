@@ -1,7 +1,4 @@
 from variables import candle_intervals
-import logic
-import pandas as pd
-from datetime import datetime
 
 
 def main():

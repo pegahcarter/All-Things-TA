@@ -1,8 +1,3 @@
-from datetime import datetime, timedelta
-import time
-import ccxt
-import os
-
 # exchange = ccxt.bitfinex()
 exchange = ccxt.bitmex()
 

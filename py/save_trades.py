@@ -1,7 +1,5 @@
-import pandas as pd
 from py.functions import *
 from py.variables import tickers
-from datetime import datetime, timedelta
 
 signals = pd.read_csv('data/signals/Hourly.csv')
 signals = signals.loc[signals['ticker'] != 'ADAU19']
