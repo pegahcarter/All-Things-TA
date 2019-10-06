@@ -1,7 +1,113 @@
-from datetime import datetime, timedelta
-import pandas as pd
-import numpy as np
+from utils import *
 
+
+# Determine signals from OHLCV dataframe
+def find_signals(df, window_fast=5, window_mid=20, window_slow=56):
+
+    emaslow = ema(df['close'], span=window_slow)
+    mamid = df['close'].rolling(window=window_mid).mean().fillna(0)
+    emafast = ema(df['close'], span=window_fast)
+
+    mamid_emaslow_diff = abs(mamid - emaslow) / mamid
+
+    candle_body = abs(df['close'] - df['open']) / df['open']
+    candle_std = candle_body.rolling(168).std()
+    relative_strength = rsi(df['close'])
+
+    intersections = crossover(emafast, mamid)
+    signals = {}
+
+    for i in intersections:
+        if i < 48:
+            continue
+
+        signal = None
+        price = df['close'][i]
+        high = df['high'][i]
+        low = df['low'][i]
+
+        body_sorted = sorted(candle_body[i-48:i], reverse=True)
+        window_std = candle_std[i-48:i].mean()
+        candle_mean = candle_body[i-48:i].median()
+
+        if sum(body_sorted[:3]) - (4*candle_mean) > 12*window_std \
+        or candle_body[i-12:i].max() > .025 \
+        or (high - low) / high > 0.02:
+            continue
+
+        if price > emafast[i]:
+            if mamid[i] > emaslow[i] and relative_strength[i] > 50:
+                signal = 'Long'
+                stop_loss = df['low'][i-10:i].min()
+        else:   # price < emafast[i]
+            if mamid[i] < emaslow[i] and relative_strength[i] < 50:
+                signal = 'Short'
+                stop_loss = df['high'][i-10:i].max()
+
+        if signal and 0.0075 < abs(1 - stop_loss/price) < .04 and mamid_emaslow_diff[i] > .001:
+            signals[i] = {'date': df['date'][i],
+                          'signal': signal,
+                          'price': price,
+                          'stop_loss': stop_loss}
+
+    signals = pd.DataFrame.from_dict(signals, orient='index')
+    return signals
+
+
+# Figure out which TP level is hit
+def determine_TP(df, signals, cushion=0, compound=False):
+    tp_lst = []
+    index_closed_lst = []
+    index_tp_hit_lst = []
+
+    for index, row in signals.iterrows():
+        if row['signal'] == 'Long':
+            l_bounds = df['low']
+            u_bounds = df['high']
+        else:   # signal == 'Short'
+            l_bounds = -df['high']
+            u_bounds = -df['low']
+            cushion *= -1
+            row['price'] *= -1
+            row['stop_loss'] *= -1
+
+        row['stop_loss'] *= (1. + cushion)
+        if row['stop_loss'] > row['price']:
+            tp_lst.append(5)
+            index_closed_lst.append(index)
+        else:
+            diff = row['price'] - row['stop_loss']
+
+            tp1 = row['price'] + diff/2.
+            tp2 = row['price'] + diff
+            tp3 = row['price'] + diff*2
+            tp4 = row['price'] + diff*3
+
+            tp_targets = [tp1, tp2, tp3, tp4]
+            index_tp_hit = [0, 0, 0, 0]
+            tp = 0
+
+            for x in range(index+1, len(df)):
+                while tp != 4 and u_bounds[x] > tp_targets[tp]:
+                    index_tp_hit[tp] = x
+                    tp += 1
+                if tp == 4 or l_bounds[x] < row['stop_loss']:
+                    break
+                if tp > 0:
+                    row['stop_loss'] = row['price']
+
+            tp_lst.append(tp)
+            index_closed_lst.append(x)
+            index_tp_hit_lst.append(index_tp_hit)
+
+    if compound:
+        return tp_lst, index_closed_lst, index_tp_hit_lst
+    else:
+        return tp_lst
+
+
+# ------------------------------------------------------------------------------
+# Old functions
 
 # Find intersections indices between two lines
 def find_intersections(line1, line2):
@@ -17,79 +123,11 @@ def find_intersections(line1, line2):
     return intersections
 
 
-# Determine signals from OHLCV dataframe
-def find_signals(df, gap=0, window_fast=3, window_mid=20, window_slow=40):
-    emafast = df['close'].ewm(span=window_fast, adjust=False).mean()
-    mamid = df['close'].rolling(window=window_mid).mean().fillna(0)
-    emaslow = df['close'].ewm(span=window_slow, adjust=False).mean()
-
-    mamid_emaslow_diff = abs(np.subtract(mamid, emaslow)) / mamid
-    candle_body = abs(df['close'] - df['open']) / df['open']
-    candle_std = candle_body.rolling(168).std()
-    rsi = calc_rsi(df['close'])
-
-    intersections = find_intersections(emafast, mamid)
-    signals = {}
-
-    for i in intersections:
-        if i < 48:
-            continue
-
-        body_sorted = sorted(candle_body[i-48:i], reverse=True)
-        candle_48h = body_sorted[0]
-        window_std = candle_std[i-48:i].mean()
-        candle_mean = candle_body[i-48:i].median()
-
-        price = df['close'][i]
-        high_1 = df['high'][i]
-        low_1 = df['low'][i]
-
-        if sum(body_sorted[:3]) - (4*candle_mean) > 12*window_std:
-            continue
-
-        if candle_body[i-12:i].max() > .025:
-            continue
-
-        if (high_1 - low_1) / high_1 > 0.02:
-            continue
-
-        try:
-            high_2 = df['high'][i+1]
-            low_2 = df['low'][i+1]
-            if (high_2 - low_2) / high_2 > 0.02:
-                continue
-        except:
-            pass
-
-        signal = None
-        stop_loss_low = df['low'][i-10:i].min()
-        stop_loss_high = df['high'][i-10:i].max()
-
-        if price > emafast[i] \
-        and mamid[i] > emaslow[i] \
-        and rsi[i] > 50:
-            signal = 'Long'
-            stop_loss = stop_loss_low
-            pct_from_high = stop_loss_high/price - 1
-        elif price < emafast[i] \
-        and mamid[i] < emaslow[i] \
-        and rsi[i] < 50:
-            signal = 'Short'
-            stop_loss = stop_loss_high
-            pct_from_high = 1 - stop_loss_low/price
-        if signal:
-            if 0.0075 < abs(1 - stop_loss/price) < .04\
-            and mamid_emaslow_diff[i] > .001:
-                signals[i] = {
-                    'date': df['date'].iat[i],
-                    'signal': signal,
-                    'price': price,
-                    'stop_loss': stop_loss
-                }
-
-    signals = pd.DataFrame.from_dict(signals, orient='index')
-    return signals
-    # return drop_extra_signals(signals, gap)
+# Return outcome of TP in %
+def net_profit_pct(tp_pcts, tps_hit, prices, stop_losses):
+    profit_pct = abs(prices - stop_losses) / prices
+    end_pct = list(map(lambda x: tp_pcts[x], tps_hit))
+    return profit_pct * end_pct
 
 
 # TODO: conceptually this is very similar to find_intersections().  Is there a
@@ -103,65 +141,6 @@ def drop_extra_signals(signals, gap=0):
         last_signal = signal
     return signals.drop([i for i in signals.index if i not in clean_signals])
 
-
-# Figure out which TP level is hit
-def determine_TP(df, signals, cushion=0, compound=False):
-    tp_lst = []
-    position_closed_lst = []
-    for index, row in signals.iterrows():
-        if row['signal'] == 'Long':
-            l_bounds = df['low']
-            u_bounds = df['high']
-        else:   # signal == 'Short'
-            l_bounds = -df['high']
-            u_bounds = -df['low']
-            cushion *= -1
-            row['price'] *= -1
-            row['stop_loss'] *= -1
-
-        row['stop_loss'] *= (1. + cushion)
-        if row['stop_loss'] > row['price']:
-            tp_lst.append(5)
-            position_closed_lst.append(index)
-        else:
-            diff = row['price'] - row['stop_loss']
-
-            tp1 = row['price'] + diff/2.
-            tp2 = row['price'] + diff
-            tp3 = row['price'] + diff*2
-            tp4 = row['price'] + diff*3
-
-            tp_targets = [tp1, tp2, tp3, tp4]
-            tp = 0
-
-            for x in range(index+1, len(df)):
-                while tp != 4 and u_bounds[x] > tp_targets[tp]:
-                    tp += 1
-                if tp == 4 or l_bounds[x] < row['stop_loss']:
-                    break
-                if tp > 0:
-                    row['stop_loss'] = row['price']
-
-            tp_lst.append(int(tp))
-            position_closed_lst.append(int(x))
-
-    if compound:
-        return tp_lst, position_closed_lst
-    else:
-        return tp_lst
-
-
-
-# TODO
-# Return outcome of TP in %
-# def net_profit_pct(tp_pcts, tps_hit, prices, stop_losses):
-#     profit_pct = abs(prices - stop_losses) / prices
-#     end_pct = list(map(lambda x: tp_pcts[x], tps_hit))
-#     return profit_pct * end_pct
-
-
-# ------------------------------------------------------------------------------
-# Old functions
 
 # Loop to update CSV's with recent OHLCV data
 def refresh_ohlcv(file, offline=False):
@@ -191,55 +170,3 @@ def refresh_ohlcv(file, offline=False):
     df.to_csv('prices/' + file, index=False)
 
     return coin, df
-
-
-# Group hourly candle into candle intervals
-def group_candles(df, period):
-    candles = np.array(df)
-    results = []
-    for i in range(0, len(df)-period, period):
-        results.append([
-            candles[i, 0],                  # date
-            candles[i, 1],                  # open
-            candles[i:i+period, 2].max(),   # high
-            candles[i:i+period, 3].min(),   # low
-            candles[i+period, 4],           # close
-            candles[i:i+period, 5].sum()    # volume
-        ])
-    return pd.DataFrame(results, columns=df.columns)
-
-
-def calc_macd(_close, fast=12, slow=26):
-    '''
-    macd line = fast_ema - slow_ema
-    signal line = 9ema of macd line
-    histogram = macd line - signal line
-    '''
-    ema1 = _close.ewm(span=fast, adjust=False).mean()
-    ema2 = _close.ewm(span=slow, adjust=False).mean()
-    return abs(ema2/ema1 - 1)*100
-
-
-def calc_rsi(_close):
-    n = 14
-    deltas = np.diff(_close)
-    seed = deltas[:n+1]
-    up = seed[seed > 0].sum()/n
-    down = -seed[seed < 0].sum()/n
-    rsi = np.zeros_like(_close)
-    rsi[:n] = 100. - 100./(1.+ up/down)
-    for i in range(n, len(_close)):
-        delta = deltas[i-1]
-        if delta > 0:
-            up_val = delta
-            down_val = 0
-        else:
-            up_val = 0
-            down_val = -delta
-
-        up = (up*(n-1) + up_val)/n
-        down = (down*(n-1) + down_val)/n
-
-        rsi[i] = 100. - 100./(1. + up/down)
-
-    return rsi

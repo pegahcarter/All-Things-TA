@@ -1,6 +1,7 @@
 # Helper functions
 import pandas as pd
 import numpy as np
+import timeit
 from datetime import datetime, timedelta
 
 
@@ -38,7 +39,7 @@ def sma(line, window, attribute='mean'):
     return getattr(line.rolling(window=window, min_periods=1), attribute)()
 
 
-def roc(close, n=14):
+def roc(close, n=1):
     ''' Returns the rate of change in price over n periods '''
     close = np.array(close)
     pct_diff = np.zeros_like(close)
@@ -50,7 +51,7 @@ def macd(close, fast=8, slow=21):
     ''' Returns the "moving average convergence/divergence" (MACD) '''
     ema_fast = ema(close, fast)
     ema_slow = ema(close, slow)
-    return ema_fast - ema_slow
+    return (ema_fast/ema_slow - 1) * 100
 
 
 def rsi(close, n=14):
@@ -97,10 +98,10 @@ def maxmin(max_or_min, *args):
         raise ValueError('Enter "max" or "min" as max_or_min parameter.')
 
 
-# def crossover(x1, x2):
-#     ''' Find all instances of intersections between two lines '''
-#     x1_gt_x2 = x1 > x2
-#     cross = np.diff(x1_gt_x2)
-#     cross = np.insert(cross, 0, False)
-#     cross_indices = np.flatnonzero(cross)
-#     return cross_indices
+def crossover(x1, x2):
+    ''' Find all instances of intersections between two lines '''
+    x1_gt_x2 = x1 > x2
+    cross = np.diff(x1_gt_x2)
+    cross = np.insert(cross, 0, False)
+    cross_indices = np.flatnonzero(cross)
+    return cross_indices
