@@ -13,7 +13,7 @@ Sell 10% at TP1, 10% @ TP2, 10% @ TP3, 70% @ breakeven
 TP4
 Sell 10% at TP1, 10% @ TP2, 10% @ TP3, 70% @ TP4
 
-# Let's assume fee is 1.5%
+# Let's assume fee is .075%
 '''
 
 tp_pcts = [-1, .05, .15, .35, 2.45]
@@ -36,70 +36,22 @@ end_pct = signals['tp'].apply(lambda x: tp_pcts[x])
 signals['net_profit'] = potential_profit * end_pct
 
 # ------------------------------------------------------------------------------
+# NOTE: this is based on market orders.
 
 potential_profit = .02
-normal_fee = .02
+normal_fee = .0075
 
-# TP0
-(1.00 - potential_profit) * normal_fee
+# SL
+normal_fee * (1 + tp_pcts[0] * potential_profit)
 
-# Imagine we hit TP1
-breakeven_fee = 0.90 * normal_fee
-tp1_fee = 0.10 * (normal_fee + potential_profit/2)
-
-breakeven_fee + tp1_fee
-
-# Imagine we hit TP2
-breakeven_fee = 0.80 * normal_fee
-tp1_fee = .10 * (normal_fee + potential_profit/2)
-tp2_fee = .10 * (normal_fee + potential_profit)
-
-breakeven_fee + tp1_fee + tp2_fee
-
-# TP3
-breakeven_fee = 0.70 * normal_fee
-tp1_fee = .10 * (normal_fee + potential_profit/2)
-tp2_fee = .10 * (normal_fee + potential_profit)
-tp3_fee = .10 * (normal_fee + potential_profit*2)
-
-breakeven_fee + tp1_fee + tp2_fee + tp3_fee
-
-# TP4
-tp1_fee = .10 * (normal_fee + potential_profit/2)
-tp2_fee = .10 * (normal_fee + potential_profit)
-tp3_fee = .10 * (normal_fee + potential_profit*2)
-tp4_fee = .70 * (normal_fee + potential_profit*3)
-
-tp1_fee + tp2_fee + tp3_fee + tp4_fee
-
-# OR
 # TP1
-tp_pcts[1] * potential_profit + normal_fee
+normal_fee * (1 + tp_pcts[1] * potential_profit)
 # TP2
-tp_pcts[2] * potential_profit + normal_fee
+normal_fee * (1 + tp_pcts[2] * potential_profit)
 # TP3
-tp_pcts[3] * potential_profit + normal_fee
+normal_fee * (1 + tp_pcts[3] * potential_profit)
 # TP4
-tp_pcts[4] * potential_profit + normal_fee
-
-# ------------------------------------------------------------------------------
-
-
-
-tp1 = signals.iloc[13]
-tp1['potential_profit']
-
-
-
-
-
-
-
-
-
-
-
-
+normal_fee * (1 + tp_pcts[4] * potential_profit)
 
 
 
