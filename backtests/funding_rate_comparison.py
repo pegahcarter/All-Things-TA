@@ -1,25 +1,5 @@
 from py.functions import *
 
-tp_pcts = [-1, .05, .15, .35, 2.45]
-
-df = pd.read_csv('data/bitfinex/BTC.csv')
-
-signals = find_signals(df)
-
-tp, index_closed, index_tp_hit = determine_TP(df, signals, compound=True)
-signals['tp'] = tp
-signals['index_closed'] = index_closed
-signals['index_tp_hit'] = index_tp_hit
-signals['index_opened'] = signals.index
-signals = signals.reset_index(drop=True)
-
-potential_profit = abs(signals['price'] - signals['stop_loss']) / signals['price']
-signals['potential_profit'] = potential_profit
-end_pct = signals['tp'].apply(lambda x: tp_pcts[x])
-signals['net_profit'] = potential_profit * end_pct
-# signals['net_profit'].sum()
-
-
 '''
 TP1
 Sell 10% at TP1, 90% @ breakeven
@@ -32,24 +12,82 @@ Sell 10% at TP1, 10% @ TP2, 10% @ TP3, 70% @ breakeven
 
 TP4
 Sell 10% at TP1, 10% @ TP2, 10% @ TP3, 70% @ TP4
+
+# Let's assume fee is 1.5%
 '''
 
-tp_pct_absolute = [.05, .1, .2, 2.1]
+tp_pcts = [-1, .05, .15, .35, 2.45]
+tp_pct_absolute = [-1, .05, .1, .2, 2.1]
+
+df = pd.read_csv('data/bitfinex/BTC.csv')
+
+signals = find_signals(df)
+tp, index_closed, index_tp_hit = determine_TP(df, signals, compound=True)
+
+signals['tp'] = tp
+signals['index_closed'] = index_closed
+signals['index_tp_hit'] = index_tp_hit
+signals['index_opened'] = signals.index
+signals = signals.reset_index(drop=True)
+
+potential_profit = abs(signals['price'] - signals['stop_loss']) / signals['price']
+signals['potential_profit'] = potential_profit
+end_pct = signals['tp'].apply(lambda x: tp_pcts[x])
+signals['net_profit'] = potential_profit * end_pct
+
+# ------------------------------------------------------------------------------
+
+potential_profit = .02
+normal_fee = .02
+
+# TP0
+(1.00 - potential_profit) * normal_fee
 
 # Imagine we hit TP1
+breakeven_fee = 0.90 * normal_fee
+tp1_fee = 0.10 * (normal_fee + potential_profit/2)
+
+breakeven_fee + tp1_fee
+
+# Imagine we hit TP2
+breakeven_fee = 0.80 * normal_fee
+tp1_fee = .10 * (normal_fee + potential_profit/2)
+tp2_fee = .10 * (normal_fee + potential_profit)
+
+breakeven_fee + tp1_fee + tp2_fee
+
+# TP3
+breakeven_fee = 0.70 * normal_fee
+tp1_fee = .10 * (normal_fee + potential_profit/2)
+tp2_fee = .10 * (normal_fee + potential_profit)
+tp3_fee = .10 * (normal_fee + potential_profit*2)
+
+breakeven_fee + tp1_fee + tp2_fee + tp3_fee
+
+# TP4
+tp1_fee = .10 * (normal_fee + potential_profit/2)
+tp2_fee = .10 * (normal_fee + potential_profit)
+tp3_fee = .10 * (normal_fee + potential_profit*2)
+tp4_fee = .70 * (normal_fee + potential_profit*3)
+
+tp1_fee + tp2_fee + tp3_fee + tp4_fee
+
+# OR
+# TP1
+tp_pcts[1] * potential_profit + normal_fee
+# TP2
+tp_pcts[2] * potential_profit + normal_fee
+# TP3
+tp_pcts[3] * potential_profit + normal_fee
+# TP4
+tp_pcts[4] * potential_profit + normal_fee
+
+# ------------------------------------------------------------------------------
+
+
+
 tp1 = signals.iloc[13]
 tp1['potential_profit']
-
-
-
-
-signals.iloc[13:14]
-
-
-
-# Imagine we hit TP4
-row = signals.iloc[1]
-
 
 
 
