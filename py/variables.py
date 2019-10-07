@@ -1,3 +1,5 @@
+import ccxt
+
 # exchange = ccxt.bitfinex()
 exchange = ccxt.bitmex()
 
