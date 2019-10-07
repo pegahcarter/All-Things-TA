@@ -1,5 +1,7 @@
 from py.functions import *
 
+tp_pcts = [-1, .05, .15, .35, 2.45]
+
 df = pd.read_csv('data/bitfinex/BTC.csv')
 
 signals = find_signals(df)
@@ -11,6 +13,60 @@ signals['index_tp_hit'] = index_tp_hit
 signals['index_opened'] = signals.index
 signals = signals.reset_index(drop=True)
 
+potential_profit = abs(signals['price'] - signals['stop_loss']) / signals['price']
+signals['potential_profit'] = potential_profit
+end_pct = signals['tp'].apply(lambda x: tp_pcts[x])
+signals['net_profit'] = potential_profit * end_pct
+# signals['net_profit'].sum()
+
+
+'''
+TP1
+Sell 10% at TP1, 90% @ breakeven
+
+TP2
+Sell 10% at TP1, 10% @ TP2, 80% @ breakeven
+
+TP3
+Sell 10% at TP1, 10% @ TP2, 10% @ TP3, 70% @ breakeven
+
+TP4
+Sell 10% at TP1, 10% @ TP2, 10% @ TP3, 70% @ TP4
+'''
+
+tp_pct_absolute = [.05, .1, .2, 2.1]
+
+# Imagine we hit TP1
+tp1 = signals.iloc[13]
+tp1['potential_profit']
+
+
+
+
+signals.iloc[13:14]
+
+
+
+# Imagine we hit TP4
+row = signals.iloc[1]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------
+# Old calculations that assumed we pay a funding fee per hour
 units_borrowed = []
 for _, row in signals.iterrows():
     open_to_close = [row['index_opened']] + row['index_tp_hit'][:row['tp']]
@@ -22,13 +78,6 @@ for _, row in signals.iterrows():
     units_borrowed.append(units)
 
 units_borrowed
-
-
-
-
-
-
-
 
 # # Testing for calculations with TP4
 # signals.iloc[15:16]
