@@ -5,7 +5,7 @@ import timeit
 import requests
 import time
 import os
-from urllib.parse import urlencode
+# from urllib.parse import urlencode
 from datetime import datetime, timedelta
 from variables import *
 
@@ -32,21 +32,32 @@ def group_candles(df, interval):
     return pd.DataFrame(results, columns=columns)
 
 
+def args_to_numpy_array(fn):
+    def wrapper(*args, **kwargs):
+        args = [np.array(x) if not isinstance(x, np.ndarray) else x for x in args]
+        return fn(*args, **kwargs)
+    return wrapper
+
+
 def ema(line, span):
     ''' Returns the "exponential moving average" for a list '''
     line = pd.Series(line)
     return line.ewm(span=span, min_periods=1, adjust=False).mean()
 
 
-def sma(line, window, attribute='mean'):
+@args_to_numpy_array
+def sma(close, window=14):
     ''' Returns the "simple moving average" for a list '''
-    line = pd.Series(line)
-    return getattr(line.rolling(window=window, min_periods=1), attribute)()
+    arr = close.cumsum()
+    arr[window:] = arr[window:] - arr[:-window]
+    arr[:window] = 0
+    return arr / window
 
 
+@args_to_numpy_array
 def roc(close, n=1):
     ''' Returns the rate of change in price over n periods '''
-    close = np.array(close)
+
     pct_diff = np.zeros_like(close)
     pct_diff[n:] = np.diff(close, n) / close[:-n] * 100
     return pct_diff
@@ -103,6 +114,7 @@ def maxmin(max_or_min, *args):
         raise ValueError('Enter "max" or "min" as max_or_min parameter.')
 
 
+@args_to_numpy_array
 def crossover(x1, x2):
     ''' Find all instances of intersections between two lines '''
     x1_gt_x2 = x1 > x2
@@ -110,3 +122,9 @@ def crossover(x1, x2):
     cross = np.insert(cross, 0, False)
     cross_indices = np.flatnonzero(cross)
     return cross_indices
+
+
+# def sma(line, window, attribute='mean'):
+#     ''' Returns the "simple moving average" for a list '''
+#     line = pd.Series(line)
+#     return getattr(line.rolling(window=window, min_periods=1), attribute)()
