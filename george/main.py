@@ -1,17 +1,10 @@
 import json
 import requests as r
-import yfinance as yf
 
-tick = yf.Ticker('^NDX')
 
-data = tick.history(period='max')
-
-data
 
 
 api_key = 'oqVEAzxXwz6O9SlRhLClsxJS'
-
-
 
 url = 'https://www.oanda.com/rates/api/v2/rates/candles.json?api_key=oqVEAzxXwz6O9SlRhLClsxJS&data_set=OANDA&base=USD&quote=NAS100USD&start_time=2017-01-01&end_time=2017-01-02'
 

@@ -7,64 +7,43 @@ from v20 import spec_properties
 
 
 class Candlestick(BaseEntity):
-    """
-    The Candlestick representation
-    """
+    """ The Candlestick representation """
 
-    #
     # Format string used when generating a summary for this object
-    #
     _summary_format = ""
 
-    #
     # Format string used when generating a name for this object
-    #
     _name_format = ""
 
-    #
     # Property metadata for this object
-    #
     _properties = spec_properties.instrument_Candlestick
 
     def __init__(self, **kwargs):
-        """
-        Create a new Candlestick instance
-        """
+        """ Create a new Candlestick instance """
+
         super(Candlestick, self).__init__()
- 
-        #
+
         # The start time of the candlestick
-        #
         self.time = kwargs.get("time")
- 
-        #
+
         # The candlestick data based on bids. Only provided if bid-based
         # candles were requested.
-        #
         self.bid = kwargs.get("bid")
- 
-        #
+
         # The candlestick data based on asks. Only provided if ask-based
         # candles were requested.
-        #
         self.ask = kwargs.get("ask")
- 
-        #
+
         # The candlestick data based on midpoints. Only provided if midpoint-
         # based candles were requested.
-        #
         self.mid = kwargs.get("mid")
- 
-        #
+
         # The number of prices created during the time-range represented by the
         # candlestick.
-        #
         self.volume = kwargs.get("volume")
- 
-        #
+
         # A flag indicating if the candlestick is complete. A complete
         # candlestick is one whose ending time is not in the future.
-        #
         self.complete = kwargs.get("complete")
 
     @staticmethod
@@ -100,51 +79,32 @@ class Candlestick(BaseEntity):
 
 
 class CandlestickData(BaseEntity):
-    """
-    The price data (open, high, low, close) for the Candlestick representation.
-    """
+    """ The price data (open, high, low, close) for the Candlestick representation. """
 
-    #
     # Format string used when generating a summary for this object
-    #
     _summary_format = ""
 
-    #
     # Format string used when generating a name for this object
-    #
     _name_format = ""
 
-    #
     # Property metadata for this object
-    #
     _properties = spec_properties.instrument_CandlestickData
 
     def __init__(self, **kwargs):
-        """
-        Create a new CandlestickData instance
-        """
+        """ Create a new CandlestickData instance """
+
         super(CandlestickData, self).__init__()
- 
-        #
-        # The first (open) price in the time-range represented by the
-        # candlestick.
-        #
+
+        # The first (open) price in the time-range represented by the candlestick.
         self.o = kwargs.get("o")
- 
-        #
+
         # The highest price in the time-range represented by the candlestick.
-        #
         self.h = kwargs.get("h")
- 
-        #
+
         # The lowest price in the time-range represented by the candlestick.
-        #
         self.l = kwargs.get("l")
- 
-        #
-        # The last (closing) price in the time-range represented by the
-        # candlestick.
-        #
+
+        # The last (closing) price in the time-range represented by the candlestick.
         self.c = kwargs.get("c")
 
     @staticmethod
@@ -182,58 +142,39 @@ class CandlestickData(BaseEntity):
 
 
 class OrderBook(BaseEntity):
-    """
-    The representation of an instrument's order book at a point in time
-    """
+    """ The representation of an instrument's order book at a point in time """
 
-    #
     # Format string used when generating a summary for this object
-    #
     _summary_format = ""
 
-    #
     # Format string used when generating a name for this object
-    #
     _name_format = ""
 
-    #
     # Property metadata for this object
-    #
     _properties = spec_properties.instrument_OrderBook
 
     def __init__(self, **kwargs):
-        """
-        Create a new OrderBook instance
-        """
+        """ Create a new OrderBook instance """
+
         super(OrderBook, self).__init__()
- 
-        #
+
         # The order book's instrument
-        #
         self.instrument = kwargs.get("instrument")
- 
-        #
+
         # The time when the order book snapshot was created.
-        #
         self.time = kwargs.get("time")
- 
-        #
+
         # The price (midpoint) for the order book's instrument at the time of
         # the order book snapshot
-        #
         self.price = kwargs.get("price")
- 
-        #
+
         # The price width for each bucket. Each bucket covers the price range
         # from the bucket's price to the bucket's price + bucketWidth.
-        #
         self.bucketWidth = kwargs.get("bucketWidth")
- 
-        #
+
         # The partitioned order book, divided into buckets using a default
         # bucket width. These buckets are only provided for price ranges which
         # actually contain order or position data.
-        #
         self.buckets = kwargs.get("buckets")
 
     @staticmethod
@@ -267,48 +208,32 @@ class OrderBook(BaseEntity):
 
 
 class OrderBookBucket(BaseEntity):
-    """
-    The order book data for a partition of the instrument's prices.
-    """
+    """ The order book data for a partition of the instrument's prices. """
 
-    #
     # Format string used when generating a summary for this object
-    #
     _summary_format = ""
 
-    #
     # Format string used when generating a name for this object
-    #
     _name_format = ""
 
-    #
     # Property metadata for this object
-    #
     _properties = spec_properties.instrument_OrderBookBucket
 
     def __init__(self, **kwargs):
-        """
-        Create a new OrderBookBucket instance
-        """
+        """ Create a new OrderBookBucket instance """
+
         super(OrderBookBucket, self).__init__()
- 
-        #
+
         # The lowest price (inclusive) covered by the bucket. The bucket covers
-        # the price range from the price to price + the order book's
-        # bucketWidth.
-        #
+        # the price range from the price to price + the order book's bucketWidth.
         self.price = kwargs.get("price")
- 
-        #
+
         # The percentage of the total number of orders represented by the long
         # orders found in this bucket.
-        #
         self.longCountPercent = kwargs.get("longCountPercent")
- 
-        #
+
         # The percentage of the total number of orders represented by the short
         # orders found in this bucket.
-        #
         self.shortCountPercent = kwargs.get("shortCountPercent")
 
     @staticmethod
@@ -341,58 +266,39 @@ class OrderBookBucket(BaseEntity):
 
 
 class PositionBook(BaseEntity):
-    """
-    The representation of an instrument's position book at a point in time
-    """
+    """ The representation of an instrument's position book at a point in time """
 
-    #
     # Format string used when generating a summary for this object
-    #
     _summary_format = ""
 
-    #
     # Format string used when generating a name for this object
-    #
     _name_format = ""
 
-    #
     # Property metadata for this object
-    #
     _properties = spec_properties.instrument_PositionBook
 
     def __init__(self, **kwargs):
-        """
-        Create a new PositionBook instance
-        """
+        """ Create a new PositionBook instance """
+
         super(PositionBook, self).__init__()
- 
-        #
+
         # The position book's instrument
-        #
         self.instrument = kwargs.get("instrument")
- 
-        #
+
         # The time when the position book snapshot was created
-        #
         self.time = kwargs.get("time")
- 
-        #
+
         # The price (midpoint) for the position book's instrument at the time
         # of the position book snapshot
-        #
         self.price = kwargs.get("price")
- 
-        #
+
         # The price width for each bucket. Each bucket covers the price range
         # from the bucket's price to the bucket's price + bucketWidth.
-        #
         self.bucketWidth = kwargs.get("bucketWidth")
- 
-        #
+
         # The partitioned position book, divided into buckets using a default
         # bucket width. These buckets are only provided for price ranges which
         # actually contain order or position data.
-        #
         self.buckets = kwargs.get("buckets")
 
     @staticmethod
@@ -426,48 +332,33 @@ class PositionBook(BaseEntity):
 
 
 class PositionBookBucket(BaseEntity):
-    """
-    The position book data for a partition of the instrument's prices.
-    """
+    """ The position book data for a partition of the instrument's prices. """
 
-    #
     # Format string used when generating a summary for this object
-    #
     _summary_format = ""
 
-    #
     # Format string used when generating a name for this object
-    #
     _name_format = ""
 
-    #
     # Property metadata for this object
-    #
     _properties = spec_properties.instrument_PositionBookBucket
 
     def __init__(self, **kwargs):
-        """
-        Create a new PositionBookBucket instance
-        """
+        """ Create a new PositionBookBucket instance """
+
         super(PositionBookBucket, self).__init__()
- 
-        #
+
         # The lowest price (inclusive) covered by the bucket. The bucket covers
         # the price range from the price to price + the position book's
         # bucketWidth.
-        #
         self.price = kwargs.get("price")
- 
-        #
+
         # The percentage of the total number of positions represented by the
         # long positions found in this bucket.
-        #
         self.longCountPercent = kwargs.get("longCountPercent")
- 
-        #
+
         # The percentage of the total number of positions represented by the
         # short positions found in this bucket.
-        #
         self.shortCountPercent = kwargs.get("shortCountPercent")
 
     @staticmethod
@@ -644,9 +535,7 @@ class EntitySpec(object):
 
         parsed_body = {}
 
-        #
         # Parse responses as defined by the API specification
-        #
         if str(response.status) == "200":
             if jbody.get('instrument') is not None:
                 parsed_body['instrument'] = \
@@ -698,9 +587,7 @@ class EntitySpec(object):
                 parsed_body['errorMessage'] = \
                     jbody.get('errorMessage')
 
-        #
         # Unexpected response status
-        #
         else:
             parsed_body = jbody
 
@@ -758,9 +645,7 @@ class EntitySpec(object):
 
         parsed_body = {}
 
-        #
         # Parse responses as defined by the API specification
-        #
         if str(response.status) == "200":
             if jbody.get('price') is not None:
                 parsed_body['price'] = \
@@ -805,9 +690,7 @@ class EntitySpec(object):
                 parsed_body['errorMessage'] = \
                     jbody.get('errorMessage')
 
-        #
         # Unexpected response status
-        #
         else:
             parsed_body = jbody
 
@@ -872,9 +755,7 @@ class EntitySpec(object):
 
         parsed_body = {}
 
-        #
         # Parse responses as defined by the API specification
-        #
         if str(response.status) == "200":
             if jbody.get('prices') is not None:
                 parsed_body['prices'] = [
@@ -918,9 +799,7 @@ class EntitySpec(object):
                 parsed_body['errorMessage'] = \
                     jbody.get('errorMessage')
 
-        #
         # Unexpected response status
-        #
         else:
             parsed_body = jbody
 
@@ -977,9 +856,7 @@ class EntitySpec(object):
 
         parsed_body = {}
 
-        #
         # Parse responses as defined by the API specification
-        #
         if str(response.status) == "200":
             if jbody.get('orderBook') is not None:
                 parsed_body['orderBook'] = \
@@ -1024,9 +901,7 @@ class EntitySpec(object):
                 parsed_body['errorMessage'] = \
                     jbody.get('errorMessage')
 
-        #
         # Unexpected response status
-        #
         else:
             parsed_body = jbody
 
@@ -1083,9 +958,7 @@ class EntitySpec(object):
 
         parsed_body = {}
 
-        #
         # Parse responses as defined by the API specification
-        #
         if str(response.status) == "200":
             if jbody.get('positionBook') is not None:
                 parsed_body['positionBook'] = \
@@ -1130,13 +1003,10 @@ class EntitySpec(object):
                 parsed_body['errorMessage'] = \
                     jbody.get('errorMessage')
 
-        #
         # Unexpected response status
-        #
         else:
             parsed_body = jbody
 
         response.body = parsed_body
 
         return response
-
