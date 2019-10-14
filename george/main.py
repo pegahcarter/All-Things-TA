@@ -1,5 +1,12 @@
 import json
 import requests as r
+import yfinance as yf
+
+tick = yf.Ticker('^NDX')
+
+data = tick.history(period='max')
+
+data
 
 
 api_key = 'oqVEAzxXwz6O9SlRhLClsxJS'
