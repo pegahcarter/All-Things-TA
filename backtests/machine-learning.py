@@ -6,7 +6,7 @@ btc = pd.read_csv('data/bitfinex/BTC.csv')
 signals = pd.DataFrame()
 features = ['rsi', 'macd', 'avg_diff']
 tp_pcts = [-1, 0.05, 0.15, 0.35, 2.45, 0]
-emafast, mamid, emaslow = 5, 8, 40
+# emafast, mamid, emaslow = 5, 8, 40
 
 for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']:
     coin = ticker[:ticker.find('/')]
@@ -17,21 +17,22 @@ for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']
         for col in ['open', 'high', 'low', 'close']:
             df[col] /= btc_slice['close']
 
-    df['mamid'] = df['close'].rolling(window=mamid).mean().fillna(0)
-    df['emaslow'] = df['close'].ewm(span=emaslow, adjust=False).mean()
+    # df['mamid'] = df['close'].rolling(window=?).mean().fillna(0)
+    # df['emaslow'] = df['close'].ewm(span=emaslow, adjust=False).mean()
 
-    df['rsi'] = calc_rsi(df['close'])
-    df['macd'] = calc_macd(df['close'])
-    df['mamid_slope'] = np.subtract(df['mamid'][1:], df['mamid'][:-1]) / df['mamid'][:-1] * 100
-    df['avg_diff'] = abs(np.subtract(df['mamid'], df['emaslow'])) / df['mamid'] * 100
+    # df['rsi'] = rsi(df['close'])
+    # df['macd'] = macd(df['close'])
+    # df['mamid_slope'] = roc(df['mamid'], 1)
+    # df['mamid_slope'] = np.subtract(df['mamid'][1:], df['mamid'][:-1]) / df['mamid'][:-1] * 100
+    # df['avg_diff'] = abs(np.subtract(df['mamid'], df['emaslow'])) / df['mamid'] * 100
 
-    coin_signals = find_signals(df, window_fast=emafast, window_mid=mamid, window_slow=emaslow)
-    tp, index_closed = determine_TP(df, coin_signals, compound=True)
+    coin_signals = find_signals(df, window_fast=21, window_mid=30, window_slow=50)
+    tp, index_closed, index_tp_hit = determine_TP(df, coin_signals, compound=True)
     coin_signals['tp'] = tp
     # coin_signals['index_closed'] = index_closed
-    coin_signals['macd'] = df.iloc[coin_signals.index]['macd']
-    coin_signals['rsi'] = df.iloc[coin_signals.index]['rsi']
-    coin_signals['avg_diff'] = df.iloc[coin_signals.index]['avg_diff']
+    # coin_signals['macd'] = df.iloc[coin_signals.index]['macd']
+    # coin_signals['rsi'] = df.iloc[coin_signals.index]['rsi']
+    # coin_signals['avg_diff'] = df.iloc[coin_signals.index]['avg_diff']
 
     coin_signals['ticker'] = [ticker for i in range(len(coin_signals))]
     coin_signals = coin_signals.reset_index()
@@ -42,6 +43,12 @@ profit_pct = abs(signals['price'] - signals['stop_loss']) / signals['price']
 signals['tp'] = signals['tp'].astype('int')
 end_pct = list(map(lambda x: tp_pcts[x], signals['tp']))
 signals['net_profit'] = end_pct * profit_pct
+
+signals['net_profit'].sum()
+len(signals)
+
+
+signals.groupby('tp').count()
 
 bad_calls = signals[signals['tp'] == 0]
 good_calls = signals[signals['tp'] != 0]
