@@ -1,26 +1,28 @@
 import pandas as pd
-from variables import candle_intervals
 import logic
 from datetime import datetime
+from variables import channels
 
 
 def main():
-    for candle_abv, candle_string in candle_intervals.items():
-        if candle_string == 'Daily' and datetime.now().hour not in [6, 7, 8]:
-            break
+    for channel in channels:
+        # if channel['name'] == 'atta_insiders':
+        #     break
 
-        signal_df = logic.run(candle_abv)
-        # signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/data/signals' + candle_string + '.csv', index=False)
+        signal_df = logic.run(channel)
+        # signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/data/signals/' + channel['name'] + '.csv', index=False)
 
-        old_signal_df = pd.read_csv('C:/Users/carter/Documents/crypto/peter-signal/data/signals/' + candle_string + '.csv')
+        old_signal_df = pd.read_csv('C:/Users/carter/Documents/crypto/peter-signal/data/signals/Hourly.csv')
+        # old_signal_df = pd.read_csv('C:/Users/carter/Documents/crypto/peter-signal/data/signals/' + channel['name'] + '.csv')
         new_signals = signal_df[signal_df['date'] > max(old_signal_df['date'])]
 
         if len(new_signals) > 0:
             old_signal_df = old_signal_df.append(new_signals, ignore_index=True, sort=False)
-            old_signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/data/signals/' + candle_string + '.csv', index=False)
+            old_signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/data/signals/Hourly.csv', index=False)
+            # old_signal_df.to_csv('C:/Users/carter/Documents/crypto/peter-signal/data/signals/' + channel['name'] + '.csv', index=False)
 
             for _, row in new_signals.iterrows():
-                logic.send_signal(row, candle_string)
+                logic.send_signal(row, channel)
 
 
 if __name__ == '__main__':

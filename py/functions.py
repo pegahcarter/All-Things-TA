@@ -2,7 +2,7 @@ from utils import *
 
 
 # Determine signals from OHLCV dataframe
-def find_signals(df, window_fast=5, window_mid=20, window_slow=56):
+def find_signals(df, window_fast, window_mid, window_slow):
 
     emaslow = ema(df['close'], span=window_slow)
     mamid = df['close'].rolling(window=window_mid).mean().fillna(0)
@@ -31,7 +31,7 @@ def find_signals(df, window_fast=5, window_mid=20, window_slow=56):
         candle_mean = candle_body[i-48:i].median()
 
         if sum(body_sorted[:3]) - (4*candle_mean) > 12*window_std \
-        or candle_body[i-12:i].max() > .025 \
+        or candle_body[i-24:i].max() > .025 \
         or (high - low) / high > 0.02:
             continue
 
