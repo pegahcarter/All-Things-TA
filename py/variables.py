@@ -11,7 +11,9 @@ chat_id = '-360419097'
 test_chat_id = '-1001192596591'
 wc_id = '@worldclasstrader'
 wc_elite_id = '-1001229157672'
+atta_id = '@AllthingsTA'
 atta_insiders_id = '-1001456456400'
+
 
 channels = {
     'wc_elite': [21, 30, 50],

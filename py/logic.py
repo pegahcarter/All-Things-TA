@@ -104,5 +104,7 @@ def msg_atta(ticker, signal, stop_loss, low_price, high_price, tps):
     text += '*Disclaimer: Please consult a financial advisor before investing/trading.  This is not financial advice🚀🚀\n\n'
     text += '💰💰@Allthingstaadmin💰💰'
 
-    # requests.get(url + urlencode({'chat_id': atta_insiders_id, 'text': text}))
-    requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
+    requests.get(url + urlencode({'chat_id': atta_insiders_id, 'text': text}))
+    if ticker == 'BTC/USD' or ticker == 'ETH/Z19':
+        requests.get(url + urlencode({'chat_id': atta_id, 'text': text}))
+    # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
