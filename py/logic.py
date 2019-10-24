@@ -86,11 +86,11 @@ def msg_wc(ticker, signal, stop_loss, low_price, high_price, tps):
     text += 'Stop loss {}\n\n'.format(stop_loss)
     text += '🚨🚨🚨'
 
-    requests.get(url + urlencode({'chat_id': wc_elite_id, 'text': text}))
-
     if ticker in ['XRP/Z19', 'ETH/USD', 'LTC/Z19', 'BCH/Z19']:
         requests.get(url + urlencode({'chat_id': wc_id, 'text': msg}))
-    # requests.get(url + urlencode({'chat_id': atta_insiders_id, 'text': text}))
+
+    requests.get(url + urlencode({'chat_id': wc_elite_id, 'text': text}))
+    # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
 
 
 def msg_atta(ticker, signal, stop_loss, low_price, high_price, tps):
@@ -104,7 +104,8 @@ def msg_atta(ticker, signal, stop_loss, low_price, high_price, tps):
     text += '*Disclaimer: Please consult a financial advisor before investing/trading.  This is not financial advice🚀🚀\n\n'
     text += '💰💰@Allthingstaadmin💰💰'
 
-    requests.get(url + urlencode({'chat_id': atta_insiders_id, 'text': text}))
-    if ticker == 'BTC/USD' or ticker == 'ETH/Z19':
+    if ticker in ['BTC/USD', 'ETH/Z19']:
         requests.get(url + urlencode({'chat_id': atta_id, 'text': text}))
+
+    requests.get(url + urlencode({'chat_id': atta_insiders_id, 'text': text}))
     # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
