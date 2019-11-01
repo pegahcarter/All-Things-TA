@@ -7,6 +7,7 @@ def find_signals(df, window_fast, window_mid, window_slow):
     emaslow = ema(df['close'], span=window_slow)
     mamid = df['close'].rolling(window=window_mid).mean().fillna(0)
     emafast = ema(df['close'], span=window_fast)
+    mabase = df['close'].rolling(window=200).mean().fillna(0)
 
     mamid_emaslow_diff = abs(mamid - emaslow) / mamid
 
@@ -36,11 +37,11 @@ def find_signals(df, window_fast, window_mid, window_slow):
             continue
 
         if price > emafast[i]:
-            if mamid[i] > emaslow[i] and relative_strength[i] > 50:
+            if mamid[i] > emaslow[i] and relative_strength[i] > 50 and price > mabase[i]:
                 signal = 'Long'
                 stop_loss = df['low'][i-10:i].min()
         else:   # price < emafast[i]
-            if mamid[i] < emaslow[i] and relative_strength[i] < 50:
+            if mamid[i] < emaslow[i] and relative_strength[i] < 50 and price < mabase[i]:
                 signal = 'Short'
                 stop_loss = df['high'][i-10:i].max()
 
