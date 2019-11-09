@@ -32,26 +32,31 @@ def send_signal(row, channel):
     ticker = row['ticker']
     signal = row['signal']
 
-    low_price, high_price = buy_range(price)
+    if channel == 'wc_elite':
+        low_price, high_price = buy_range(price, diff=.0015)
+    else:  # channel == 'ata_insiders'
+        price *= .9998
+        low_price, high_price = buy_range(price, diff=.00121)
+
 
     diff = price - stop_loss
     tps = [price + diff/2., price + diff, price + diff*2, price + diff*3]
 
-    if 'XRP' in ticker:
-        x = 8
-    elif 'EOS' in ticker:
-        x = 7
-    elif 'LTC' in ticker:
-        x = 6
-    elif 'BCH' in ticker or ('ETH' in ticker and 'USD' not in ticker):
-        x = 5
-    elif ticker == 'BTC/USD':
-        x = 0
-    elif ticker == 'ETH/USD':
+    if ticker == 'ETH/USD':
         low_price = format(low_price, '.2f')
         high_price = format(high_price, '.2f')
         tps = [format(tp, '.2f') for tp in tps]
         stop_loss = format(stop_loss, '.2f')
+    elif ticker == 'BTC/USD':
+        x = 0
+    elif 'BCH' in ticker or 'ETH' in ticker:
+        x = 5
+    elif 'LTC' in ticker:
+        x = 6
+    elif 'EOS' in ticker:
+        x = 7
+    elif 'XRP' in ticker:
+        x = 8
 
     if channel == 'wc_elite':
         if ticker != 'ETH/USD':
@@ -70,7 +75,7 @@ def send_signal(row, channel):
         msg_atta(ticker, signal, stop_loss, low_price, high_price, tps)
 
 
-def buy_range(price, diff=.0015):
+def buy_range(price, diff=0):
     low_price = price * (1. - diff)
     high_price = price * (1. + diff)
     return low_price, high_price
