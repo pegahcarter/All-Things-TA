@@ -89,3 +89,15 @@ reward/risk = 600 / 200 = __3.00__
   - tp2_pct = tp1_pct + tp2
   - tp3_pct = tp2_pct + (2 * tp3)
   - tp4_pct = tp3_pct + (3 * tp4)
+
+
+
+### 2019.11.05
+#### Take Profit levels for ATTA
+  - R/R for 20-20-20-40 if closed at each TP
+    - Assume we enter @ 10000 and SL @ 9800
+    - TP0: -1   ->  (9800 - 10000) * 1
+    - TP1: 0.1  -> (10100 - 10000) * 0.2
+    - TP2: 0.3  -> tp1 + (10200 - 10000) * 0.2
+    - TP3: 0.8  -> tp1 + tp2 + (10400 - 10000) * 0.2
+    - TP4: 2.4  -> tp1 + tp2 + tp3  + (10600 - 10000) * 0.4     

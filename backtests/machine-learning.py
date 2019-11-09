@@ -6,7 +6,6 @@ btc = pd.read_csv('data/bitfinex/BTC.csv')
 signals = pd.DataFrame()
 features = ['rsi', 'macd', 'avg_diff']
 tp_pcts = [-1, 0.05, 0.15, 0.35, 2.45, 0]
-# emafast, mamid, emaslow = 5, 8, 40
 
 for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']:
     coin = ticker[:ticker.find('/')]
@@ -17,22 +16,9 @@ for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']
         for col in ['open', 'high', 'low', 'close']:
             df[col] /= btc_slice['close']
 
-    # df['mamid'] = df['close'].rolling(window=?).mean().fillna(0)
-    # df['emaslow'] = df['close'].ewm(span=emaslow, adjust=False).mean()
-
-    # df['rsi'] = rsi(df['close'])
-    # df['macd'] = macd(df['close'])
-    # df['mamid_slope'] = roc(df['mamid'], 1)
-    # df['mamid_slope'] = np.subtract(df['mamid'][1:], df['mamid'][:-1]) / df['mamid'][:-1] * 100
-    # df['avg_diff'] = abs(np.subtract(df['mamid'], df['emaslow'])) / df['mamid'] * 100
-
-    coin_signals = find_signals(df, window_fast=21, window_mid=30, window_slow=50)
-    tp, index_closed, index_tp_hit = determine_TP(df, coin_signals, compound=True)
+    coin_signals = find_signals(df, 21, 30, 50)
+    tp = determine_TP(df, coin_signals)
     coin_signals['tp'] = tp
-    # coin_signals['index_closed'] = index_closed
-    # coin_signals['macd'] = df.iloc[coin_signals.index]['macd']
-    # coin_signals['rsi'] = df.iloc[coin_signals.index]['rsi']
-    # coin_signals['avg_diff'] = df.iloc[coin_signals.index]['avg_diff']
 
     coin_signals['ticker'] = [ticker for i in range(len(coin_signals))]
     coin_signals = coin_signals.reset_index()
@@ -43,19 +29,46 @@ profit_pct = abs(signals['price'] - signals['stop_loss']) / signals['price']
 signals['tp'] = signals['tp'].astype('int')
 end_pct = list(map(lambda x: tp_pcts[x], signals['tp']))
 signals['net_profit'] = end_pct * profit_pct
+signals = signals.drop('index', axis=1)
 
-signals['net_profit'].sum()
-len(signals)
-
-
-signals.groupby('tp').count()
-
-bad_calls = signals[signals['tp'] == 0]
-good_calls = signals[signals['tp'] != 0]
-long_calls = signals[signals['signal'] == 'Long']
-short_calls = signals[signals['signal'] == 'Short']
+signals['date'] = pd.to_datetime(signals['date'])
+signals.index = signals['date']
 
 
+df_2018 = signals[signals['date'] < '2019-01-01 00:00:00']
+df_2019 = signals[signals['date'] >= '2019-01-01 00:00:00']
+
+df_2018.groupby(pd.Grouper(freq='M'))['net_profit'].sum()
+
+df_2019.groupby(pd.Grouper(freq='M'))['net_profit'].sum()
+
+
+date
+01-18:   0.050
+02-18:   0.318
+03-18:   0.340
+04-18:   0.253
+05-18:   0.216
+06-18:   0.029
+07-18:   0.052
+08-18:   0.319
+09-18:  -0.021
+10-18:   0.101
+11-18:   0.195
+12-18:   0.043
+01-19:   0.065
+02-19:   0.171
+03-19:   0.047
+04-19:   0.342
+05-19:   0.310
+06-19:   0.598
+07-19:   0.049
+08-19:   0.536
+09-19:   0.363
+10-19:  -0.232
+
+
+signals['date'][0]
 
 
 
