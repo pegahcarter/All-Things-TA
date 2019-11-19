@@ -101,3 +101,32 @@ reward/risk = 600 / 200 = __3.00__
     - TP2: 0.3  -> tp1 + (10200 - 10000) * 0.2
     - TP3: 0.8  -> tp1 + tp2 + (10400 - 10000) * 0.2
     - TP4: 2.4  -> tp1 + tp2 + tp3  + (10600 - 10000) * 0.4     
+
+
+
+### 2019.11.18
+#### TP ERROR?!?
+  - Realized TP2 and on assumes we profit based on 100% of our trade value
+  - Selling 20% at TP1 means we're only making profit on 80% our trade value if we close
+      at TP2...
+
+### Correct TP Logic
+
+  - TPS: 0.5:1, 1:1, 2:1, 3:1
+  - price = 10000
+  - pct = .03
+
+  - Example 1:
+    - tp1 = price * pct * 0.5 * .25 * 1.0  = 37.50
+    - tp2 = price * pct * 1.0 * .25 * .75  = 56.25
+    - tp3 = price * pct * 2.0 * .25 * .50  = 75.00
+    - tp4 = price * pct * 3.0 * .25 * .25  = 56.25
+  - Example 2:
+    - sell_pct = [.25, .25, .25, .25]
+    - tps = [.5, 1, 2, 3]
+    - tp1 = pct * tps[0] * (1 - sum(sell_pct[:0])) * sell_pct[0]
+    - tp2 = pct * tps[1] * (1 - sum(sell_pct[:1])) * sell_pct[1]
+    - tp3 = pct * tps[2] * (1 - sum(sell_pct[:2])) * sell_pct[2]
+    - tp4 = pct * tps[3] * (1 - sum(sell_pct[:3])) * sell_pct[3]
+
+  - tp1 + tp2 + tp3 + tp4 = 225
