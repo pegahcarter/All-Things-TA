@@ -7,7 +7,11 @@ from py.functions import *
 from backtests.simulations.portfolio import Portfolio
 
 btc = pd.read_csv('data/bitfinex/BTC.csv')
-signals = pd.read_csv('signals.csv')
+# signals = pd.read_csv('signals.csv')
+signals = pd.read_csv('data/backtests.csv')
+
+signals.head()
+
 
 portfolio = Portfolio()
 for i, date in enumerate(btc['date']):
@@ -18,15 +22,15 @@ for i, date in enumerate(btc['date']):
 
     if sum(signals['index_closed'] == i):
         for position in list(filter(lambda x: x['index_closed'] == i, portfolio.positions)):
-            portfolio.close_position(x_leverage=20, **position)
+            portfolio.close_position(x_leverage=5, **position)
 
 
 for position in portfolio.positions:
-    portfolio.close_position(x_leverage=20, **position)
+    portfolio.close_position(x_leverage=5, **position)
 
 
 portfolio.available_capital
-
+portfolio
 
 
 20x @ 5%

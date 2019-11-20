@@ -1,4 +1,4 @@
-from utils import *
+from py.utils import *
 
 
 # Determine signals from OHLCV dataframe
@@ -61,28 +61,36 @@ def determine_TP(df, signals, cushion=0, compound=False):
     index_closed_lst = []
     index_tp_hit_lst = []
 
-    for index, row in signals.iterrows():
-        if row['signal'] == 'Long':
-            l_bounds = df['low']
-            u_bounds = df['high']
-        else:   # signal == 'Short'
-            l_bounds = -df['high']
-            u_bounds = -df['low']
-            cushion *= -1
-            row['price'] *= -1
-            row['stop_loss'] *= -1
+    low = df['low'].tolist()
+    low_inverse = (-df['low']).tolist()
+    high = df['high'].tolist()
+    high_inverse = (-df['high']).tolist()
 
-        row['stop_loss'] *= (1. + cushion)
-        if row['stop_loss'] > row['price']:
+
+    for index, row in signals.iterrows():
+        price = row['price']
+        stop_loss = row['stop_loss']
+        if row['signal'] == 'Long':
+            l_bounds = low
+            u_bounds = high
+        else:   # signal == 'Short'
+            l_bounds = high_inverse
+            u_bounds = low_inverse
+            cushion *= -1
+            price *= -1
+            stop_loss *= -1
+
+        stop_loss *= (1. + cushion)
+        if stop_loss > price:
             tp_lst.append(5)
             index_closed_lst.append(index)
         else:
-            diff = row['price'] - row['stop_loss']
+            diff = price - stop_loss
 
-            tp1 = row['price'] + diff/2.
-            tp2 = row['price'] + diff
-            tp3 = row['price'] + diff*2
-            tp4 = row['price'] + diff*3
+            tp1 = price + diff/2.
+            tp2 = price + diff
+            tp3 = price + diff*2
+            tp4 = price + diff*3
 
             tp_targets = [tp1, tp2, tp3, tp4]
             index_tp_hit = [0, 0, 0, 0]
@@ -92,10 +100,10 @@ def determine_TP(df, signals, cushion=0, compound=False):
                 while tp != 4 and u_bounds[x] > tp_targets[tp]:
                     index_tp_hit[tp] = x
                     tp += 1
-                if tp == 4 or l_bounds[x] < row['stop_loss']:
+                if tp == 4 or l_bounds[x] < stop_loss:
                     break
                 if tp > 0:
-                    row['stop_loss'] = row['price']
+                    stop_loss = price
 
             tp_lst.append(tp)
             index_closed_lst.append(x)

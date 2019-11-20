@@ -5,6 +5,8 @@ import numpy as np
 from datetime import datetime, timedelta
 import time
 import ccxt
+from py.utils import *
+
 
 
 gc = pygsheets.authorize(service_file='C:/Users/carter/Documents/crypto/peter-signal/credentials.json')
@@ -33,8 +35,7 @@ test1_a
 test1_b = [foo() for i in range(3)]
 test1_b
 
-# ------------------------------------------------------------------------------
-
+# --------------------------------------------------------------------------------
 def foo2():
     data = [[1,1,1], [2,3,4], [10, 100, 1000]]
     return pd.DataFrame(data, columns=['col1', 'col2', 'col3'])
@@ -69,23 +70,7 @@ messages = list(filter(lambda x: 'channel_post' in x.keys(), data))
 url = 'https://api.telegram.org/bot862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8/sendMessage?'
 requests.get(url + urlencode({'chat_id': '@worldclasstrader', 'text': 'Test'}))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# --------------------------------------------------------------------------------
 df = pd.read_csv(os.getcwd() + '/data/optimize_moving_avg.csv')
 
 df.head()
@@ -101,3 +86,43 @@ df['sum'] = df.drop('average', axis=1).sum(axis=1)
 df2 = df[['average', 'mean', 'sum']]
 df2 = df2.sort_values('sum', ascending=False).reset_index(drop=True)
 df2[:60]
+
+# --------------------------------------------------------------------------------
+df = pd.read_csv('data/bitfinex/BTC.csv')
+
+%timeit prices = df['close'].to_numpy()
+%timeit prices = np.array(df['close'])
+
+
+
+df['test'] = numpy_ewm_alpha_v2(df['close'], 14)
+
+df.iloc[-14:]
+
+
+
+
+def numpy_ewm_alpha_v2(data, window):
+    alpha = 2. / (window + 1)
+    wghts = (1-alpha)**np.arange(window)
+    wghts /= wghts.sum()
+    out = np.convolve(data,wghts)
+    out[:window-1] = np.nan
+    return out[:data.size]
+
+
+def ewma(data, window):
+    a = 2. / (window + 1)
+    a_inverse = 1 - a
+    n = data.shape[0]
+
+    pows = a_inverse**(np.arange(n+1))
+
+    scale_arr = 1. / pows[::-1]
+    offset = data[0] * pows[1:]
+    pw0 = a * a_inverse**(n-1)
+
+    mult = data * pw0 * scale_arr
+    cumsums = mult.cumsum()
+    results = offset + cumsums*scale_arr[::-1]
+    return results

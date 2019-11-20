@@ -7,7 +7,7 @@ import time
 import os
 from urllib.parse import urlencode
 from datetime import datetime, timedelta
-from variables import *
+from py.variables import *
 
 
 def group_candles(df, interval):
@@ -128,3 +128,29 @@ def crossover(x1, x2):
 #     ''' Returns the "simple moving average" for a list '''
 #     line = pd.Series(line)
 #     return getattr(line.rolling(window=window, min_periods=1), attribute)()
+
+def profit_per_tp(*tp_pcts):
+    '''
+    Take-profit levels:  .5:1, 1:1, 2:1, 3:1
+    '''
+
+    profit_levels = [0.5, 1, 2, 3]
+    results = [0 for _ in tp_pcts]
+
+    tp_pcts = np.divide(tp_pcts, 100)
+
+    for x in range(len(tp_pcts)):
+        results[x] = tp_pcts[x] * profit_levels[x] * sum(tp_pcts[x:])
+        if x > 0:
+            results[x] += results[x - 1]
+
+    results.insert(0, -1)
+    return results
+
+
+def net_profit(signals, tp_pcts):
+
+    tp_profit_pcts = profit_per_tp(*tp_pcts.values())
+    trade_profits = list(map(lambda x: x['pct'] * tp_profit_pcts[x['tp']], signals))
+
+    return sum(trade_profits)
