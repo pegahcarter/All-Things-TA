@@ -32,20 +32,25 @@ def group_candles(df, interval):
     return pd.DataFrame(results, columns=columns)
 
 
-def args_to_numpy_array(fn):
-    def wrapper(*args, **kwargs):
-        args = [np.array(x) if not isinstance(x, np.ndarray) else x for x in args]
-        return fn(*args, **kwargs)
-    return wrapper
+def args_to_dtype(dtype):
+    ''' Convert arguments in a function to a specific data type, depending on what
+        actions will be done with the arguments '''
+
+    def format_args(fn):
+        def wrapper(*args, **kwargs):
+            args = [dtype(x) if type(x) != dtype else x for x in args]
+            return fn(*args, **kwargs)
+        return wrapper
+    return format_args
 
 
-def ema(line, span):
+@args_to_dtype(pd.Series)
+def ema(line, span=2):
     ''' Returns the "exponential moving average" for a list '''
-    line = pd.Series(line)
-    return line.ewm(span=span, min_periods=1, adjust=False).mean()
+    return line.ewm(span=span, min_periods=1, adjust=False).mean().tolist()
 
 
-@args_to_numpy_array
+@args_to_dtype(np.array)
 def sma(close, window=14):
     ''' Returns the "simple moving average" for a list '''
     arr = close.cumsum()
@@ -53,8 +58,12 @@ def sma(close, window=14):
     arr[:window] = 0
     return arr / window
 
+# def sma(line, window, attribute='mean'):
+#     line = pd.Series(line)
+#     return getattr(line.rolling(window=window, min_periods=1), attribute)()
 
-@args_to_numpy_array
+
+@args_to_dtype(np.array)
 def roc(close, n=1):
     ''' Returns the rate of change in price over n periods '''
 
@@ -70,6 +79,7 @@ def macd(close, fast=8, slow=21):
     return (ema_fast/ema_slow - 1) * 100
 
 
+@args_to_dtype(pd.Series)
 def rsi(close, n=14):
     ''' Returns the "relative strength index", which is used to measure the velocity
     and magnitude of directional price movement.
@@ -101,7 +111,7 @@ def rsi(close, n=14):
 
         rsi[i] = 100. - 100./(1. + up/down)
 
-    return rsi
+    return list(rsi)
 
 
 def maxmin(max_or_min, *args):
@@ -114,7 +124,7 @@ def maxmin(max_or_min, *args):
         raise ValueError('Enter "max" or "min" as max_or_min parameter.')
 
 
-@args_to_numpy_array
+@args_to_dtype(np.array)
 def crossover(x1, x2):
     ''' Find all instances of intersections between two lines '''
     x1_gt_x2 = x1 > x2
@@ -123,11 +133,6 @@ def crossover(x1, x2):
     cross_indices = np.flatnonzero(cross)
     return cross_indices
 
-
-# def sma(line, window, attribute='mean'):
-#     ''' Returns the "simple moving average" for a list '''
-#     line = pd.Series(line)
-#     return getattr(line.rolling(window=window, min_periods=1), attribute)()
 
 def profit_per_tp(*tp_pcts):
     '''

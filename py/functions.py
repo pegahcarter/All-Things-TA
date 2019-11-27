@@ -11,21 +11,23 @@ def find_signals(df, window_fast, window_mid, window_slow, dtype=None):
 
     mamid_emaslow_diff = abs(mamid - emaslow) / mamid
 
-    candle_body = abs(df['close'] - df['open']) / df['open']
+    candle_body = (abs(df['close'] - df['open']) / df['open']).tolist()
     candle_std = candle_body.rolling(168).std()
     relative_strength = rsi(df['close'])
 
-    intersections = crossover(emafast, mamid)
+    close = df['close'].tolist()
+    high = df['high'].tolist()
+    low = df['low'].tolist()
+
     signals = {}
 
-    for i in intersections:
+    for i in crossover(emafast, mamid):
         if i < 48:
             continue
 
-        signal = None
-        price = df['close'][i]
-        high = df['high'][i]
-        low = df['low'][i]
+        price = close[i]
+        high = high[i]
+        low = low[i]
 
         body_sorted = sorted(candle_body[i-48:i], reverse=True)
         window_std = candle_std[i-48:i].mean()
@@ -36,14 +38,16 @@ def find_signals(df, window_fast, window_mid, window_slow, dtype=None):
         or (high - low) / high > 0.02:
             continue
 
+        signal = None
+
         if price > emafast[i]:
             if mamid[i] > emaslow[i] and relative_strength[i] > 50 and price > mabase[i]:
-                signal = 'Long'
-                stop_loss = df['low'][i-10:i].min()
+                signal = 'long'
+                stop_loss = min(low[i-10:i])
         else:   # price < emafast[i]
             if mamid[i] < emaslow[i] and relative_strength[i] < 50 and price < mabase[i]:
-                signal = 'Short'
-                stop_loss = df['high'][i-10:i].max()
+                signal = 'short'
+                stop_loss = max(high[i-10:i])
 
         if signal and 0.0075 < abs(1 - stop_loss/price) < .04 and mamid_emaslow_diff[i] > .001:
             signals[i] = {'date': df['date'][i],
@@ -59,8 +63,8 @@ def find_signals(df, window_fast, window_mid, window_slow, dtype=None):
 
 # Figure out which TP level is hit
 def determine_TP(df, signals, cushion=0, compound=False):
+
     tp_lst = []
-    index_closed_lst = []
     index_tp_hit_lst = []
 
     low = df['low'].tolist()
@@ -68,52 +72,45 @@ def determine_TP(df, signals, cushion=0, compound=False):
     high = df['high'].tolist()
     high_inverse = (-df['high']).tolist()
 
-
     for index, row in signals.iterrows():
         price = row['price']
         stop_loss = row['stop_loss']
-        if row['signal'] == 'Long':
+        if row['signal'] == 'long':
             l_bounds = low
             u_bounds = high
-        else:   # signal == 'Short'
+        else:   # signal == 'short'
             l_bounds = high_inverse
             u_bounds = low_inverse
             cushion *= -1
             price *= -1
             stop_loss *= -1
 
-        if stop_loss > price:
-            tp_lst.append(5)
-            index_closed_lst.append(index)
-        else:
-            diff = price - stop_loss
+        diff = price - stop_loss
+        # stop_loss *= (1. + cushion)
 
-            tp1 = price + diff/2.
-            tp2 = price + diff
-            tp3 = price + diff*2
-            tp4 = price + diff*3
+        tp1 = price + diff/2.
+        tp2 = price + diff
+        tp3 = price + diff*2
+        tp4 = price + diff*3
 
-            stop_loss *= (1. + cushion)
+        tp_targets = [tp1, tp2, tp3, tp4]
+        index_tp_hit = [0, 0, 0, 0]
+        tp = 0
 
-            tp_targets = [tp1, tp2, tp3, tp4]
-            index_tp_hit = [0, 0, 0, 0]
-            tp = 0
+        for x in range(index+1, len(df)):
+            while tp != 4 and u_bounds[x] > tp_targets[tp]:
+                index_tp_hit[tp] = x
+                tp += 1
+            if tp == 4 or l_bounds[x] < stop_loss:
+                break
+            if tp > 0:
+                stop_loss = price
 
-            for x in range(index+1, len(df)):
-                while tp != 4 and u_bounds[x] > tp_targets[tp]:
-                    index_tp_hit[tp] = x
-                    tp += 1
-                if tp == 4 or l_bounds[x] < stop_loss:
-                    break
-                if tp > 0:
-                    stop_loss = price
-
-            tp_lst.append(tp)
-            index_closed_lst.append(x)
-            index_tp_hit_lst.append(index_tp_hit)
+        tp_lst.append(tp)
+        index_tp_hit_lst.append(index_tp_hit)
 
     if compound:
-        return tp_lst, index_closed_lst, index_tp_hit_lst
+        return tp_lst, index_tp_hit_lst
     else:
         return tp_lst
 
