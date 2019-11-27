@@ -141,3 +141,11 @@ reward/risk = 600 / 200 = __3.00__
   - Close % of trade at each TP
   - Use a # for % of trade open?
   - Changes per TP
+
+
+### 2019.11.27
+#### Train of thought to execute backtest improvement
+- Optimize fetch_signals & add functions from fx-signal
+- Review Bitmex fees
+- Super simple compounding
+  - Use TP - 1 for indexing closing position

@@ -62,7 +62,7 @@ def find_signals(df, window_fast, window_mid, window_slow, dtype=None):
 
 
 # Figure out which TP level is hit
-def determine_TP(df, signals, cushion=0, compound=False):
+def determine_TP(df, signals, cushion=0):
 
     tp_lst = []
     index_tp_hit_lst = []
@@ -109,10 +109,8 @@ def determine_TP(df, signals, cushion=0, compound=False):
         tp_lst.append(tp)
         index_tp_hit_lst.append(index_tp_hit)
 
-    if compound:
-        return tp_lst, index_tp_hit_lst
-    else:
-        return tp_lst
+    return tp_lst, index_tp_hit_lst
+
 
 
 # ------------------------------------------------------------------------------

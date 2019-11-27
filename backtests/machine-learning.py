@@ -37,11 +37,8 @@ signals.index = signals['date']
 
 df_2018 = signals[signals['date'] < '2019-01-01 00:00:00']
 df_2019 = signals[signals['date'] >= '2019-01-01 00:00:00']
-
 df_2018.groupby(pd.Grouper(freq='M'))['net_profit'].sum()
-
 df_2019.groupby(pd.Grouper(freq='M'))['net_profit'].sum()
-
 
 date
 01-18:   0.050
