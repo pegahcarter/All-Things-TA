@@ -7,7 +7,7 @@ import time
 import os
 from urllib.parse import urlencode
 from datetime import datetime, timedelta
-from py.variables import *
+from variables import *
 
 
 def group_candles(df, interval):

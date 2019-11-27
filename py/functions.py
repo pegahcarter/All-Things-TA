@@ -1,18 +1,19 @@
-from py.utils import *
+from utils import *
 
 
-# Determine signals from OHLCV dataframe
-def find_signals(df, window_fast, window_mid, window_slow, dtype=None):
+def find_signals(df, window_fast, window_mid, window_slow):
+    ''' Determine signals from OHLCV dataframe '''
 
     emaslow = ema(df['close'], span=window_slow)
-    mamid = df['close'].rolling(window=window_mid).mean().fillna(0)
+    mamid = sma(df['close'], window=window_mid)
     emafast = ema(df['close'], span=window_fast)
-    mabase = df['close'].rolling(window=200).mean().fillna(0)
+    mabase = sma(df['close'], window=200)
 
     mamid_emaslow_diff = abs(mamid - emaslow) / mamid
 
-    candle_body = (abs(df['close'] - df['open']) / df['open']).tolist()
-    candle_std = candle_body.rolling(168).std()
+    candle_body = abs(df['close'] - df['open']) / df['open']
+    candle_std = candle_body.rolling(168).std().tolist()
+    candle_body = candle_body.tolist()
     relative_strength = rsi(df['close'])
 
     close = df['close'].tolist()
@@ -25,19 +26,16 @@ def find_signals(df, window_fast, window_mid, window_slow, dtype=None):
         if i < 48:
             continue
 
-        price = close[i]
-        high = high[i]
-        low = low[i]
-
         body_sorted = sorted(candle_body[i-48:i], reverse=True)
-        window_std = candle_std[i-48:i].mean()
-        candle_mean = candle_body[i-48:i].median()
+        window_std = np.mean(candle_std[i-48:i])
+        candle_mean = np.median(candle_body[i-48:i])
 
-        if sum(body_sorted[:3]) - (4*candle_mean) > 12*window_std \
-        or candle_body[i-24:i].max() > .025 \
-        or (high - low) / high > 0.02:
+        if (high[i] - low[i]) / high[i] > 0.02 \
+        or max(candle_body[i-24:i]) > .025 \
+        or sum(body_sorted[:3]) - (4*candle_mean) > 12*window_std:
             continue
 
+        price = close[i]
         signal = None
 
         if price > emafast[i]:
@@ -55,14 +53,11 @@ def find_signals(df, window_fast, window_mid, window_slow, dtype=None):
                           'price': price,
                           'stop_loss': stop_loss}
 
-    if dtype == 'pd.DataFrame':
-        return pd.DataFrame.from_dict(signals, orient='index')
-    else:
-        return signals
+    return pd.DataFrame.from_dict(signals, orient='index')
 
 
-# Figure out which TP level is hit
 def determine_TP(df, signals, cushion=0):
+    ''' Figure out which TP level is hit '''
 
     tp_lst = []
     index_tp_hit_lst = []
@@ -116,8 +111,9 @@ def determine_TP(df, signals, cushion=0):
 # ------------------------------------------------------------------------------
 # Old functions
 
-# Find intersections indices between two lines
 def find_intersections(line1, line2):
+    ''' Find intersections indices between two lines '''
+
     line1_gt_line2 = line1 > line2
     intersections = []
     current_val = line1_gt_line2[0]
@@ -130,16 +126,18 @@ def find_intersections(line1, line2):
     return intersections
 
 
-# Return outcome of TP in %
 def net_profit_pct(tp_pcts, tps_hit, prices, stop_losses):
+    ''' Return outcome of TP in % '''
+
     profit_pct = abs(prices - stop_losses) / prices
     end_pct = list(map(lambda x: tp_pcts[x], tps_hit))
     return profit_pct * end_pct
 
 
-# TODO: conceptually this is very similar to find_intersections().  Is there a
-# reasonable way to combine them into one function?
 def drop_extra_signals(signals, gap=0):
+    ''' TODO: conceptually this is very similar to find_intersections().  Is
+    there a reasonable way to combine them into one function? '''
+
     last_signal = 0
     clean_signals = []
     for signal in signals.index:
@@ -149,8 +147,8 @@ def drop_extra_signals(signals, gap=0):
     return signals.drop([i for i in signals.index if i not in clean_signals])
 
 
-# Loop to update CSV's with recent OHLCV data
 def refresh_ohlcv(file, offline=False):
+    ''' Loop to update CSVs with recent OHLCV data '''
 
     df = pd.read_csv('prices/' + file)
     if 'signal' in df.columns:
