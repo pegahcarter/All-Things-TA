@@ -13,7 +13,7 @@ def run(averages):
 
         df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
 
-        signals = find_signals(df, *averages)
+        signals = find_signals(df, *averages, dtype='pd.DataFrame')
         if 'Z19' in ticker: ticker = ticker[:3] + '/Z19'
 
         if len(signals) > 0:

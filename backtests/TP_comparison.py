@@ -27,27 +27,14 @@ for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']
 signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
 signals = signals.sort_values('profit_pct')
 signals.groupby('tp').count()['date'] / len(signals)
-tp_pcts = [-1, 0.05, 0.14, 0.26, 1.24, 0]
+tp_pcts = profit_per_tp(*[10, 10, 10, 70])
 end_pct = list(map(lambda x: tp_pcts[x], signals['tp']))
 signals['net_profit'] = end_pct * signals['profit_pct']
 signals['net_profit'].sum()
 
-# Current
-1181, 3.8
-
-0    340
-1    414
-2    168
-3     67
-4    192
-
-profit_per_tp(*[10, 10, 10, 70])
-
 # Ignoring a lot
 len(signals)
 
-
-signals
 results = {}
 pcts = list(range(0, 101, 10))
 pcts *= 4
@@ -55,7 +42,6 @@ perms = permutations(pcts, 4)
 # good_results = [x for x in perms if sum(x) == 100 and len(x) == 4]
 good_results = [x for x in perms if sum(x) == 100]
 tp_combos = set(good_results)
-# tp_combos.add((25, 25, 25, 25))
 
 for tp_combo in tp_combos:
     tp_pcts = profit_per_tp(*tp_combo)
@@ -64,9 +50,10 @@ for tp_combo in tp_combos:
     signals[col] = signals['tp'].map(lambda x: tp_pcts[x]) * signals['profit_pct']
     results[col] = signals[col].sum()
 
-    sorted(results.items(), key=lambda x: x[1], reverse=True)
 
+sorted(results.items(), key=lambda x: x[1], reverse=True)
 list(filter(lambda x: '10-10-10-70' in x, results.items()))
+
 
 
 

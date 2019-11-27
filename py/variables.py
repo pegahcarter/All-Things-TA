@@ -15,9 +15,4 @@ atta_id = '@AllthingsTA'
 atta_insiders_id = '-1001456456400'
 
 
-channels = {
-    'wc_elite': [21, 30, 50],
-    'atta_insiders': [8, 25, 50]
-}
-
 tickers = ['BTC/USD', 'ETH/USD', 'ETHZ19', 'LTCZ19', 'XRPZ19', 'BCHZ19', 'EOSZ19']

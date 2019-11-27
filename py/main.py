@@ -1,7 +1,12 @@
 import pandas as pd
 import logic
 from datetime import datetime
-from variables import channels
+
+
+channels = {
+    'wc_elite': [21, 30, 50],
+    'atta_insiders': [8, 25, 50]
+}
 
 
 def main():

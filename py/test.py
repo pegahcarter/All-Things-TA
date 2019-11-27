@@ -90,17 +90,7 @@ df2[:60]
 # --------------------------------------------------------------------------------
 df = pd.read_csv('data/bitfinex/BTC.csv')
 
-%timeit prices = df['close'].to_numpy()
-%timeit prices = np.array(df['close'])
-
-
-
 df['test'] = numpy_ewm_alpha_v2(df['close'], 14)
-
-df.iloc[-14:]
-
-
-
 
 def numpy_ewm_alpha_v2(data, window):
     alpha = 2. / (window + 1)

@@ -2,7 +2,7 @@ from py.utils import *
 
 
 # Determine signals from OHLCV dataframe
-def find_signals(df, window_fast, window_mid, window_slow):
+def find_signals(df, window_fast, window_mid, window_slow, dtype=None):
 
     emaslow = ema(df['close'], span=window_slow)
     mamid = df['close'].rolling(window=window_mid).mean().fillna(0)
@@ -51,8 +51,10 @@ def find_signals(df, window_fast, window_mid, window_slow):
                           'price': price,
                           'stop_loss': stop_loss}
 
-    signals = pd.DataFrame.from_dict(signals, orient='index')
-    return signals
+    if dtype == 'pd.DataFrame':
+        return pd.DataFrame.from_dict(signals, orient='index')
+    else:
+        return signals
 
 
 # Figure out which TP level is hit
@@ -80,7 +82,6 @@ def determine_TP(df, signals, cushion=0, compound=False):
             price *= -1
             stop_loss *= -1
 
-        stop_loss *= (1. + cushion)
         if stop_loss > price:
             tp_lst.append(5)
             index_closed_lst.append(index)
@@ -91,6 +92,8 @@ def determine_TP(df, signals, cushion=0, compound=False):
             tp2 = price + diff
             tp3 = price + diff*2
             tp4 = price + diff*3
+
+            stop_loss *= (1. + cushion)
 
             tp_targets = [tp1, tp2, tp3, tp4]
             index_tp_hit = [0, 0, 0, 0]

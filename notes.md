@@ -130,3 +130,14 @@ reward/risk = 600 / 200 = __3.00__
     - tp4 = pct * tps[3] * (1 - sum(sell_pct[:3])) * sell_pct[3]
 
   - tp1 + tp2 + tp3 + tp4 = 225
+
+
+### 2019.11.21
+#### Train of thought for new backtests
+- Ensure TP logic is correct
+- Use COMPOUNDING return, not absolute return
+  - For each backtested trade, get TP, index opened, and index closed
+  - Use index opened to indicate opening trade
+  - Close % of trade at each TP
+  - Use a # for % of trade open?
+  - Changes per TP

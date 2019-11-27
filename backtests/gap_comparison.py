@@ -1,13 +1,34 @@
+# Determine the best SL and TP levels for 3EMA, 20MA, and 40EMA
 import pandas as pd
-from py.functions import *
+from py.functions import find_signals, determine_TP, drop_extra_signals
+from py.utils import *
+
 
 df = pd.read_csv('data/bitfinex/BTC.csv')
-signals = find_signals(df)
-# signals = signals.drop('date', axis=1)
+coin_signals = find_signals(df, window_fast=5, window_mid=20, window_slow=56)
+coin_signals
 
-signals[0] = determine_TP(df, signals)
+
+
+
+for ticker in ['BTC/USD', 'ETH/USD', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'XRP/BTC']:
+    coin = ticker[:ticker.find('/')]
+    df = pd.read_csv('data/bitfinex/' + coin + '.csv', usecols=['date', 'open', 'high', 'low', 'close'])
+    if '/BTC' in ticker:
+        btc_slice = btc[btc['date'] >= df['date'][0]]
+        for col in ['open', 'high', 'low', 'close']:
+            df[col] /= btc_slice['close']
+
+    coin_signals = find_signals(df, window_fast=5, window_mid=20, window_slow=56)
+    # coin_signals['tp'] = determine_TP(df, coin_signals)
+    coin_signals['ticker'] = [ticker for i in range(len(coin_signals))]
+    coin_signals = coin_signals.reset_index()
+    signals = signals.append(coin_signals, ignore_index=True, sort=False)
+
+
 signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
-tp_pcts = [-1, 0.05, 0.15, 0.35, 2.45, 0]
+
+signals['profit_pct'] = abs(signals['price'] - signals['stop_loss']) / signals['price']
 signals['end_pct'] = list(map(lambda x: tp_pcts[x], signals[0]))
 signals['net_profit'] = signals['end_pct'] * signals['profit_pct']
 
