@@ -3,11 +3,17 @@ import numpy as np
 from datetime import datetime
 
 class Portfolio:
+
+    initial_capital = 10000
+    x_leverage = 1
+    trade_size = .1
+
     def __init__(self, *args, **kwargs):
-        self.PORTFOLIO_START_VALUE = 10000.
-        self.available_capital = self.PORTFOLIO_START_VALUE
-        self.num_positions = 0
+        self.available_capital = self.initial_capital
         self.positions = []
+
+    def positions_open(self):
+        return len(self.positions)
 
     def open_position(self, pct_capital, **position):
         self.num_positions += 1
@@ -20,7 +26,3 @@ class Portfolio:
     def close_position(self, x_leverage, **position):
         self.available_capital += position['d_amt'] * (1 + position['net_profit'] * x_leverage)
         return self.positions.pop(self.positions.index(position))
-
-
-    def match_ticker(self, ticker):
-        return 

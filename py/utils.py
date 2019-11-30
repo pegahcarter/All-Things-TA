@@ -5,6 +5,7 @@ import timeit
 import requests
 import time
 import os
+import sys
 from urllib.parse import urlencode
 from datetime import datetime, timedelta
 from variables import *

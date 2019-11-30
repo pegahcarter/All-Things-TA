@@ -4,6 +4,8 @@ from utils import *
 def find_signals(df, window_fast, window_mid, window_slow):
     ''' Determine signals from OHLCV dataframe '''
 
+    df['date'] = pd.to_datetime(df['date'])
+
     emaslow = ema(df['close'], span=window_slow)
     mamid = sma(df['close'], window=window_mid)
     emafast = ema(df['close'], span=window_fast)

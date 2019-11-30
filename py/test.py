@@ -1,13 +1,26 @@
-import requests
-import os
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-import time
-import ccxt
-from py.utils import *
+from functions import *
+
+# --------------------------------------------------------------------------------
+# I need to create a date_closed and ticker column/data point
+
+df = pd.read_csv('../data/bitfinex/BTC.csv')
+tp_pcts = {1: 10, 2: 10, 3: 10, 4: 70}
+
+signals = find_signals(df, 21, 30, 50)
+determine_TP(df, signals)
+
+for x in range(len(signals)):
+    signals[x]['date'] += timedelta(hours=int(signals[x]['index_closed'] - signals[x]['index_opened']))
+    signals[x]['ticker'] = 'BTC/USD'
 
 
+
+
+net_profit(signals, tp_pcts)
+
+
+pd.DataFrame.from_dict(signals)
+# --------------------------------------------------------------------------------
 
 gc = pygsheets.authorize(service_file='C:/Users/carter/Documents/crypto/peter-signal/credentials.json')
 g_doc = gc.open_by_key('1T67gVealvVutn_VuiedbH7ViK8_OIBWOmoDIMq82oQE')

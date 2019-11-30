@@ -54,3 +54,9 @@ signals = signals\
             .rename(columns={'date': 'date_opened'})
 
 signals.to_csv('data/bitfinex/WORLD CLASS TRADERS BACKTEST RESULTS.csv', index=False)
+
+
+# ------------------------------------------------------------------------------
+# Combine backtest signals with signals now as a list of dicts instead of a dataframe
+
+btc = pd.read_csv()
