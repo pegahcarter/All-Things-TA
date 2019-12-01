@@ -149,3 +149,11 @@ reward/risk = 600 / 200 = __3.00__
 - Review Bitmex fees
 - Super simple compounding
   - Use TP - 1 for indexing closing position
+
+
+### 2019.11.30
+#### Compounding Logic
+- Closing a position
+  - SL will close on `index_closed`
+  - TP1 - TP3 will close on `index_closed`
+  - TP4 will close on `index_closed` OR `index_tp_hit[-1]`
