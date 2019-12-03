@@ -30,7 +30,7 @@ signals_sorted_copy = list(sorted(signals, key=lambda x: x['index_opened']))
 class Portfolio:
 
     initial_capital = 10000
-    x_leverage = 1
+    x_leverage = 10
     trade_size = .1
     profit_levels = [.5, 1, 2, 3]
 
@@ -45,8 +45,9 @@ class Portfolio:
         return len(self.positions)
 
     def open_position(self, position):
-        position['d_amt'] = self.available_capital * self.trade_size * self.x_leverage
-        self.available_capital -= position['d_amt']
+        d_amt = self.available_capital * self.trade_size
+        self.available_capital -= d_amt
+        position['d_amt'] = d_amt * self.x_leverage
 
         self.index_tp_hit_set.update(position['index_tp_hit'])
         self.index_closed_set.add(position['index_closed'])
@@ -59,6 +60,8 @@ class Portfolio:
 
         base_sold = position['d_amt'] * pct_sold/100
         profit = base_sold * position['pct_open'] * position['pct'] * profit_level / 100
+
+        base_sold /= self.x_leverage
 
         position['pct_open'] -= pct_sold
         position['index_tp_hit'][pos] = None
@@ -78,6 +81,8 @@ class Portfolio:
             profit = -base_sold * position['pct']
         else:
             profit = 0
+
+        base_sold /= self.x_leverage
 
         self.available_capital += base_sold + profit
 
@@ -110,21 +115,4 @@ len(p.positions)
 i
 
 
-signals_sorted_copy[24:27]
-signals_sorted_copy[25]
-
-
-# Old code
-# for i, date in enumerate(btc['date']):
-#
-#     if sum(signals['date'] == date):
-#         for _, position in signals[signals['date'] == date].iterrows():
-#             portfolio.open_position(pct_capital=.05, **position)
-#
-#     if sum(signals['index_closed'] == i):
-#         for position in list(filter(lambda x: x['index_closed'] == i, portfolio.positions)):
-#             portfolio.close_position(x_leverage=5, **position)
-#
-#
-# for position in portfolio.positions:
-#     portfolio.close_position(x_leverage=5, **position)
+net_profit(signals, tp_pcts)
