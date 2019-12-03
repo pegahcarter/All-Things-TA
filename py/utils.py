@@ -140,11 +140,12 @@ def profit_per_tp(*tp_pcts):
     Take-profit levels:  .5:1, 1:1, 2:1, 3:1
     '''
 
+    tp_pcts = [x/100 for x in tp_pcts]
     profit_levels = [0.5, 1, 2, 3]
     results = [0 for _ in tp_pcts]
 
     for x in range(len(tp_pcts)):
-        results[x] = tp_pcts[x] * profit_levels[x] * sum(tp_pcts[x:]) / 100
+        results[x] = tp_pcts[x] * profit_levels[x] * sum(tp_pcts[x:])
         if x > 0:
             results[x] += results[x - 1]
 
@@ -154,7 +155,7 @@ def profit_per_tp(*tp_pcts):
 
 def net_profit(signals, tp_pcts):
 
-    tp_profit_pcts = profit_per_tp(*tp_pcts)
+    tp_profit_pcts = profit_per_tp(*tp_pcts.values())
     trade_profits = list(map(lambda x: x['pct'] * tp_profit_pcts[x['tp']], signals))
 
     return sum(trade_profits)
