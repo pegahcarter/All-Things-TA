@@ -4,6 +4,7 @@ from portfolio import Portfolio
 signals = []
 tp_pcts = {1: 10, 2: 10, 3: 10, 4: 70}
 
+
 for f in os.listdir('../data/binance/'):
 
     df = pd.read_csv('../data/binance/' + f)
@@ -24,23 +25,26 @@ for f in os.listdir('../data/binance/'):
 
 # Re-order signals by `index_opened`
 signals_sorted = list(sorted(signals, key=lambda x: x['index_opened']))
+signals_sorted_copy = list(sorted(signals, key=lambda x: x['index_opened']))
 
 class Portfolio:
 
     initial_capital = 10000
     x_leverage = 1
     trade_size = .1
+    profit_levels = [.5, 1, 2, 3]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, tp_pcts):
         self.available_capital = self.initial_capital
         self.positions = []
+        self.tp_pcts =  tp_pcts
         self.index_tp_hit_set = set()
         self.index_closed_set = set()
 
     def positions_open(self):
         return len(self.positions)
 
-    def open_position(self, **position):
+    def open_position(self, position):
         position['d_amt'] = self.available_capital * self.trade_size * self.x_leverage
         self.available_capital -= position['d_amt']
 
@@ -48,35 +52,66 @@ class Portfolio:
         self.index_closed_set.add(position['index_closed'])
         self.positions.append(position)
 
-    def close_position(self, x_leverage, **position):
-        self.available_capital += position['d_amt'] * (1 + position['net_profit'] * x_leverage)
-        return self.positions.pop(self.positions.index(position))
+    def sell_position(self, hr, position):
+        pos = position['index_tp_hit'].index(hr)
+        profit_level = self.profit_levels[pos]
+        pct_sold = self.tp_pcts[pos + 1]
+
+        base_sold = position['d_amt'] * pct_sold/100
+        profit = base_sold * position['pct_open'] * position['pct'] * profit_level / 100
+
+        position['pct_open'] -= pct_sold
+        position['index_tp_hit'][pos] = None
+
+        self.available_capital += base_sold + profit
 
 
+    def close_position(self, position):
 
-p = Portfolio()
+        # self.positions.pop(self.positions.index(position))
+        pct_sold = position['pct_open']
 
-# Add test position
-p.open_position(**signals_sorted[0])
-p.open_position(**signals_sorted[1])
-p.positions
+        base_sold = position['d_amt'] * pct_sold/100
+        if position['tp'] == 4:
+            return
+        elif position['tp'] == 0:
+            profit = -base_sold * position['pct']
+        else:
+            profit = 0
 
-
-list(filter(lambda x: 68 in x['index_tp_hit'], p.positions))
-
-# Sell 10% of position at TP1
-# if 68 in p.index_tp_hit_set:
-
-# TODO: remove [0] from line below when looping through entire portfolio, and
-#   rename `p` as `positions_to_sell`
-p = list(filter(lambda x: 68 in x['index_tp_hit'], p.positions))[0]
-
-# for p in positions_to_sell:
-while 68 in p['index_tp_hit']gfh
+        self.available_capital += base_sold + profit
 
 
+p = Portfolio(tp_pcts)
+i = 0
+
+for hr in range(16000):
+
+    # Opening positions
+    while len(signals_sorted) > 0 and signals_sorted[0]['index_opened'] == hr:
+        p.open_position(signals_sorted.pop(0))
+
+    if p.positions_open():
+        # Selling part of positions
+        if hr in p.index_tp_hit_set:
+            for position in filter(lambda x: hr in x['index_tp_hit'], p.positions):
+                while hr in position['index_tp_hit']:
+                    p.sell_position(hr, position)
+
+        # Closing out positions
+        if hr in p.index_closed_set:
+            for position in filter(lambda x: hr == x['index_closed'], p.positions):
+                i += 1
+                p.close_position(position)
 
 
+p.available_capital
+len(p.positions)
+i
+
+
+signals_sorted_copy[24:27]
+signals_sorted_copy[25]
 
 
 # Old code
