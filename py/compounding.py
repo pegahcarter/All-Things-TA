@@ -5,9 +5,11 @@ signals = []
 tp_pcts = {1: 10, 2: 10, 3: 10, 4: 70}
 
 
-for f in os.listdir('../data/binance/'):
+# for f in os.listdir('../data/binance/'):
+for coin in ['ETH-USDT', 'BTC-USDT']:
 
-    df = pd.read_csv('../data/binance/' + f)
+#     df = pd.read_csv('../data/binance/' + f)
+    df = pd.read_csv('../data/binance/' + coin + '.csv')
     coin_signals = find_signals(df, 21, 30, 50)
 
     # Add `tp`, `index_tp_hit`, and `index_closed`
@@ -16,7 +18,8 @@ for f in os.listdir('../data/binance/'):
     # Add ticker & pct_open to signal
     for x in coin_signals:
         x.update({
-            'ticker': f[:f.find('.')],
+            # 'ticker': f[:f.find('.')],
+            'ticker': coin,
             'pct_open': 100
         })
 
@@ -48,3 +51,5 @@ for hr in range(16000):
 
 
 p.available_capital
+
+len(signals)
