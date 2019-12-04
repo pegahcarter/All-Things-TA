@@ -24,13 +24,9 @@ for f in os.listdir('../data/binance/'):
     signals.extend(coin_signals)
 
 # Re-order signals by `index_opened`
-signals_sorted = list(sorted(signals, key=lambda x: x['index_opened']))
-signals_sorted_copy = list(sorted(signals, key=lambda x: x['index_opened']))
-
-
+signals_sorted = sorted(signals, key=lambda x: x['index_opened'])
 
 p = Portfolio(tp_pcts)
-i = 0
 
 for hr in range(16000):
 
@@ -48,13 +44,7 @@ for hr in range(16000):
         # Closing out positions
         if hr in p.index_closed_set:
             for position in list(filter(lambda x: hr == x['index_closed'], p.positions))[::-1]:
-                i += 1
                 p.close_position(position)
 
 
 p.available_capital
-len(p.positions)
-i
-
-
-net_profit(signals, tp_pcts)
