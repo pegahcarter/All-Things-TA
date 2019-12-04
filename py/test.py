@@ -1,25 +1,36 @@
 from functions import *
 
 # --------------------------------------------------------------------------------
-# I need to create a date_closed and ticker column/data point
+# I need to create a ticker column/data point
 
-df = pd.read_csv('../data/bitfinex/BTC.csv')
+all_signals = []
 tp_pcts = {1: 10, 2: 10, 3: 10, 4: 70}
 
-signals = find_signals(df, 21, 30, 50)
-determine_TP(df, signals)
+for f in os.listdir('../data/binance/'):
 
-for x in range(len(signals)):
-    signals[x]['date'] += timedelta(hours=int(signals[x]['index_closed'] - signals[x]['index_opened']))
-    signals[x]['ticker'] = 'BTC/USD'
+    df = pd.read_csv('../data/binance/' + f)
+    signals = find_signals(df, 21, 30, 50)
+    determine_TP(df, signals)
+
+    for x in range(len(signals)):
+        signals[x]['ticker'] = f[:f.find('.')]
+
+    all_signals.extend(signals)
+
+net_profit(all_signals, tp_pcts)
+
+
+len(all_signals)
+
+819, 1.62
 
 
 
+test = list(sorted(all_signals, key=lambda x: x['index_opened']))
+test[:4]
 
-net_profit(signals, tp_pcts)
 
 
-pd.DataFrame.from_dict(signals)
 # --------------------------------------------------------------------------------
 
 gc = pygsheets.authorize(service_file='C:/Users/carter/Documents/crypto/peter-signal/credentials.json')
