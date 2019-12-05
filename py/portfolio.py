@@ -4,10 +4,10 @@ from datetime import datetime
 
 class Portfolio:
 
-    initial_capital = 10000
     x_leverage = 10
     trade_size = .1
     profit_levels = [.5, 1, 2, 3]
+    initial_capital = 10000
 
     def __init__(self, tp_pcts):
         self.available_capital = self.initial_capital
