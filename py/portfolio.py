@@ -60,3 +60,7 @@ class Portfolio:
         base_sold /= self.x_leverage
 
         self.available_capital += base_sold + profit
+        if 'USDT' in position['ticker']:
+            self.available_capital -= position['d_amt'] * .0005
+        else:
+            self.available_capital -= position['d_amt'] * .002
