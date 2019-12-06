@@ -1,20 +1,16 @@
 from functions import *
 from portfolio import Portfolio
-from variables import avgs_combined
+from variables import avgs_combined, tp_pcts_lst
 
-available_capital_lst = []
-tp_pcts = {1: 10, 2: 10, 3: 10, 4: 70}
-
-results = pd.DataFrame()
-results['average'] = avgs_combined
+results = pd.DataFrame(index=['-'.join(str(x) for x in tp_pcts.values()) for tp_pcts in tp_pcts_lst])
 
 
-for avgs in avgs_combined[::40]:
+for avgs in avgs_combined[:2]:
     signals = []
 
-    for coin in ['ETH-USDT', 'BTC-USDT']:
+    for f in os.listdir('../data/binance/'):
 
-        df = pd.read_csv('../data/binance/' + coin + '.csv')
+        df = pd.read_csv('../data/binance/' + f)
         coin_signals = find_signals(df, *avgs)
 
         # Add `tp`, `index_tp_hit`, and `index_closed`
@@ -23,8 +19,7 @@ for avgs in avgs_combined[::40]:
         # Add ticker & pct_open to signal
         for x in coin_signals:
             x.update({
-                # 'ticker': f[:f.find('.')],
-                'ticker': coin,
+                'ticker': f[:f.find('.')],
                 'pct_open': 100
             })
 
@@ -32,30 +27,33 @@ for avgs in avgs_combined[::40]:
         signals.extend(coin_signals)
 
     # Re-order signals by `index_opened`
-    signals_sorted = list(sorted(signals, key=lambda x: x['index_opened']))
+    signals_sorted = list(sorted(signals.copy(), key=lambda x: x['index_opened']))
 
-    p = Portfolio(tp_pcts)
+    available_capital_lst = []
+    for tp_pcts in tp_pcts_lst[:2]:
 
-    for hr in range(16000):
+        signals_sorted_copy = signals_sorted.copy()
+        portfolio = Portfolio(tp_pcts)
 
-        # Opening positions
-        while len(signals_sorted) > 0 and signals_sorted[0]['index_opened'] == hr:
-            p.open_position(signals_sorted.pop(0))
+        for hr in range(len(df)):
 
-        if p.positions_open():
+            # Opening positions
+            while len(signals_sorted_copy) > 0 and signals_sorted_copy[0]['index_opened'] == hr:
+                portfolio.open_position(signals_sorted_copy.pop(0))
 
-            # Selling part of positions
-            if hr in p.index_tp_hit_set:
-                for position in list(filter(lambda x: hr in x['index_tp_hit'], p.positions)):
-                    while hr in position['index_tp_hit']:
-                        p.sell_position(hr, position)
+            if len(portfolio.positions) > 0:
 
-            # Closing out positions
-            if hr in p.index_closed_set:
-                for position in list(filter(lambda x: hr == x['index_closed'], p.positions))[::-1]:
-                    p.close_position(position)
+                # Selling part of positions
+                if hr in portfolio.index_tp_hit_set:
+                    for position in list(filter(lambda x: hr in x['index_tp_hit'], portfolio.positions)):
+                        while hr in position['index_tp_hit']:
+                            portfolio.sell_position(hr, position)
 
-    available_capital_lst.append(p.available_capital)
+                # Closing out positions
+                if hr in portfolio.index_closed_set:
+                    for position in list(filter(lambda x: hr == x['index_closed'], portfolio.positions))[::-1]:
+                        portfolio.close_position(position)
 
+        available_capital_lst.append(portfolio.available_capital)
 
-available_capital_lst
+    # results['-'.join(str(x) for x in avgs)] = available_capital_lst
