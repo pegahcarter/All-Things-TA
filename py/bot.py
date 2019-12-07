@@ -4,8 +4,8 @@ from datetime import datetime
 
 
 channels = {
-    'wc_elite': [21, 30, 50],
-    'atta_insiders': [8, 25, 50]
+    'wc_elite': [21, 30, 55]
+   # 'atta_insiders': [8, 25, 50]
 }
 
 
