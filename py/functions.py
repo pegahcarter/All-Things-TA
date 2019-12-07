@@ -4,6 +4,8 @@ from utils import *
 def find_signals(df, window_fast, window_mid, window_slow):
     ''' Determine signals from OHLCV dataframe '''
 
+    df['date'] = pd.to_datetime(df['date'])
+
     emaslow = ema(df['close'], span=window_slow)
     mamid = sma(df['close'], window=window_mid)
     emafast = ema(df['close'], span=window_fast)
@@ -12,7 +14,7 @@ def find_signals(df, window_fast, window_mid, window_slow):
     mamid_emaslow_diff = abs(mamid - emaslow) / mamid
 
     candle_body = abs(df['close'] - df['open']) / df['open']
-    candle_std = candle_body.rolling(168).std().tolist()
+    candle_sdev = candle_body.rolling(168).std().tolist()
     candle_body = candle_body.tolist()
     relative_strength = rsi(df['close'])
 
@@ -27,12 +29,12 @@ def find_signals(df, window_fast, window_mid, window_slow):
             continue
 
         body_sorted = sorted(candle_body[i-48:i], reverse=True)
-        window_std = np.mean(candle_std[i-48:i])
-        candle_mean = np.median(candle_body[i-48:i])
+        window_sdev = np.mean(candle_sdev[i-48:i])
+        candle_median = np.median(candle_body[i-48:i])
 
-        if (high[i] - low[i]) / high[i] > 0.02 \
-        or max(candle_body[i-24:i]) > .025 \
-        or sum(body_sorted[:3]) - (4*candle_mean) > 12*window_std:
+        if (max(high[i-12:i]) - min(low[i-12:i])) / max(high[i-12:i]) > 0.04 \
+        or max(candle_body[i-24:i]) > .04 \
+        or sum(body_sorted[:3]) - (4*candle_median) > 12*window_sdev:
             continue
 
         price = close[i]

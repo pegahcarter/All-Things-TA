@@ -1,44 +1,60 @@
-# This file will simulate a portfolio and return the end total value.
-# Hopefully, the gains will compound and we'll see a higher ending value than
-#   just the %
+from functions import *
+from portfolio import Portfolio
+from variables import avgs_combined, tp_pcts_lst
 
-import pandas as pd
-from py.functions import *
-from backtests.simulations.portfolio import Portfolio
+results = pd.DataFrame(index=['-'.join(str(x) for x in tp_pcts.values()) for tp_pcts in tp_pcts_lst])
 
-btc = pd.read_csv('data/bitfinex/BTC.csv')
-# signals = pd.read_csv('signals.csv')
-signals = pd.read_csv('data/backtests.csv')
+for avgs in avgs_combined:
 
-signals.head()
+    available_capital_lst = []
+    for tp_pcts in tp_pcts_lst:
+
+        signals = []
+        for f in os.listdir('../data/binance/'):
+
+            df = pd.read_csv('../data/binance/' + f)
+            coin_signals = find_signals(df, *avgs)
+
+            # Add `tp`, `index_tp_hit`, and `index_closed`
+            determine_TP(df, coin_signals)
+
+            # Add ticker & pct_open to signal
+            for x in coin_signals:
+                x.update({
+                    'ticker': f[:f.find('.')],
+                    'pct_open': 100
+                })
+
+            # Add coin signals to the primary signal list
+            signals.extend(coin_signals)
+
+        # Re-order signals by `index_opened`
+        signals_sorted = list(sorted(signals.copy(), key=lambda x: x['index_opened']))
+        portfolio = Portfolio(tp_pcts)
+
+        for hr in range(16000):
+
+            # Opening positions
+            while len(signals_sorted) > 0 and signals_sorted[0]['index_opened'] == hr:
+                portfolio.open_position(signals_sorted.pop(0))
+
+            if len(portfolio.positions) > 0:
+
+                # Selling part of positions
+                if hr in portfolio.index_tp_hit_set:
+                    for position in list(filter(lambda x: hr in x['index_tp_hit'], portfolio.positions)):
+                        while hr in position['index_tp_hit']:
+                            portfolio.sell_position(hr, position)
+
+                # Closing out positions
+                if hr in portfolio.index_closed_set:
+                    for position in list(filter(lambda x: hr == x['index_closed'], portfolio.positions))[::-1]:
+                        portfolio.close_position(position)
+
+        available_capital_lst.append(portfolio.available_capital)
 
 
-portfolio = Portfolio()
-for i, date in enumerate(btc['date']):
-
-    if sum(signals['date'] == date):
-        for _, position in signals[signals['date'] == date].iterrows():
-            portfolio.open_position(pct_capital=.05, **position)
-
-    if sum(signals['index_closed'] == i):
-        for position in list(filter(lambda x: x['index_closed'] == i, portfolio.positions)):
-            portfolio.close_position(x_leverage=5, **position)
+    results['-'.join(str(x) for x in avgs)] = available_capital_lst
 
 
-for position in portfolio.positions:
-    portfolio.close_position(x_leverage=5, **position)
-
-
-portfolio.available_capital
-portfolio
-
-
-20x @ 5%
-495571.1494007507
-
-
-
-
-btc['date'][57] in signals['date']
-signals['date'][0] == btc['date'][57]
-btc['date'][57] in signals['date']
+results.to_csv('../backtests/data/2019.12.06.csv')
