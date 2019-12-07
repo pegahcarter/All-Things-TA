@@ -45,14 +45,12 @@ class Portfolio:
 
 
     def close_position(self, position):
-
         self.positions.pop(self.positions.index(position))
         pct_sold = position['pct_open']
 
         base_sold = position['d_amt'] * pct_sold/100
-        if position['tp'] == 4:
-            return
-        elif position['tp'] == 0:
+
+        if position['tp'] == 0:
             profit = -base_sold * position['pct']
         else:
             profit = 0
@@ -60,6 +58,7 @@ class Portfolio:
         base_sold /= self.x_leverage
 
         self.available_capital += base_sold + profit
+
         if 'USDT' in position['ticker']:
             self.available_capital -= position['d_amt'] * .0005
         else:
