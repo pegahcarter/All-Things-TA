@@ -57,4 +57,4 @@ for avgs in avgs_combined:
     results['-'.join(str(x) for x in avgs)] = available_capital_lst
 
 
-results.to_csv('../backtests/data/2019.12.06.csv')
+results.to_csv('2019.12.06.csv')
