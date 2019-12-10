@@ -4,57 +4,68 @@ from variables import avgs_combined, tp_pcts_lst
 
 results = pd.DataFrame(index=['-'.join(str(x) for x in tp_pcts.values()) for tp_pcts in tp_pcts_lst])
 
-for avgs in avgs_combined:
+def foo():
+    for avgs in avgs_combined[:1]:
 
-    available_capital_lst = []
-    for tp_pcts in tp_pcts_lst:
+        available_capital_lst = []
+        for tp_pcts in tp_pcts_lst[:1]:
 
-        signals = []
-        for f in os.listdir('../data/binance/'):
+            signals = []
+            for f in os.listdir('../data/binance/'):
 
-            df = pd.read_csv('../data/binance/' + f)
-            coin_signals = find_signals(df, *avgs)
+                df = pd.read_csv('../data/binance/' + f)
+                coin_signals = find_signals(df, *avgs)
 
-            # Add `tp`, `index_tp_hit`, and `index_closed`
-            determine_TP(df, coin_signals)
+                # Add `tp`, `index_tp_hit`, and `index_closed`
+                determine_TP(df, coin_signals)
 
-            # Add ticker & pct_open to signal
-            for x in coin_signals:
-                x.update({
-                    'ticker': f[:f.find('.')],
-                    'pct_open': 100
-                })
+                # Add ticker & pct_open to signal
+                for x in coin_signals:
+                    x.update({
+                        'ticker': f[:f.find('.')],
+                        'pct_open': 100
+                    })
 
-            # Add coin signals to the primary signal list
-            signals.extend(coin_signals)
+                # Add coin signals to the primary signal list
+                signals.extend(coin_signals)
 
-        # Re-order signals by `index_opened`
-        signals_sorted = list(sorted(signals.copy(), key=lambda x: x['index_opened']))
-        portfolio = Portfolio(tp_pcts)
+            # Re-order signals by `index_opened`
+            signals_sorted = list(sorted(signals.copy(), key=lambda x: x['index_opened']))
+            portfolio = Portfolio(tp_pcts)
 
-        for hr in range(16000):
+            for hr in range(16000):
 
-            # Opening positions
-            while len(signals_sorted) > 0 and signals_sorted[0]['index_opened'] == hr:
-                portfolio.open_position(signals_sorted.pop(0))
+                # Opening positions
+                while len(signals_sorted) > 0 and signals_sorted[0]['index_opened'] == hr:
+                    portfolio.open_position(signals_sorted.pop(0))
 
-            if len(portfolio.positions) > 0:
+                if len(portfolio.positions) > 0:
 
-                # Selling part of positions
-                if hr in portfolio.index_tp_hit_set:
-                    for position in list(filter(lambda x: hr in x['index_tp_hit'], portfolio.positions)):
-                        while hr in position['index_tp_hit']:
-                            portfolio.sell_position(hr, position)
+                    # Selling part of positions
+                    if hr in portfolio.index_tp_hit_set:
+                        for position in list(filter(lambda x: hr in x['index_tp_hit'], portfolio.positions)):
+                            while hr in position['index_tp_hit']:
+                                portfolio.sell_position(hr, position)
 
-                # Closing out positions
-                if hr in portfolio.index_closed_set:
-                    for position in list(filter(lambda x: hr == x['index_closed'], portfolio.positions))[::-1]:
-                        portfolio.close_position(position)
+                    # Closing out positions
+                    if hr in portfolio.index_closed_set:
+                        for position in list(filter(lambda x: hr == x['index_closed'], portfolio.positions))[::-1]:
+                            portfolio.close_position(position)
 
-        available_capital_lst.append(portfolio.available_capital)
-
-
-    results['-'.join(str(x) for x in avgs)] = available_capital_lst
+            available_capital_lst.append(portfolio.available_capital)
 
 
-results.to_csv('2019.12.06.csv')
+        # results['-'.join(str(x) for x in avgs)] = available_capital_lst
+
+
+%timeit foo()
+
+# Before
+773 ms ± 15 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
+
+# Converting all .tolist() to .values
+
+
+
+# results.to_csv('2019.12.06.csv')

@@ -24,8 +24,8 @@ def main(testing=False):
             if testing:
                 return
 
-            # for _, row in new_signals.iterrows():
-            #     logic.send_signal(row, channel)
+            for _, row in new_signals.iterrows():
+                logic.send_signal(row, channel)
 
 
 if __name__ == '__main__':

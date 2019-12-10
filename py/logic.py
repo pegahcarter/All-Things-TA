@@ -42,7 +42,7 @@ def send_signal(row, channel):
 
 
     diff = price - stop_loss
-    tps = [price + diff/2., price + diff, price + diff*2, price + diff*3]
+    tps = [price + diff/2., price + diff, price + diff*2]
 
     if ticker == 'ETH/USD':
         low_price = format(low_price, '.2f')
@@ -88,16 +88,17 @@ def msg_wc(ticker, signal, stop_loss, low_price, high_price, tps):
     text = '🚨🚨🚨\n\n'
     text += '{}\nBitMEX\n'.format(ticker)
     text += '{} zone {}-{}\n'.format(signal, low_price, high_price)
-    text += 'Take profit {}, {}, {}, {}\n'.format(*tps)
+    text += 'Take profit {}, {}, {}\n'.format(*tps)
     text += 'Leverage 10x\n'
     text += 'Stop loss {}\n\n'.format(stop_loss)
     text += '🚨🚨🚨'
 
+    # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
+    requests.get(url + urlencode({'chat_id': wc_elite_id, 'text': text}))
+
     if ticker in ['XRP/Z19', 'ETH/USD', 'LTC/Z19', 'BCH/Z19']:
         requests.get(url + urlencode({'chat_id': wc_id, 'text': msg}))
 
-    requests.get(url + urlencode({'chat_id': wc_elite_id, 'text': text}))
-    # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
 
 
 def msg_atta(ticker, signal, stop_loss, low_price, high_price, tps):
@@ -105,14 +106,14 @@ def msg_atta(ticker, signal, stop_loss, low_price, high_price, tps):
     text = '🚀🚀{}🚀🚀\n\n'.format(ticker)
     text += 'BitMEX' + '\n\n{} '.format(signal)
     text += '{} - {}\n\n'.format(low_price, high_price)
-    text += 'Sell {}, {}, {}, {}\n\n'.format(*tps)
+    text += 'Sell {}, {}\n\n'.format(tps[0], tps[1])
     text += 'Leverage 5x\n\n'
     text += 'Stop Loss: {}\n\n'.format(stop_loss)
     text += '*Disclaimer: Please consult a financial advisor before investing/trading.  This is not financial advice🚀🚀\n\n'
     text += '💰💰@Allthingstaadmin💰💰'
 
+    # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
+    requests.get(url + urlencode({'chat_id': atta_insiders_id, 'text': text}))
+
     if ticker in ['BTC/USD', 'ETH/Z19']:
         requests.get(url + urlencode({'chat_id': atta_id, 'text': text}))
-
-    requests.get(url + urlencode({'chat_id': atta_insiders_id, 'text': text}))
-    # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
