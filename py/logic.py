@@ -22,6 +22,7 @@ def run(averages):
             signal_df = signal_df.append(signals, ignore_index=True, sort=False)
 
     signal_df['date'] = [datetime.fromtimestamp(x/1000) for x in signal_df['date']]
+
     signal_df = signal_df.sort_values('date').reset_index(drop=True)
     return signal_df
 

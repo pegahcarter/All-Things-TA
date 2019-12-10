@@ -4,8 +4,6 @@ from utils import *
 def find_signals(df, window_fast, window_mid, window_slow):
     ''' Determine signals from OHLCV dataframe '''
 
-    df['date'] = pd.to_datetime(df['date'])
-
     emaslow = ema(df['close'], span=window_slow)
     mamid = sma(df['close'], window=window_mid)
     emafast = ema(df['close'], span=window_fast)
@@ -14,13 +12,13 @@ def find_signals(df, window_fast, window_mid, window_slow):
     mamid_emaslow_diff = abs(mamid - emaslow) / mamid
 
     candle_body = abs(df['close'] - df['open']) / df['open']
-    candle_sdev = candle_body.rolling(168).std().tolist()
-    candle_body = candle_body.tolist()
+    candle_sdev = candle_body.rolling(168).std().values
+    candle_body = candle_body.values
     relative_strength = rsi(df['close'])
 
-    close = df['close'].tolist()
-    high = df['high'].tolist()
-    low = df['low'].tolist()
+    close = df['close'].values
+    high = df['high'].values
+    low = df['low'].values
 
     signals = []
 
@@ -64,10 +62,10 @@ def find_signals(df, window_fast, window_mid, window_slow):
 def determine_TP(df, signals, cushion=0):
     ''' Figure out which TP level is hit '''
 
-    low = df['low'].tolist()
-    low_inverse = (-df['low']).tolist()
-    high = df['high'].tolist()
-    high_inverse = (-df['high']).tolist()
+    low = df['low'].values
+    low_inverse = (-df['low']).values
+    high = df['high'].values
+    high_inverse = (-df['high']).values
 
     for i, row in enumerate(signals):
         price = row['price']
