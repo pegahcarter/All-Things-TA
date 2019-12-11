@@ -93,7 +93,7 @@ def msg_wc(ticker, signal, stop_loss, low_price, high_price, tps):
     text += 'Stop loss {}\n\n'.format(stop_loss)
     text += '🚨🚨🚨'
 
-    # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
+#    requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
     requests.get(url + urlencode({'chat_id': wc_elite_id, 'text': text}))
 
     if ticker in ['XRP/Z19', 'ETH/USD', 'LTC/Z19', 'BCH/Z19']:
