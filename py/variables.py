@@ -17,7 +17,7 @@ atta_id = '@AllthingsTA'
 atta_insiders_id = '-1001456456400'
 
 
-tickers = ['BTC/USD', 'ETH/USD', 'ETHZ19', 'LTCZ19', 'XRPZ19', 'BCHZ19', 'EOSZ19']
+tickers = ['BTC/USD', 'ETH/USD', 'ETHH20', 'LTCH20', 'XRPH20', 'BCHH20', 'EOSH20']
 
 
 avg1 = [8, 15, 21, 30]
