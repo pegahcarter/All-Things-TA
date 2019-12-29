@@ -1,24 +1,30 @@
-from utils import *
+# from utils import *
+from TAcharts.py.ta import ema, sma
+from TAcharts.py.momentum import rsi
+
+import numpy as np
+import pandas as pd
+
 
 
 def find_signals(df, window_fast, window_mid, window_slow):
     ''' Determine signals from OHLCV dataframe '''
 
-    emaslow = ema(df['close'], span=window_slow)
-    mamid = sma(df['close'], window=window_mid)
-    emafast = ema(df['close'], span=window_fast)
-    mabase = sma(df['close'], window=200)
+    _open = df['open'].values
+    high = df['high'].values
+    low = df['low'].values
+    close = df['close'].values
+
+    emaslow = ema(close, n=window_slow)
+    mamid = sma(close, n=window_mid)
+    emafast = ema(close, n=window_fast)
+    mabase = sma(close, n=200)
 
     mamid_emaslow_diff = abs(mamid - emaslow) / mamid
 
-    candle_body = abs(df['close'] - df['open']) / df['open']
-    candle_sdev = candle_body.rolling(168).std().values
-    candle_body = candle_body.values
-    relative_strength = rsi(df['close'])
-
-    close = df['close'].values
-    high = df['high'].values
-    low = df['low'].values
+    candle_body = np.abs(close - _open) / _open
+    candle_sdev = pd.Series(candle_body).rolling(168).std().values
+    relative_strength = rsi(close)
 
     signals = []
 
@@ -26,13 +32,13 @@ def find_signals(df, window_fast, window_mid, window_slow):
         if i < 48:
             continue
 
-        body_sorted = sorted(candle_body[i-48:i], reverse=True)
+        body_sorted = np.sort(candle_body[i-48:i])
         window_sdev = np.mean(candle_sdev[i-48:i])
         candle_median = np.median(candle_body[i-48:i])
 
         if (max(high[i-12:i]) - min(low[i-12:i])) / max(high[i-12:i]) > 0.04 \
         or max(candle_body[i-24:i]) > .04 \
-        or sum(body_sorted[:3]) - (4*candle_median) > 12*window_sdev:
+        or sum(body_sorted[-3:]) - (4*candle_median) > 12*window_sdev:
             continue
 
         price = close[i]
@@ -56,16 +62,15 @@ def find_signals(df, window_fast, window_mid, window_slow):
                             'pct': abs(stop_loss - price) / price})
 
     return signals
-    # return pd.DataFrame.from_dict(signals, orient='index')
 
 
 def determine_TP(df, signals, cushion=0):
     ''' Figure out which TP level is hit '''
 
     low = df['low'].values
-    low_inverse = (-df['low']).values
+    low_inverse = -low
     high = df['high'].values
-    high_inverse = (-df['high']).values
+    high_inverse = -high
 
     for i, row in enumerate(signals):
         price = row['price']
