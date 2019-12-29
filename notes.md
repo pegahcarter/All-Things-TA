@@ -157,3 +157,71 @@ reward/risk = 600 / 200 = __3.00__
   - SL will close on `index_closed`
   - TP1 - TP3 will close on `index_closed`
   - TP4 will close on `index_closed` OR `index_tp_hit[-1]`
+
+
+### 2019.12.01
+#### Thoughts for funding
+- Only real remaining work to get ATTA/WC profitable is on my end
+- Carter has been spending ~20 hrs a week on this project
+- Work load has been proportionally higher on my end
+- Total payment: .2 BTC / $2,000
+
+#### Fee Structure
+- Options
+  - 6 months - .035 BTC
+  - Lifetime - .055 BTC
+
+#### ATTA Earning Potential
+- Insiders: 183 total members - 150 "real" members
+  - Assume 10% of members renew for 6 months, and 5% renew for a lifetime
+    - 6 month revenue = 150 members * 10% * .035 = .525 BTC
+    - Lifetime revenue = 150 members * 5% * .055 = .413 BTC
+    __- Total:  .938 BTC__
+- Free: 2,923 total members - 2,500 "real" members
+  - Assume 4% subscribe for 6 months, and 2% subscribe for a lifetime
+    - 6 month revenue = 2,500 members * 4% * .035 = 3.5 BTC
+    - Lifetime revenue = 2,500 members * 2% * .055 = 2.75 BTC
+    __- Total: 6.25 BTC__
+__- Net Profit: .938 BTC + 6.5 BTC = 7.188 BTC or 1.8 BTC each__
+
+#### Order of Execution
+1. Fix & improve WC/ATTA signals immediately
+2. Start generating income from WC/ATTA
+  - WC
+
+#### Cost of work
+- September to end of December = 4 months or 16 weeks
+- 20 hrs/week * 16 weeks = 320 hrs
+- Pay for an entry data scientist ~ $100k/yr or $50/hr
+- 320 hrs * $50/hr = $16,000
+- Already paid: .2 BTC or $2,000
+- Remaining cost = $14,000
+
+#### Proposal
+1.
+  - Upfront payment of $5,000 for September - December work
+  - For the first 10 BTC of subscriptions:
+    - George, George, and Peter reduce percent by 5% (from 25% to 20%), Carter goes to 40%
+      - Before: 2.5 BTC for George, George, Peter, and Carter
+      - After: 2 BTC for George, George, and Peter, 4 BTC for Carter
+    - Carter's BTC profit goes from 2.5 BTC => 4 BTC, profit of 1.5 BTC
+  - Total: $5,000 and 1.5 BTC
+2.
+  - Upfront payment of $7,500 for September - December work
+  - For the first 5 BTC of subscriptions:
+    - George, George, and Peter reduce percent by 5% (from 25% to 20%), Carter goes to 40%
+      - Before: 1.25 BTC for George, George, Peter, and Carter
+      - After: 1 BTC for George, George, and Peter, 2 BTC for Carter
+    - Carter's BTC profit goes from 1.25 BTC => 2 BTC, profit of .75 BTC
+  - Total: $7,500 and .75 BTC
+3.
+  - Upfront payment of $10,000 for September - December work
+  - For the first 2 BTC of subscriptions:
+    - George, George, and Peter reduce percent by 5% (from 25% to 20%), Carter goes to 40%
+      - Before: 0.5 BTC for George, George, Peter, and Carter
+      - After: 0.4 BTC for George, George, and Peter, .8 BTC for Carter
+    - Carter's BTC profit goes from .5 BTC => .8 BTC, profit of .3 BTC
+  - Total: $10,000 and .3 BTC
+4.
+  - Upfront payment of $14,000 (or BTC equivalent) for September - December work
+  - It remains 25% for each member
