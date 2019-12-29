@@ -1,5 +1,37 @@
 from functions import *
 
+
+# --------------------------------------------------------------------------------
+# 2019.12.28
+# Figuring out argsort of top 3
+import pandas as pd
+import numpy as np
+import timeit
+
+df = pd.read_csv('../data/bitmex/BTCUSD.csv')
+
+close_pd = df['close']
+close_np = df['close'].values
+
+
+def original_fn():
+    body_sorted = sorted(close_pd[500:548])
+    results = sum(body_sorted[-3:])
+    return
+
+def new_fn():
+    body_sorted = np.sort(close_np[500:548])
+    results = np.sum(body_sorted[-3:])
+    return results
+
+
+%timeit original_fn()
+58.1 µs ± 1.36 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+
+
+%timeit new_fn()
+6.17 µs ± 43.2 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+
 # --------------------------------------------------------------------------------
 # I need to create a ticker column/data point
 
@@ -93,6 +125,13 @@ messages = list(filter(lambda x: 'channel_post' in x.keys(), data))
 
 url = 'https://api.telegram.org/bot862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8/sendMessage?'
 requests.get(url + urlencode({'chat_id': '@worldclasstrader', 'text': 'Test'}))
+
+requests.get(url + urlencode({'chat_id': wc_id, 'text': 'Test'}))
+response = requests.get(url + urlencode({'chat_id': atta_id, 'text': 'Test'}))
+
+response.text
+
+
 
 # --------------------------------------------------------------------------------
 df = pd.read_csv(os.getcwd() + '/data/optimize_moving_avg.csv')

@@ -1,6 +1,6 @@
-# from utils import *
 from TAcharts.py.ta import ema, sma
 from TAcharts.py.momentum import rsi
+from TAcharts.py.utils import crossover
 
 import numpy as np
 import pandas as pd
@@ -29,7 +29,7 @@ def find_signals(df, window_fast, window_mid, window_slow):
     signals = []
 
     for i in crossover(emafast, mamid):
-        if i < 48:
+        if i < 200:
             continue
 
         body_sorted = np.sort(candle_body[i-48:i])

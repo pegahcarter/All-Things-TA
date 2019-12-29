@@ -21,11 +21,10 @@ def main(testing=False):
             old_signal_df = old_signal_df.append(new_signals, ignore_index=True, sort=False)
             old_signal_df.to_csv('/home/carter/peter-signal/data/signals/' + channel + '.csv', index=False)
 
-            if testing:
-                return
+            if not testing:
+                for _, row in new_signals.iterrows():
+                    logic.send_signal(row, channel)
 
-            for _, row in new_signals.iterrows():
-                logic.send_signal(row, channel)
 
 
 if __name__ == '__main__':
