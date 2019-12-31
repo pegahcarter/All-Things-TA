@@ -6,80 +6,76 @@ class Portfolio:
 
     x_leverage = 10
     trade_size = .1
-    profit_levels = [.5, 1, 2, 3]
+    # NOTE: rr = risk/return
+    rr_list = [-1, .5, 1, 2, 3]
     initial_capital = 10000
 
     def __init__(self, tp_pcts):
         self.available_capital = self.initial_capital
         self.positions = []
-        self.tp_pcts =  tp_pcts
-        self.index_tp_hit_set = set()
-        self.index_closed_set = set()
+        self.tp_pcts = tp_pcts
 
 
-    def _add_fee(self, ticker, d_amt, profit=0):
-        if 'USDT' in ticker:
-            rate = .0005
-        else:
-            rate = .002
+    def _add_fee(self, ticker, trade_value, side, profit=0):
 
-        fee = (d_amt + profit) * rate
+        if ticker == 'ETH-USDT' or ticker == 'BTC-USDT':
+            if side == 'buy':
+                rate = .00075
+            else:  # side == 'sell'
+                rate = -.00025
+        else:    # ticker is not a perpetual contract
+            if side == 'buy':
+                rate = .0025
+            else:  # side == 'sell'
+                rate = -.0005
+
+        fee = (trade_value + profit) * rate
         self.available_capital -= fee
 
 
-    def positions_open(self):
-        return len(self.positions)
+    def _trade(self, ticker, trade_value, profit=0, side='long', method='open'):
+
+        base_value = trade_value / self.x_leverage
+        if side == 'buy':
+            self.available_capital -= base_value
+        else:  # side == 'sell'
+            self.available_capital += base_value + profit
+
+        self._add_fee(ticker, trade_value, side, profit)
 
 
-    def open_position(self, position):
-        d_amt_no_lev = self.available_capital * self.trade_size
-        d_amt_w_lev = d_amt_no_lev * self.x_leverage
+    def _manage_positions(self, position, method):
 
-        self.available_capital -= d_amt_no_lev
-        position['d_amt'] = d_amt_w_lev
-
-        self._add_fees(position['ticker'], d_amt_w_lev)
-
-        self.index_tp_hit_set.update(position['index_tp_hit'])
-        self.index_closed_set.add(position['index_closed'])
-        self.positions.append(position)
+        if method == 'open':
+            self.positions.append(position)
+        elif method == 'close':
+            position_index = self.positions.index(position)
+            self.positions.pop(position_index)
 
 
-    def sell_position(self, hr, position):
-        pos = position['index_tp_hit'].index(hr)
-        profit_level = self.profit_levels[pos]
-        pct_sold = self.tp_pcts[pos + 1]
+    def open(self, position):
 
-        d_amt_w_lev = position['d_amt'] * pct_sold/100
-        profit = d_amt_w_lev * position['pct_open'] * position['pct'] * profit_level / 100
+        trade_value = self.available_capital * self.trade_size * self.x_leverage
+        position['dollar_value'] = trade_value
+        self._trade(position['ticker'], trade_value, side=position['signal'], method='open')
+        self._manage_positions(position, method='open')
 
-        d_amt_no_lev = d_amt_w_lev / self.x_leverage
 
-        self.available_capital += d_amt_no_lev + profit
+    def sell(self, position, index_of_action=None):
 
+        tp_index = position['index_tp_hit'].index(index_of_action)
+
+        rr = self.rr_list[tp_index]
+        pct_sold = self.tp_pcts[tp_index]
+
+        trade_value = position['dollar_value'] * pct_sold
+        profit = rr * trade_value * position['pct_open'] * position['pct']
+
+        position['index_tp_hit'][tp_index] = None
         position['pct_open'] -= pct_sold
-        position['index_tp_hit'][pos] = None
 
+        self._trade(position['ticker'], trade_value, profit=profit, side='sell')
 
-    def close_position(self, position):
-        self.positions.pop(self.positions.index(position))
-
-        pct_sold = position['pct_open']
-
-        d_amt_w_lev = position['d_amt'] * pct_sold/100
-
-        if position['tp'] == 0:
-            profit = -d_amt_w_lev * position['pct']
-        else:
-            profit = 0
-
-        d_amt_w_lev /= self.x_leverage
-
-        self.available_capital += d_amt_w_lev + profit
-
-        self._add_fee(position['ticker'], d_amt_w_lev, profit)
-
-        if 'USDT' in position['ticker']:
-            self.available_capital -= position['d_amt'] * .0005
-        else:
-            self.available_capital -= position['d_amt'] * .002
+        # Close position
+        if tp_index == position['tp']:
+            self._manage_positions(position, method='close')
