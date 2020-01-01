@@ -87,4 +87,4 @@ for window_lookback in window_lookback_list:
     # Save ending portfolio value
     results[window_lookback] = results_for_window
 
-results.to_csv('/home/carter/peter-signal/data/compounding_2.csv')
+results.to_csv('/home/carter/peter-signal/backtests/results/compounding-2.csv')
