@@ -1,62 +1,84 @@
 # Builds on compounding-1.py by finding best combination of additional parameters
 # given a set moving average combo and tp
+# Finds compounding results with different moving averages and tp_pct
 from functions import *
 from portfolio import Portfolio
-from variables import avgs_combined, tp_pcts_lst
+from variables import avgs_combined, tp_pcts_list
+import itertools
+import os
+import ujson
 
-results = pd.DataFrame(index=['-'.join(str(x) for x in tp_pcts.values()) for tp_pcts in tp_pcts_lst])
+avgs = [21, 30, 50]
+tp_pcts = [1, .05, .95, 0, 0]
+
+num_candles_list = range(2, 11)
+median_multiplier_list = range(2, 11)
+sdev_multiplier_list = range(5, 25)
+window_lookback_list = [12, 24, 36, 48, 60, 72]
+
+results = pd.DataFrame()
+
+for window_lookback in window_lookback_list:
+    results_for_window = []
+    for num_candles in num_candles_list:
+        for median_multiplier in median_multiplier_list:
+            for sdev_multiplier in sdev_multiplier_list:
+
+                signals = []
+                for f in os.listdir('../data/binance/'):
+
+                    df = pd.read_csv('../data/binance/' + f)
+                    coin_signals = find_signals(
+                        df, 21, 30, 50, num_candles=num_candles, median_multiplier=median_multiplier,
+                        sdev_multiplier=sdev_multiplier, window_lookback=window_lookback
+                    )
+
+                    # Add `tp`, `index_tp_hit`, and `index_closed`
+                    determine_TP(df, coin_signals)
+
+                    # Add ticker to signal & remove unused keys
+                    ticker = f[:f.find('.')]
+                    for x in coin_signals:
+                        x.update({'ticker': ticker})
+                        x.pop('date')
+                        x.pop('price')
+                        x.pop('stop_loss')
+
+                # Add coin signals to the primary signal list
+                signals.extend(coin_signals)
+
+                # Re-order signals by index opened
+                signals = sorted(signals, key=lambda x: x['index_opened'])
+
+                indices_tp_hit = set(itertools.chain.from_iterable(map(lambda x: x['index_tp_hit'], signals)))
+                indices_tp_hit.remove(None)
+                indices_opened = set(map(lambda x: x['index_opened'], signals))
+                indices_closed = set(map(lambda x: x['index_closed'], signals))
+                indices_of_action = sorted(indices_opened | indices_tp_hit | indices_closed)
+
+                portfolio = Portfolio(tp_pcts)
+
+                for index_of_action in indices_of_action:
+
+                    # Opening positions
+                    while len(signals) > 0 and signals[0]['index_opened'] == index_of_action:
+                        portfolio.open(signals.pop(0))
+
+                    # Selling positions
+                    if index_of_action in indices_tp_hit:
+                        for position in filter(lambda x: index_of_action in x['index_tp_hit'], portfolio.positions):
+                            while index_of_action in position['index_tp_hit']:
+                                portfolio.sell(position, index_of_action)
+
+                    # Closing positions
+                    if index_of_action in indices_closed:
+                        for position in list(filter(lambda x: index_of_action == x['index_closed'], portfolio.positions))[::-1]:
+                            portfolio.close(position)
 
 
-for avgs in avgs_combined[:1]:
+                results_for_window[str(num_candles) + '-' + str(median_multiplier) + '-' + str(sdev_multiplier)] = portfolio.available_capital
 
-    signals = []
-    for f in os.listdir('../data/binance/'):
+    # Save ending portfolio value
+    results[window_lookback] = results_for_window
 
-        df = pd.read_csv('../data/binance/' + f)
-        coin_signals = find_signals(df, *avgs)
-
-        # Add `tp`, `index_tp_hit`, and `index_closed`
-        determine_TP(df, coin_signals)
-
-        # Add ticker & pct_open to signal
-        for x in coin_signals:
-            x.update({
-                'ticker': f[:f.find('.')],
-                'pct_open': 100
-            })
-
-        # Add coin signals to the primary signal list
-        signals.extend(coin_signals)
-
-    available_capital_lst = []
-    for tp_pcts in tp_pcts_lst:
-
-        # Re-order signals by `index_opened`
-        signals_sorted = sorted(signals.copy(), key=lambda x: x['index_opened'])
-        portfolio = Portfolio(tp_pcts)
-
-        for hr in range(16000):
-
-            # Opening positions
-            while len(signals_sorted) > 0 and signals_sorted[0]['index_opened'] == hr:
-                portfolio.open_position(signals_sorted.pop(0))
-
-            # Only check for selling/closing positions when we have open trades
-            if len(portfolio.positions) > 0:
-
-                # Selling part of positions
-                if hr in portfolio.index_tp_hit_set:
-                    for position in filter(lambda x: hr in x['index_tp_hit'], portfolio.positions):
-                        while hr in position['index_tp_hit']:
-                            portfolio.sell_position(hr, position)
-
-                # Closing out positions
-                if hr in portfolio.index_closed_set:
-                    for position in list(filter(lambda x: hr == x['index_closed'], portfolio.positions))[::-1]:
-                        portfolio.close_position(position)
-
-        # Save ending portfolio value
-        available_capital_lst.append(portfolio.available_capital)
-
-    # Save all TP outcomes for moving average combination
-    results['-'.join(str(x) for x in avgs)] = available_capital_lst
+results.to_csv('/home/carter/peter-signal/data/compounding_2.csv')
