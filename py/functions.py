@@ -6,8 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-def find_signals(df, window_fast, window_mid, window_slow, window_lookback=48, \
-                 num_candles=3, median_multiplier=4, sdev_multiplier=12):
+def find_signals(df, window_fast, window_mid, window_slow):
     ''' Determine signals from OHLCV dataframe '''
 
     _open = df['open'].values
@@ -32,14 +31,13 @@ def find_signals(df, window_fast, window_mid, window_slow, window_lookback=48, \
         if i < 300:
             continue
 
-        body_sorted = np.sort(candle_body[i-window_lookback:i])
-        window_sdev = np.mean(candle_sdev[i-window_lookback:i])
-        candle_median = np.median(candle_body[i-window_lookback:i])
+        body_sorted = np.sort(candle_body[i-36:i])
+        window_sdev = np.mean(candle_sdev[i-36:i])
+        candle_median = np.median(candle_body[i-36:i])
 
         if (max(high[i-12:i]) - min(low[i-12:i])) / max(high[i-12:i]) > 0.04 \
         or max(candle_body[i-24:i]) > .04 \
-        or sum(body_sorted[-num_candles:]) - (candle_median * median_multiplier) > window_sdev * sdev_multiplier:
-        # or sum(body_sorted[-3:]) - (4*candle_median) > 12*window_sdev:
+        or sum(body_sorted[-2:]) - (candle_median * 3) > 8 * window_sdev:
             continue
 
         price = float(close[i])
