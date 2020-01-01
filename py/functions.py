@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 
 
-
-def find_signals(df, window_fast, window_mid, window_slow):
+def find_signals(df, window_fast, window_mid, window_slow, window_lookback=48, \
+                 num_candles=3, median_multiplier=4, sdev_multiplier=12):
     ''' Determine signals from OHLCV dataframe '''
 
     _open = df['open'].values
@@ -32,13 +32,14 @@ def find_signals(df, window_fast, window_mid, window_slow):
         if i < 300:
             continue
 
-        body_sorted = np.sort(candle_body[i-48:i])
-        window_sdev = np.mean(candle_sdev[i-48:i])
-        candle_median = np.median(candle_body[i-48:i])
+        body_sorted = np.sort(candle_body[i-window_lookback:i])
+        window_sdev = np.mean(candle_sdev[i-window_lookback:i])
+        candle_median = np.median(candle_body[i-window_lookback:i])
 
         if (max(high[i-12:i]) - min(low[i-12:i])) / max(high[i-12:i]) > 0.04 \
         or max(candle_body[i-24:i]) > .04 \
-        or sum(body_sorted[-3:]) - (4*candle_median) > 12*window_sdev:
+        or sum(body_sorted[-num_candles:]) - (candle_median * median_multiplier) > window_sdev * sdev_multiplier:
+        # or sum(body_sorted[-3:]) - (4*candle_median) > 12*window_sdev:
             continue
 
         price = float(close[i])
@@ -117,71 +118,3 @@ def determine_TP(df, signals, cushion=0):
         signals[i]['tp'] = tp
         signals[i]['index_tp_hit'] = index_tp_hit
         signals[i]['index_closed'] = x
-
-# ------------------------------------------------------------------------------
-# Old functions
-
-def find_intersections(line1, line2):
-    ''' Find intersections indices between two lines '''
-
-    line1_gt_line2 = line1 > line2
-    intersections = []
-    current_val = line1_gt_line2[0]
-
-    for i, val in line1_gt_line2.items():
-        if val != current_val:
-            intersections.append(i)
-        current_val = val
-
-    return intersections
-
-
-def net_profit_pct(tp_pcts, tps_hit, prices, stop_losses):
-    ''' Return outcome of TP in % '''
-
-    profit_pct = abs(prices - stop_losses) / prices
-    end_pct = list(map(lambda x: tp_pcts[x], tps_hit))
-    return profit_pct * end_pct
-
-
-def drop_extra_signals(signals, gap=0):
-    ''' TODO: conceptually this is very similar to find_intersections().  Is
-    there a reasonable way to combine them into one function? '''
-
-    last_signal = 0
-    clean_signals = []
-    for signal in signals.index:
-        if signal > last_signal + gap:
-            clean_signals.append(signal)
-        last_signal = signal
-    return signals.drop([i for i in signals.index if i not in clean_signals])
-
-
-def refresh_ohlcv(file, offline=False):
-    ''' Loop to update CSVs with recent OHLCV data '''
-
-    df = pd.read_csv('prices/' + file)
-    if 'signal' in df.columns:
-        df.drop('signal', axis=1,inplace=True)
-    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d %H:%M:%S')
-    coin = file[:file.find('.')]
-
-    if offline:
-        return coin, df
-
-    start_date = df.iloc[-1]['date']
-    df_new = []
-    binance = ccxt.binance()
-
-    while start_date < datetime.now():
-        results = binance.fetch_ohlcv(coin + '/USDT', '1h', since=int(start_date.timestamp()*1000))
-        df_new += results
-        start_date += timedelta(hours=len(results))
-
-    df_new = pd.DataFrame(df_new, columns=df.columns)
-    df_new['date'] = df_new['date'].apply(lambda x: datetime.fromtimestamp(x/1000))
-    df_new = df_new[df_new['date'] > df.iloc[-1]['date']]
-    df = df.append(df_new, ignore_index=True)
-    df.to_csv('prices/' + file, index=False)
-
-    return coin, df
