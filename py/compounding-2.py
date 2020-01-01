@@ -22,14 +22,11 @@ median_multiplier_list = range(2, 11)
 sdev_multiplier_list = range(6, 25, 2)
 window_lookback_list = [24, 36, 48, 60, 72]
 
-
-results = pd.DataFrame()
+results = []
 
 for window_lookback in window_lookback_list:
 
     print('\n' + str(window_lookback) + '\n')
-    results_for_window = {}
-
     for num_candles in tqdm(num_candles_list):
         for median_multiplier in median_multiplier_list:
             for sdev_multiplier in sdev_multiplier_list:
@@ -82,9 +79,9 @@ for window_lookback in window_lookback_list:
                             portfolio.close(position)
 
 
-                results_for_window['-'.join([str(num_candles), str(median_multiplier), str(sdev_multiplier)])] = portfolio.available_capital
+                # Save ending portfolio value
+                results.append([num_candles, median_multiplier, sdev_multiplier, window_lookback, portfolio.available_capital])
 
-    # Save ending portfolio value
-    results[window_lookback] = results_for_window
 
+results = pd.DataFrame(results, columns=['num_candles', 'median_multiplier', 'sdev_multiplier', 'window_lookback', 'ending_capital'])
 results.to_csv('/home/carter/peter-signal/backtests/results/compounding-2.csv')
