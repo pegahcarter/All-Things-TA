@@ -2,6 +2,7 @@ from functions import *
 from datetime import datetime, timedelta
 from variables import tickers, exchange
 from time import mktime
+from urllib.parse import urlencode
 
 
 def run(averages):
