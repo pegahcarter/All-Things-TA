@@ -1,4 +1,68 @@
 from functions import *
+import pandas as pd
+import numpy as np
+import itertools
+import os
+
+# --------------------------------------------------------------------------------
+# 2019.01.01
+# Seeing the best results of compounding-2.py
+df = pd.read_csv('../backtests/results/compounding-2.csv')
+df.columns
+df.sort_values('ending_capital', ascending=False)[:10]
+
+
+# --------------------------------------------------------------------------------
+# 2019.12.29
+# Testing out new portfolio class with revised determine_TP
+df = pd.read_csv('../data/binance/BTC-USDT.csv')
+
+%timeit signals = find_signals(df, window_fast=21, window_mid=30, window_slow=55)
+76.4 ms ± 759 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+
+%timeit x = determine_TP(df, signals)
+1.05 ms ± 3.7 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+
+results = set(itertools.chain.from_iterable(map(lambda x: x['index_tp_hit'], signals)))
+results.remove(None)
+
+index_opened = set(map(lambda x: x['index_opened'], signals))
+len(index_opened)
+test = sorted(results | index_opened)
+test
+len(test)
+indices_with_action = index_opened.update(results)
+
+
+
+# --------------------------------------------------------------------------------
+# 2019.12.28
+# Figuring out argsort of top 3
+
+
+df = pd.read_csv('../data/bitmex/BTCUSD.csv')
+
+close_pd = df['close']
+close_np = df['close'].values
+
+
+def original_fn():
+    body_sorted = sorted(close_pd[500:548])
+    results = sum(body_sorted[-3:])
+    return
+
+def new_fn():
+    body_sorted = np.sort(close_np[500:548])
+    results = np.sum(body_sorted[-3:])
+    return results
+
+
+%timeit original_fn()
+58.1 µs ± 1.36 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+
+
+%timeit new_fn()
+6.17 µs ± 43.2 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
 
 # --------------------------------------------------------------------------------
 # I need to create a ticker column/data point
@@ -93,6 +157,13 @@ messages = list(filter(lambda x: 'channel_post' in x.keys(), data))
 
 url = 'https://api.telegram.org/bot862004249:AAFS3xQAWRCYVbadZqr94k3sA5oqyjzmMW8/sendMessage?'
 requests.get(url + urlencode({'chat_id': '@worldclasstrader', 'text': 'Test'}))
+
+requests.get(url + urlencode({'chat_id': wc_id, 'text': 'Test'}))
+response = requests.get(url + urlencode({'chat_id': atta_id, 'text': 'Test'}))
+
+response.text
+
+
 
 # --------------------------------------------------------------------------------
 df = pd.read_csv(os.getcwd() + '/data/optimize_moving_avg.csv')

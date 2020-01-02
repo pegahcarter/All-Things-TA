@@ -1,4 +1,7 @@
 from functions import *
+from datetime import datetime, timedelta
+from variables import tickers, exchange
+from time import mktime
 
 
 def run(averages):
@@ -9,7 +12,7 @@ def run(averages):
         data = exchange.fetch_ohlcv(ticker,
                                     '1h',
                                     limit=500,
-                                    since=int(time.mktime(since.timetuple()) * 1000))
+                                    since=int(mktime(since.timetuple()) * 1000))
 
         df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
 
@@ -35,10 +38,10 @@ def send_signal(row, channel):
     signal = row['signal']
 
     if channel == 'wc_elite':
-        low_price, high_price = buy_range(price, diff=.0015)
+        low_price, high_price = buy_range(price, diff=.00128)
     else:  # channel == 'ata_insiders'
         price *= .9998
-        low_price, high_price = buy_range(price, diff=.00121)
+        low_price, high_price = buy_range(price, diff=.00111)
 
 
     diff = price - stop_loss
