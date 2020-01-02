@@ -2,6 +2,15 @@ from functions import *
 import pandas as pd
 import numpy as np
 import itertools
+import os
+
+# --------------------------------------------------------------------------------
+# 2019.01.01
+# Seeing the best results of compounding-2.py
+df = pd.read_csv('../backtests/results/compounding-2.csv')
+df.columns
+df.sort_values('ending_capital', ascending=False)[:10]
+
 
 # --------------------------------------------------------------------------------
 # 2019.12.29

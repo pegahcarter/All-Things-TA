@@ -50,11 +50,6 @@ for ticker in ['BTC/USDT', 'EOS/BTC', 'ETH/BTC', 'LTC/BTC', 'XRP/BTC', 'ADA/BTC'
 
     df = pd.DataFrame(df, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
     df['date'] = [datetime.fromtimestamp(x/1000) for x in df['date']]
-    # if coin == 'BTC':
-    #     btc_price = df['close'].copy()
-    # else:
-    #     for col in ['open', 'high', 'low', 'close', 'volume']:
-    #         df[col] *= btc_price
 
     df_old = pd.read_csv('data/bitfinex/' + coin + '.csv')
     df_new = df_old.append(df, ignore_index=True, sort=False)
