@@ -252,7 +252,7 @@ __- Net Profit: .938 BTC + 6.5 BTC = 7.188 BTC or 1.8 BTC each__
 
 #### Trade size requirement:  0.75% < trade size < 4.0%
 - Distribution
-  - count           698
+  - count      698
   - mean        2%
   - std         8%
   - min         8%
@@ -260,4 +260,8 @@ __- Net Profit: .938 BTC + 6.5 BTC = 7.188 BTC or 1.8 BTC each__
   - 50%        18%
   - 75%        24%
   - max        39%
-Name: pct, dtype: float64
+
+### 2020.01.04
+  - Question: How would you go about deciding what % to remove?  Would you ...
+    - Look at compounding or absolute return?
+    - Apply a universal model for all exchange pairs? Or custom parameters per pair?
