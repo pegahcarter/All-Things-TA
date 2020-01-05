@@ -6,52 +6,37 @@
   - trade_size > 0.04%    =>  10.1% of all trades
 
 
-#### Custom Standard Deviation Parameters
-|   TP    | Risk/Reward |   No requirement  |
-|---------|-------------|-------------------|
-|   0     |    -1:1     |      23.26%       |
-|   1     |    .5:1     |      34.59%       |
-|   2     |     1:1     |      17.42%       |
-|   3     |     2:1     |      06.58%       |
-|   4     |     3:1     |      18.15%       |
+#### Risk vs. Reward based on Profit (TP)
+|   TP    | Risk/Reward |
+|---------|-------------|
+|   0     |    -1:1     |
+|   1     |    .5:1     |
+|   2     |     1:1     |
+|   3     |     2:1     |
+|   4     |     3:1     |
 
 
 
+#### Distribution of Profit
+- `A` : Base algorithm
+- `B` : Base algorithm with custom logic
+- `C` : Base algorithm with custom logic and trade size requirements
+
+|   TP    |    `A`    |    `B`    |    `C`    |   Change   |
+|---------|-----------|-----------|-----------|------------|
+|   0     |  27.56%   |  23.26%   |  21.92%   |   -5.64%   |
+|   1     |  32.43%   |  34.59%   |  34.53%   |    2.10%   |
+|   2     |  17.27%   |  17.42%   |  17.33%   |    0.06%   |
+|   3     |   6.23%   |   6.58%   |   6.59%   |    0.36%   |
+|   4     |  16.51%   |  18.15%   |  19.63%   |    3.12%   |
 
 
 
-
-
-
-#### Profit Distribution
-|   TP    | Risk/Reward |   No requirement  |   0.75% < trade size < 4.0%   |   Change   |
-|---------|-------------|-------------------|-------------------------------|------------|
-|   0     |    -1:1     |      23.26%       |            21.92%             |   -1.34%   |
-|   1     |    .5:1     |      34.59%       |            34.53%             |   -0.06%   |
-|   2     |     1:1     |      17.42%       |            17.33%             |   -0.09%   |
-|   3     |     2:1     |      06.58%       |            06.59%             |   -0.01%   |
-|   4     |     3:1     |      18.15%       |            19.63%             |   1.48%    |
-
-
-#### Trade size requirement: None
-- Distribution
-  - count           821
-  - mean          1.94%
-  - std           1.21%
-  - min           0.29%
-  - max           12.3%
-
-#### Trade size requirement:  `0.75% < trade size < 4.0%`
-- Distribution
-  - count      698
-  - mean     1.90%
-  - std      0.79%
-  - min      0.75%
-  - max       3.9%
-
-
-
-
+|       | Trade Count |
+|-------|-----------  |
+|  `A`  |   1702      |
+|  `B`  |    821      |
+|  `C`  |    698      |
 
 
 ### 2020.01.04
