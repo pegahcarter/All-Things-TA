@@ -1,8 +1,10 @@
-from functions import *
-from datetime import datetime, timedelta
-from variables import tickers, exchange
 from time import mktime
 from urllib.parse import urlencode
+import requests
+from datetime import datetime, timedelta
+
+from functions import *
+from variables import *
 
 
 def run(averages):
@@ -97,7 +99,7 @@ def msg_wc(ticker, signal, stop_loss, low_price, high_price, tps):
     text += 'Stop loss {}\n\n'.format(stop_loss)
     text += '🚨🚨🚨'
 
-#    requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
+    # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
     requests.get(url + urlencode({'chat_id': wc_elite_id, 'text': text}))
 
     if ticker in ['XRP/H20', 'ETH/USD', 'LTC/H20', 'BCH/H20']:

@@ -5,6 +5,21 @@ import itertools
 import os
 
 # --------------------------------------------------------------------------------
+# 2019.01.12
+# Testing out passing in a row from a DataFrame as kwargs
+df = pd.read_csv('../data/bitmex/BTCUSD.csv')
+row = df.iloc[0]
+rowDict = dict(row)
+
+def foo(test, **kwargs):
+    print(kwargs)
+
+
+foo(1, **row)
+foo(1, **rowDict)
+
+
+# --------------------------------------------------------------------------------
 # 2019.01.01
 # Seeing the best results of compounding-2.py
 df = pd.read_csv('../backtests/results/compounding-2.csv')

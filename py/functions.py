@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-def find_signals(df, window_fast, window_mid, window_slow):
+def find_signals(df, window_fast, window_mid, window_slow, trade_min=0.0075, trade_max=0.04):
     ''' Determine signals from OHLCV dataframe '''
 
     _open = df['open'].values
@@ -52,7 +52,7 @@ def find_signals(df, window_fast, window_mid, window_slow):
                 signal = 'short'
                 stop_loss = float(max(high[i-10:i]))
 
-        if signal and mamid_emaslow_diff[i] > .001 and 0.0075 < abs(1 - stop_loss/price) < .04:
+        if signal and mamid_emaslow_diff[i] > .001 and trade_min < abs(1 - stop_loss/price) < trade_max:
             signals.append({'index_opened': int(i),
                             'date': df['date'][i],
                             'signal': signal,

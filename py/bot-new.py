@@ -17,7 +17,7 @@ class Bot:
         pass
 
 
-    def build_message(self, row, channel):
+    def build_message(self, channel, row):
 
         price = row['price']
         stop_loss = row['stop_loss']
@@ -35,30 +35,11 @@ class Bot:
 
         low_price = stringify_num(channel, ticker, low_price)
         high_price = stringify_num(channel, ticker, high_price)
-        
-
-        if ticker == 'ETH/USD':
-            low_price = format(low_price, '.2f')
-            high_price = format(high_price, '.2f')
-            tps = [format(tp, '.2f') for tp in tps]
-            stop_loss = format(stop_loss, '.2f')
-        else:
-            decimals = determine_decimals(number)
-
-
-        if channel == 'wc_elite':
-            if ticker != 'ETH/USD':
-
-            msg_atta(ticker, signal, stop_loss, low_price, high_price, tps)
-
-
-
-    def build_message(channel, ticker, signal, stop_loss, low_price, high_price, tps):
-
-        chat_id = getattr(self, channel)
-
+        tps  = [stringify_num(channel, ticker, tp) for tp in tps]
+        stop_loss = stringify_num(channel, ticker, stop_loss)
 
         # Send primary message
+        chat_id = getattr(self, channel)
         self.send_message(chat_id, message)
 
         # Send message to free WC channel
@@ -68,36 +49,6 @@ class Bot:
         # Send message to free ATTA channel
         if ticker in ['BTC/USD', 'ETH/USD', 'ETH/H20']:
             self.send_message(self.atta_id, message)
-
-
-
-
-    def stringify_num(self, channel, ticker, number):
-        if ticker == 'ETH/USD':
-            return format(number, '.2f')
-        else:
-            decimals = self.determine_decimals(ticker)
-            if 'wc' in channel:
-                return format(number, '.' + str(decimals) + 'f')
-            else:  # channel == 'atta'
-                return str(int(number * 10**decimals))
-
-
-    def determine_decimals(self, ticker):
-        if ticker == 'BTC/USD':
-            decimals = 0
-        elif 'BCH' in ticker or 'ETH' in ticker:
-            decimals = 5
-        elif 'LTC' in ticker:
-            decimals = 6
-        elif 'EOS' in ticker:
-            decimals = 7
-        elif 'XRP' in ticker:
-            decimals = 8
-
-        return decimals
-
-
 
 
     def template(self, channel, ticker, signal, stop_loss, low_price, high_price, tps):
@@ -123,6 +74,7 @@ class Bot:
 
 
     def send_message(self, chat_id, message):
+        message =
         url = self.base_url + urlencode({'chat_id': chat_id, 'message': message})
         return requests.get(url)
 
@@ -131,3 +83,28 @@ class Bot:
         low_price = price * (1. - diff)
         high_price = price * (1. + diff)
         return low_price, high_price
+
+
+    def stringify_num(self, channel, ticker, number):
+        if ticker == 'ETH/USD':
+            return format(number, '.2f')
+        else:
+            decimals = self.determine_decimals(ticker)
+            if 'wc' in channel:
+                return format(number, '.' + str(decimals) + 'f')
+            else:  # channel == 'atta'
+                return str(int(number * 10**decimals))
+
+
+    def determine_decimals(self, ticker):
+        if ticker == 'BTC/USD':
+            decimals = 0
+        elif 'BCH' in ticker or 'ETH' in ticker:
+            decimals = 5
+        elif 'LTC' in ticker:
+            decimals = 6
+        elif 'EOS' in ticker:
+            decimals = 7
+        elif 'XRP' in ticker:
+            decimals = 8
+        return decimals

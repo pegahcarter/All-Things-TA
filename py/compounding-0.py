@@ -12,7 +12,7 @@ signals = []
 for f in os.listdir('../data/binance/'):
 
     df = pd.read_csv('../data/binance/' + f)
-    coin_signals = find_signals(df, *avgs)
+    coin_signals = find_signals(df, 21, 30, 50, trade_min=0,trade_max=0.8)
 
     # Add `tp`, `index_tp_hit`, and `index_closed`
     determine_TP(df, coin_signals)
@@ -36,7 +36,6 @@ indices_opened = set(map(lambda x: x['index_opened'], signals))
 indices_closed = set(map(lambda x: x['index_closed'], signals))
 indices_of_action = set(sorted(indices_opened | indices_tp_hit | indices_closed))
 
-
 for index_of_action in indices_of_action:
 
     # Opening positions
@@ -55,4 +54,4 @@ for index_of_action in indices_of_action:
             portfolio.close(position)
 
 portfolio.available_capital
-portfolio.p
+len(signals)
