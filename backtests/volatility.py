@@ -77,3 +77,23 @@ for param in params:
     df_totals[param['colname']] = running_available_capital
 
 df_totals.to_csv('../backtests/results/available_capital.csv', index=False)
+
+from TAcharts.py.ta import rolling
+from datetime import datetime
+
+df_max_drawdown = pd.DataFrame(index=df_totals.columns, columns=['Max Drawdown %', 'Max Drawdown Date'])
+
+
+for col in df_totals:
+    roll_min = rolling(df_totals[col], n=30*24, fn='min')
+    roll_max = rolling(df_totals[col], n=30*24, fn='max')
+
+    delta = np.nan_to_num((roll_max - roll_min) / roll_max, 0)
+
+    max_drawdown_pct = str(round(max(delta) * 100, 1)) + '%'
+    max_drawdown_date = coin_df['date'][np.argmax(delta)]
+    max_drawdown_date = max_drawdown_date[:max_drawdown_date.find('.000')]
+
+    df_max_drawdown.loc[col] = max_drawdown_pct, max_drawdown_date
+
+df_max_drawdown.to_csv('../backtests/results/max_drawdown.csv')
