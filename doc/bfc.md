@@ -15,9 +15,9 @@
 |   3     |     2:1     |
 |   4     |     3:1     |
 
+---
 
-
-#### Distribution of Profit
+#### Algorithm comparison
 - `A` : Base algorithm
 - `B` : Base algorithm with custom logic
 - `C` : Base algorithm with custom logic and trade size requirements
@@ -30,7 +30,7 @@
 |   3     |   6.23%   |   6.58%   |   6.59%   |    0.36%   |
 |   4     |  16.51%   |  18.15%   |  19.63%   |    3.12%   |
 
-
+#### Number of trades
 
 |       | Trade Count |
 |-------|-----------  |
@@ -39,8 +39,4 @@
 |  `C`  |    698      |
 
 
-### 2020.01.04
-  - Question: How would you go about deciding what % to remove?  Would you ...
-    - Look at compounding or absolute return?
-    - Apply a universal model for all exchange pairs? Or custom parameters per pair?
-    - Use standard deviation to remove trade size outliers?  Number other than sdev?
+#### Compounded results(March 2018 - Nov 2019 with a starting value of $10k)
