@@ -39,4 +39,25 @@
 |  `C`  |    698      |
 
 
-#### Compounded results(March 2018 - Nov 2019 with a starting value of $10k)
+#### Compounded results
+* Jan 2019 - Nov 2019
+* For all tickers on BitMEX
+* Starting value: $10k
+|       | Start Value ($)   | End Value ($)      |   % change |
+|-------|-----------        |--------------------| --------   |
+|  `A`  |    10,000         |    11,183.35       |  11.18%
+|  `B`  |    10,000         |    15,997.49       |  59.97%
+|  `C`  |    10,000         |    19,381.38       |  93.81%
+
+#### Max drawdown (30 day)
+|       | Max drawdown % | Max drawdown date   |
+|-------|-----------   |-------------------|
+|  `A`  |    62.2%    |2019-08-01 13:00:00|
+|  `B`  |    51.7%    |2019-08-25 05:00:00|
+|  `C`  |    50.3%    |2019-07-03 12:00:00|
+
+#### Conclusions
+* Decreased trade size by 60%
+* Reduce SL's hit by 5% and increase wins by 5% (10% net)
+* Added 82.6% in profit after fees
+* Reduced max drawdown by 12%
