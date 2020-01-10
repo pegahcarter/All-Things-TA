@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 
 
-def find_signals(df, window_fast, window_mid, window_slow, trade_min=0.0075, trade_max=0.04):
+def find_signals(df, window_fast=21, window_mid=30, window_slow=50, trade_min=0.0075,
+                 trade_max=0.04, custom=True, **kwargs):
     ''' Determine signals from OHLCV dataframe '''
 
     _open = df['open'].values
@@ -31,26 +32,30 @@ def find_signals(df, window_fast, window_mid, window_slow, trade_min=0.0075, tra
         if i < 300:
             continue
 
+        price = float(close[i])
+        signal = None
+
         body_sorted = np.sort(candle_body[i-36:i])
         window_sdev = np.mean(candle_sdev[i-36:i])
         candle_median = np.median(candle_body[i-36:i])
 
-        if (max(high[i-12:i]) - min(low[i-12:i])) / max(high[i-12:i]) > 0.04 \
-        or max(candle_body[i-24:i]) > .04 \
-        or sum(body_sorted[-2:]) - (candle_median * 3) > 8 * window_sdev:
-            continue
-
-        price = float(close[i])
-        signal = None
+        # apply custom logic if needed
+        if custom:
+            if (max(high[i-12:i]) - min(low[i-12:i])) / max(high[i-12:i]) > 0.04 \
+            or max(candle_body[i-24:i]) > .04 \
+            or sum(body_sorted[-2:]) - (candle_median * 3) > 8 * window_sdev:
+                continue
 
         if price > emafast[i]:
-            if price > mabase[i] and mamid[i] > emaslow[i] and relative_strength[i] > 50:
-                signal = 'long'
-                stop_loss = float(min(low[i-10:i]))
+            if price > mabase[i] and mamid[i] > emaslow[i]:
+                if (custom and relative_strength[i] > 50) or not custom:
+                    signal = 'long'
+                    stop_loss = float(min(low[i-10:i]))
         else:   # price < emafast[i]
-            if price < mabase[i] and mamid[i] < emaslow[i] and relative_strength[i] < 50:
-                signal = 'short'
-                stop_loss = float(max(high[i-10:i]))
+            if price < mabase[i] and mamid[i] < emaslow[i]:
+                if (custom and relative_strength[i] < 50) or not custom:
+                    signal = 'short'
+                    stop_loss = float(max(high[i-10:i]))
 
         if signal and mamid_emaslow_diff[i] > .001 and trade_min < abs(1 - stop_loss/price) < trade_max:
             signals.append({'index_opened': int(i),
