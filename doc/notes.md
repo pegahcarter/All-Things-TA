@@ -231,3 +231,12 @@ __- Net Profit: .938 BTC + 6.5 BTC = 7.188 BTC or 1.8 BTC each__
 #### Charging Elite
   - 12.12 Signals sent to ATTA elite
   - 12.27 Date of addition of signals to ATTA plebes
+
+
+### 2020.01.11
+#### Actionable steps
+1. Add oanda data to peter-signal
+2. Replace local TAcharts with TAcharts module
+3. Run code to send `TEST` signals
+4. Validate last signal sent from wc/atta by sending to test
+5. Create signals for one ticker with no custom logic
