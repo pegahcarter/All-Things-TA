@@ -9,7 +9,7 @@ import numpy as np
 # However, it needs to be applied uniquely to each ticker
 
 df = pd.DataFrame(signals())
-requirements = {}
+requirements = []
 
 for ticker in set(df['ticker']):
     ticker_pct_sorted = df[df['ticker'] == ticker]['pct'].sort_values().values
@@ -19,8 +19,7 @@ for ticker in set(df['ticker']):
     # Top 5% of trades
     trade_max = ticker_pct_sorted[-int(len(ticker_pct_sorted) * .05)]
 
-    requirements[ticker] = {'trade_min': trade_min, 'trade_max': trade_max}
+    requirements.append({'ticker': ticker, 'trade_min': trade_min, 'trade_max': trade_max})
 
 
-df_requirements = pd.DataFrame().from_dict(requirements, orient='index')
-df_requirements.to_csv('/home/carter/peter-signal/backtests/oanda/requirements.csv')
+pd.DataFrame(requirements).to_csv('/home/carter/peter-signal/backtests/oanda/requirements.csv', index=False)
