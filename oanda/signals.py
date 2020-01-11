@@ -17,6 +17,6 @@ def signals(trade_min=0, trade_max=1, directory='../data/oanda/'):
         _signals.extend(coin_signals)
 
     # Re-order signals by index opened
-    _signals = sorted(_signals, key=lambda x: x['opened'])
+    _signals = sorted(_signals, key=lambda x: x['index_opened'])
 
     return _signals

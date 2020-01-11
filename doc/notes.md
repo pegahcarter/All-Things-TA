@@ -239,7 +239,7 @@ __- Net Profit: .938 BTC + 6.5 BTC = 7.188 BTC or 1.8 BTC each__
   (X) Replace local TAcharts with TAcharts module
   (X) Run code to send `TEST` signals
   (X) Validate last signal sent from wc/atta by sending to test
-  (O) Create signals for one ticker with no custom logic
+  (X) Create signals for one ticker with no custom logic
   ( ) Move code from py to crypto (And fix all file references)
   ( ) Analyze distribution of trade size and determine which outliers to remove
   ( ) Decision tree model for feature importance
