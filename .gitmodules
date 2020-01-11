@@ -1,3 +1,0 @@
-[submodule "py/TAcharts"]
-	path = py/TAcharts
-	url = git@github.com:carlfarterson/TA-charts.git
