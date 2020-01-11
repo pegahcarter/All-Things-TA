@@ -240,6 +240,7 @@ __- Net Profit: .938 BTC + 6.5 BTC = 7.188 BTC or 1.8 BTC each__
   (X) Run code to send `TEST` signals
   (X) Validate last signal sent from wc/atta by sending to test
   (X) Create signals for one ticker with no custom logic
-  ( ) Move code from py to crypto (And fix all file references)
   ( ) Analyze distribution of trade size and determine which outliers to remove
+  ( ) Integrate custom trade requirements with basic signals
+  ( ) Move code from py to crypto (And fix all file references)
   ( ) Decision tree model for feature importance
