@@ -244,6 +244,8 @@ __- Net Profit: .938 BTC + 6.5 BTC = 7.188 BTC or 1.8 BTC each__
   (X) Integrate custom trade requirements with basic signals
   (X) Determine TP code
   (X) Calculate profit
+  (X) Copy over oanda py files from fx-signal
   ( ) Decision tree model for feature importance
   ( ) Add custom logic to algorithm
   ( ) Move code from py to crypto (And fix all file references)
+  ( ) Research exchange API docs
