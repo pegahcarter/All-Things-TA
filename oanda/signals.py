@@ -24,7 +24,7 @@ def signals(trade_min=0, trade_max=1, directory='../data/oanda/', tp=False, **kw
     # Re-order signals by index opened
     _signals = sorted(_signals, key=lambda x: x['index_opened'])
 
-    return pd.DataFrame(_signals)
+    return _signals
 
 
 
@@ -75,6 +75,6 @@ def determine_TP(df, signals):
         if x == len(df):
             signals.pop(i)
 
-        signals[i]['tp'] = tp
+        signals[i]['tp'] = int(tp)
         signals[i]['index_tp_hit'] = index_tp_hit
         signals[i]['index_closed'] = x

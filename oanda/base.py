@@ -16,7 +16,7 @@ def base(df, window_fast=8, window_mid=30, window_slow=50, trade_min=0,
     emafast = ema(close, n=window_fast)
     mabase = sma(close, n=200)
 
-    signals = []
+    signal_list = []
 
     for i in crossover(emafast, mamid):
         if i < 200:
@@ -35,7 +35,7 @@ def base(df, window_fast=8, window_mid=30, window_slow=50, trade_min=0,
                 stop_loss = float(max(high[i-10:i]) * (1 - cushion))
 
         if signal and trade_min < abs(1 - stop_loss/price) < trade_max:
-            signals.append({'index_opened': int(i),
+            signal_list.append({'index_opened': int(i),
                             'date': df['date'][i],
                             'signal': signal,
                             'ticker': ticker,
@@ -43,4 +43,4 @@ def base(df, window_fast=8, window_mid=30, window_slow=50, trade_min=0,
                             'stop_loss': stop_loss,
                             'pct': abs(stop_loss - price) / price})
 
-    return signals
+    return signal_list

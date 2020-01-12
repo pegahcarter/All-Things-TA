@@ -243,6 +243,7 @@ __- Net Profit: .938 BTC + 6.5 BTC = 7.188 BTC or 1.8 BTC each__
   (X) Analyze distribution of trade size and determine which outliers to remove
   (X) Integrate custom trade requirements with basic signals
   (X) Determine TP code
+  (X) Calculate profit
   ( ) Decision tree model for feature importance
   ( ) Add custom logic to algorithm
   ( ) Move code from py to crypto (And fix all file references)
