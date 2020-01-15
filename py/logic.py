@@ -102,7 +102,7 @@ def msg_wc(ticker, signal, stop_loss, low_price, high_price, tps):
     # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
     requests.get(url + urlencode({'chat_id': wc_elite_id, 'text': text}))
 
-    if ticker in ['XRP/H20', 'ETH/USD', 'LTC/H20', 'BCH/H20']:
+    if ticker in ['XRP/H20', 'LTC/H20', 'BCH/H20']:
         requests.get(url + urlencode({'chat_id': wc_id, 'text': text}))
 
 
@@ -121,5 +121,5 @@ def msg_atta(ticker, signal, stop_loss, low_price, high_price, tps):
     # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
     requests.get(url + urlencode({'chat_id': atta_insiders_id, 'text': text}))
 
-    # if ticker in ['BTC/USD', 'ETH/USD',  'ETH/H20']:
-    requests.get(url + urlencode({'chat_id': atta_id, 'text': text}))
+    if ticker in ['BTC/USD', 'ETH/USD',  'ETH/H20']:
+    	requests.get(url + urlencode({'chat_id': atta_id, 'text': text}))
