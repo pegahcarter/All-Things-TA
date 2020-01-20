@@ -6,7 +6,7 @@ from functions import *
 import seaborn as sns
 
 
-tps = {0: -1, 1: 0.025, 2: 0.925, 3: 0.925, 4: 0.925}
+tps = {0: -1, 1: 0.025, 2: 0.95, 3: 0.95, 4: 0.95}
 
 
 def all_signals(trade_min, trade_max, directory='../data/binance/'):
@@ -32,16 +32,11 @@ def all_signals(trade_min, trade_max, directory='../data/binance/'):
     return pd.DataFrame(signals)
 
 
-df_crypto = all_signals(0, .8)
+df_crypto = all_signals(0, 1)
 df_crypto = df_crypto[['ticker', 'pct', 'tp']]
-# ------------------------------------------------------------------------------
-# Net profit (the old fashioned way)
 
+    ticker_pct_sorted = df[df['ticker'] == ticker]['pct'].sort_values().values
 
-
-
-
-# ------------------------------------------------------------------------------
 
 df_crypto_outliers = df_crypto[(df_crypto['pct'] < .0075) | (df_crypto['pct'] > .04)]
 

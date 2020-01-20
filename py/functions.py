@@ -1,13 +1,13 @@
-from TAcharts.py.ta import ema, sma
-from TAcharts.py.momentum import rsi
-from TAcharts.py.utils import crossover
+from TAcharts.indicators import ema, sma, rsi
+from TAcharts.utils import crossover
+
 
 import numpy as np
 import pandas as pd
 
 
 def find_signals(df, window_fast=21, window_mid=30, window_slow=50, trade_min=0.0075,
-                 trade_max=0.04, custom=True, **kwargs):
+                 trade_max=0.04, custom=True, cushion=0, **kwargs):
     ''' Determine signals from OHLCV dataframe '''
 
     _open = df['open'].values
@@ -48,22 +48,24 @@ def find_signals(df, window_fast=21, window_mid=30, window_slow=50, trade_min=0.
 
         if price > emafast[i]:
             if price > mabase[i] and mamid[i] > emaslow[i]:
-                if (custom and relative_strength[i] > 50) or not custom:
+                if (custom and relative_strength[i] > 50) or custom == False:
                     signal = 'long'
-                    stop_loss = float(min(low[i-10:i]))
+                    stop_loss = float(min(low[i-10:i]) * (1 + cushion))
         else:   # price < emafast[i]
             if price < mabase[i] and mamid[i] < emaslow[i]:
-                if (custom and relative_strength[i] < 50) or not custom:
+                if (custom and relative_strength[i] < 50) or custom == False:
                     signal = 'short'
-                    stop_loss = float(max(high[i-10:i]))
+                    stop_loss = float(max(high[i-10:i]) * (1 - cushion))
 
-        if signal and mamid_emaslow_diff[i] > .001 and trade_min < abs(1 - stop_loss/price) < trade_max:
-            signals.append({'index_opened': int(i),
-                            'date': df['date'][i],
-                            'signal': signal,
-                            'price': price,
-                            'stop_loss': stop_loss,
-                            'pct': abs(stop_loss - price) / price})
+        if signal:
+            if custom == False \
+            or (mamid_emaslow_diff[i] > .001 and trade_min < abs(1 - stop_loss/price) < trade_max):
+                signals.append({'index_opened': int(i),
+                                'date': df['date'][i],
+                                'signal': signal,
+                                'price': price,
+                                'stop_loss': stop_loss,
+                                'pct': abs(stop_loss - price) / price})
 
     return signals
 
@@ -90,22 +92,23 @@ def determine_TP(df, signals, cushion=0):
             stop_loss *= -1
 
         diff = price - stop_loss
-        # stop_loss *= (1. + cushion)
+        stop_loss *= (1. + cushion)
 
         tp1 = price + diff/2.
         tp2 = price + diff
-        tp3 = price + diff*2
-        tp4 = price + diff*3
+        # tp3 = price + diff*2
+        # tp4 = price + diff*3
 
-        tp_targets = [tp1, tp2, tp3, tp4]
-        index_tp_hit = [None, None, None, None, None]
+        # tp_targets = [tp1, tp2, tp3, tp4]
+        tp_targets = [tp1, tp2]
+        index_tp_hit = [None, None, None]
         tp = 0
 
         for x in range(row['index_opened'] + 1, len(df)):
-            while tp != 4 and u_bounds[x] > tp_targets[tp]:
+            while tp != 2 and u_bounds[x] > tp_targets[tp]:
                 tp += 1
                 index_tp_hit[tp] = x
-            if tp == 4 or l_bounds[x] < stop_loss:
+            if tp == 2 or l_bounds[x] < stop_loss:
                 # Add index hit for stop loss
                 if tp == 0:
                     index_tp_hit[0] = x

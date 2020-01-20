@@ -30,24 +30,23 @@
 |   3     |   6.23%   |   6.58%   |   6.59%   |    0.36%   |
 |   4     |  16.51%   |  18.15%   |  19.63%   |    3.12%   |
 
-#### Number of trades
-
-|       | Trade Count |
-|-------|-----------  |
-|  `A`  |   1702      |
-|  `B`  |    821      |
-|  `C`  |    698      |
 
 
 #### Compounded results
 * Jan 2019 - Nov 2019
 * For all tickers on BitMEX
 * Starting value: $10k
-|       | Start Value ($)   | End Value ($)      |   % change |
-|-------|-----------        |--------------------| --------   |
-|  `A`  |    10,000         |    11,183.35       |  11.18%
-|  `B`  |    10,000         |    15,997.49       |  59.97%
-|  `C`  |    10,000         |    19,381.38       |  93.81%
+|       | Start Value ($)   | End Value ($)      |   % change | Trade Count | Avg. profit per trade (after fees)|
+|-------|-----------        |--------------------| --------   |-----------  | ----------------------|
+|  `A`  |    10,000         |    11,183.35       |  11.18%    |   1702      |         0.0065%       |
+|  `B`  |    10,000         |    15,997.49       |  59.97%    |    821      |         0.07%         |
+|  `C`  |    10,000         |    19,381.38       |  93.81%    |    698      |         0.13%         |
+
+
+* 0.0065% profit per trade => 0.13% profit per trade is an improvement of __20x__
+
+
+
 
 #### Max drawdown (30 day)
 |       | Max drawdown % | Max drawdown date   |
