@@ -8,7 +8,7 @@ class Portfolio:
     trade_size = .1
     # NOTE: rr = risk/return
     rrs = [-1, .5, 1, 2, 3]
-    initial_capital = 10000
+    initial_capital = 10
 
     def __init__(self, tp_pcts):
         self.available_capital = self.initial_capital
@@ -47,6 +47,10 @@ class Portfolio:
             self.available_capital += base_value + profit
 
         self._add_fee(ticker, trade_value, profit, signal, method)
+
+
+    def has_open_positions(self):
+        return len(self.positions) > 0
 
 
     def open(self, position):
