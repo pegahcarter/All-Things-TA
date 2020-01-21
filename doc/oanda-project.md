@@ -16,9 +16,23 @@
 - [ ] Send basic trade on demo account
 - [ ] Research FX-choice
 - [ ] Run code to send test signals in fx telegram group
-- [ ] Backtest
-    - [ ] 1. Loop through candle volatility parameters
-    - [ ] 2. For each set of parameters:
-        - [ ] a. Return absolute return for each set of parameters
-        - [ ] b. Return compounded return for each set of parameters
-    - [ ] 3. Decision tree model for feature importance
+
+
+- [ ] __Backtest__
+  - [ ] 1. Loop through candle volatility parameters
+  - [ ] 2. For each set of parameters:
+      - [ ] a. Return absolute return for each set of parameters
+      - [ ] b. Return compounded return for each set of parameters
+  - [ ] 3.  Decision tree model for feature importance
+
+
+- [ ] __Research__
+  - [ ] Create demo account of
+
+
+- [ ] __Sending new signals__
+  - [ ] 1. Fetch recent prices from exchange
+    - [ ] a. Set up demo account with FXchoice
+    - [ ] b. Save signals
+    - [ ] c.
+  - [ ] 2.
