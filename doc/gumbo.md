@@ -2,7 +2,7 @@
 #### By: Carter Carlson
 
 
-#### Algorithm Description
+#### Algorithm Summary
 * Max drawdown over 30 days:  26.58%
 * Max upside over 30 days: 38.03%
 * Size per trade: 10% of available capital
@@ -10,7 +10,8 @@
 * Max gain/loss possible per trade: 4% of portfolio
 * Max percent of portfolio locked in trades:  44.79%
 * Max # of trades open at one time:  6
-
+* Average trade duration: 12 hours
+* Average time between trades: 21 hours
 
 ---
 
@@ -43,12 +44,13 @@
 
 |       | Start Value (BTC) | End Value (BTC) |  Net Profit | Trade Count | Avg. profit per trade (including fees)|
 |-------|-------------------|-----------------|-----------|-------------| ----------------------|
-|  `A`  |    10             |     5.02        |  -49.08%   |   1801      |         0.0084%       |
-|  `B`  |    10             |    40.01        |  400.01%   |    786      |         0.1074%        |
+|  `A`  |    10             |     5.02        |  -49.08%   |   1801      |         -0.027%       |
+|  `B`  |    10             |    40.01        |  400.01%   |    786      |         0.509%        |
 
 
 ---
 #### Conclusions
-* Net profit __increased over 5x__ (15.1% => 84.40%)
+* Loss rate __reduced by 5%__ and win rate __improved by 5%__
+* Net profit __changed from -49.08% to +400.01%__
 * Trade count __reduced over 50%__ (1801 => 786)
-* Average profit per trade __increased over 10x__ (0.0084% => 0.1074%)
+* Average profit per trade __improved by a factor of over 20x__ (-0.027% => 0.509%)
