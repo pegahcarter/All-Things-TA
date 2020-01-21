@@ -9,13 +9,13 @@ import seaborn as sns
 tps = {0: -1, 1: 0.025, 2: 0.95, 3: 0.95, 4: 0.95}
 
 
-def all_signals(trade_min, trade_max, directory='../data/binance/'):
+def all_signals(trade_min, trade_max, custom=True, directory='../data/binance/', cushion=0):
     signals = []
     for f in os.listdir(directory):
         ticker = f[:f.find('.')]
         df = pd.read_csv(directory + f)
 
-        coin_signals = find_signals(df, 21, 30, 50, trade_min, trade_max)
+        coin_signals = find_signals(df, 21, 30, 55, trade_min, trade_max, custom, cushion)
 
         # Add `tp`, `index_tp_hit`, and `index_closed`
         determine_TP(df, coin_signals)
@@ -29,10 +29,29 @@ def all_signals(trade_min, trade_max, directory='../data/binance/'):
 
     # Re-order signals by index opened
     signals = sorted(signals, key=lambda x: x['index_opened'])
-    return pd.DataFrame(signals)
+    return pd.DataFrame(signals)[['date', 'ticker', 'signal', 'price', 'stop_loss', 'tp']]
 
 
-df_crypto = all_signals(0, 1)
+df_all = all_signals(0, 1, custom=False)
+df_custom = all_signals(.0075, .04, custom=True)
+
+df_all.to_csv('../backtests/crypto/trades_without_custom_logic.csv', index=False)
+df_custom.to_csv('../backtests/crypto/trades_with_custom_logic.csv', index=False)
+
+
+len(df_all)
+len(df_custom)
+
+df_all['tp'].value_counts() / len(df_all)
+df_custom['tp'].value_counts() / len(df_custom)
+
+
+
+
+
+
+
+
 df_crypto = df_crypto[['ticker', 'pct', 'tp']]
 
     ticker_pct_sorted = df[df['ticker'] == ticker]['pct'].sort_values().values

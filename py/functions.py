@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-def find_signals(df, window_fast=21, window_mid=30, window_slow=50, trade_min=0.0075,
+def find_signals(df, window_fast=21, window_mid=30, window_slow=55, trade_min=0.0075,
                  trade_max=0.04, custom=True, cushion=0, **kwargs):
     ''' Determine signals from OHLCV dataframe '''
 
