@@ -13,6 +13,7 @@ for f in os.listdir('../data/binance/'):
 
     df = pd.read_csv('../data/binance/' + f)
     coin_signals = find_signals(df, 21, 30, 55, 0.0075, 0.04)
+    # coin_signals = find_signals(df, 21, 30, 55, 0, 1, custom=False)
 
     # Add `tp`, `index_tp_hit`, and `index_closed`
     determine_TP(df, coin_signals)
@@ -34,7 +35,8 @@ indices_tp_hit = set(itertools.chain.from_iterable(map(lambda x: x['index_tp_hit
 indices_tp_hit.remove(None)
 indices_opened = set(map(lambda x: x['index_opened'], signals))
 indices_closed = set(map(lambda x: x['index_closed'], signals))
-indices_of_action = set(sorted(indices_opened | indices_tp_hit | indices_closed))
+indices_of_action = sorted(indices_opened | indices_tp_hit | indices_closed)
+
 
 for index_of_action in indices_of_action:
 

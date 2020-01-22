@@ -18,7 +18,7 @@ for cushion in cushion_list:
     for f in os.listdir('../data/binance/'):
 
         df = pd.read_csv('../data/binance/' + f)
-        coin_signals = find_signals(df, window_fast=21, window_mid=30, window_slow=50, cushion=cushion)
+        coin_signals = find_signals(df, window_fast=21, window_mid=30, window_slow=55, cushion=cushion)
 
         # Add `tp`, `index_tp_hit`, and `index_closed`
         determine_TP(df, coin_signals)
@@ -40,7 +40,7 @@ for cushion in cushion_list:
         indices_tp_hit.remove(None)
     indices_opened = set(map(lambda x: x['index_opened'], signals))
     indices_closed = set(map(lambda x: x['index_closed'], signals))
-    indices_of_action = set(sorted(indices_opened | indices_tp_hit | indices_closed))
+    indices_of_action = sorted(indices_opened | indices_tp_hit | indices_closed)
 
     for index_of_action in indices_of_action:
 
@@ -61,4 +61,4 @@ for cushion in cushion_list:
 
     results[cushion] = portfolio.available_capital
 
-results.to_csv('/home/carter/peter-signal/backtests/crypto/cushion.csv')
+results.to_csv('../backtests/crypto/cushion.csv')
