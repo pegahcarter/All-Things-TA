@@ -55,11 +55,11 @@ class Bot:
         # build template
         if 'wc' in channel:
             message = '🚨🚨🚨\n\n'
-            message += '{}\nBitMEX\n'.format(ticker)
-            message += '{} zone {}-{}\n'.format(signal, low_price, high_price)
-            message += 'Take profit {}, {}, {}\n'.format(*tps)
+            message += f'{ticker}\nBitMEX\n'
+            message += f'{signal} zone {low_price}-{high_price}\n'
+            message += f'Take profit {tps[0]}, {tps[1]}, {tps[2]}\n'
             message += 'Leverage 10x\n'
-            message += 'Stop loss {}\n\n'.format(stop_loss)
+            message += f'Stop loss {stop_loss}\n\n'
             message += '🚨🚨🚨'
         else:   # channel == 'atta'
             message = '🚀🚀{}🚀🚀\n\n'.format(ticker)
