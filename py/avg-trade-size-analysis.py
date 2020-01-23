@@ -1,9 +1,11 @@
 # Analyzing the percent/number of trades taken from reducing trade size criteria
 # to between .75% and 4%
 
+# Could you provide a trade log in this style: pair - buy price - sell price - % profit or loss
 import os
 from functions import *
 import seaborn as sns
+from datetime import timedelta
 
 
 tps = {0: -1, 1: 0.025, 2: 0.95, 3: 0.95, 4: 0.95}
@@ -29,7 +31,15 @@ def all_signals(trade_min, trade_max, custom=True, directory='../data/binance/',
 
     # Re-order signals by index opened
     signals = sorted(signals, key=lambda x: x['index_opened'])
-    return pd.DataFrame(signals)[['date', 'ticker', 'signal', 'price', 'stop_loss', 'tp']]
+    signals = pd.DataFrame(signals)
+
+
+    signals['date_opened'] = pd.to_datetime(signals['date'])
+    hrs_open = signals['index_closed'] - signals['index_opened']
+
+    signals['date_closed'] = [signals['date_opened'][i] + timedelta(hours=int(hrs_open[i])) for i in range(len(signals))]
+    signals['net_profit'] = [signals['pct'][i] * tps[signals['tp'][i]] for i in range(len(signals))]
+    return signals[['ticker', 'price', 'stop_loss', 'net_profit', 'pct', 'tp']]
 
 
 df_all = all_signals(0, 1, custom=False)
@@ -39,8 +49,6 @@ df_all.to_csv('../backtests/crypto/trades_without_custom_logic.csv', index=False
 df_custom.to_csv('../backtests/crypto/trades_with_custom_logic.csv', index=False)
 
 
-len(df_all)
-len(df_custom)
 
 df_all['tp'].value_counts() / len(df_all)
 df_custom['tp'].value_counts() / len(df_custom)
