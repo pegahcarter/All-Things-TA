@@ -4,7 +4,7 @@ from datetime import datetime
 
 class Portfolio:
 
-    x_leverage = 10
+    x_leverage = 5
     trade_size = .1
     # NOTE: rr = risk/return
     rrs = [-1, .5, 1, 2, 3]

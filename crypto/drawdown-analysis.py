@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from TAcharts.indicators import rolling
 
-TAcharts.indicators.rolling
 
 df = pd.read_csv('../backtests/crypto/drawdown.csv')
 

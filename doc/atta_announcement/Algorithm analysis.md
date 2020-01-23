@@ -6,11 +6,11 @@ ATTA Algorithm Summary
 
 &nbsp; | &nbsp;
 ------ | -----
-Max drawdown over 30 days |  26.58%
-Max upside over 30 days | 38.03%
+Max drawdown over 30 days |  14%
+Max upside over 30 days | 17%
 Available capital allocated per trade | 10%
-Leverage | 10x
-Max gain/loss possible per trade | 4%
+Leverage | 5x
+Max gain/loss possible per trade | 2%
 Max percent of portfolio locked in trades |  44.79%
 Max # of trades open at one time |  6
 Average trade duration | 12 hours
@@ -47,13 +47,13 @@ Compounded results
 
  &nbsp;| Start Value (BTC) | End Value (BTC) |  Net Profit | Trade Count | Avg. profit per trade (including fees)
 -------|-------------------|-----------------|-------------|-------------| ----------------------
-  `A`  |    1              |     .502        |  -49.08%    |   1801      |         -0.027%       
-  `B`  |    1              |     4.0         |  400.01%    |    786      |         0.509%        
+  `A`  |    1              |     0.81        |  -19%    |   1801      |         -0.011%       
+  `B`  |    1              |     2.06         |  106%    |    786      |         0.262%        
 
 
 Conclusions
 ======================
 * Loss rate __reduced by ~5%__ and win rate __improved by ~5%__
-* Net profit __changed from -49.08% to +400.01%__
+* Net profit __changed from -19% to +106%__
 * Trade count __reduced over 50%__ (1801 => 786)
-* Average profit per trade __improved by a factor of over 20x__ (-0.027% => 0.509%)
+* Average profit per trade __improved by a factor of over 20x__ (-0.011% => 0.262%)

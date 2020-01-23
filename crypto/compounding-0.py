@@ -12,8 +12,8 @@ signals = []
 for f in os.listdir('../data/binance/'):
 
     df = pd.read_csv('../data/binance/' + f)
-    coin_signals = find_signals(df, 21, 30, 55, 0.0075, 0.04)
-    # coin_signals = find_signals(df, 21, 30, 55, 0, 1, custom=False)
+    # coin_signals = find_signals(df, 21, 30, 55, 0.0075, 0.04)
+    coin_signals = find_signals(df, 21, 30, 55, 0, 1, custom=False)
 
     # Add `tp`, `index_tp_hit`, and `index_closed`
     determine_TP(df, coin_signals)
