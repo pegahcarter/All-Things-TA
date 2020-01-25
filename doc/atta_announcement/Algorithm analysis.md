@@ -1,6 +1,6 @@
-ATTA Algorithm Summary
+Algorithm analysis
 ======================
-[@AllthingsTA](https://t.me/AllthingsTA)
+By: Carter Carlson
 ----------------------
 
 

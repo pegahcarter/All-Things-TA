@@ -1,7 +1,6 @@
 # Analyzing the percent/number of trades taken from reducing trade size criteria
 # to between .75% and 4%
 
-# Could you provide a trade log in this style: pair - buy price - sell price - % profit or loss
 import os
 from functions import *
 import seaborn as sns
@@ -49,10 +48,16 @@ df_all.to_csv('../backtests/crypto/trades_without_custom_logic.csv', index=False
 df_custom.to_csv('../backtests/crypto/trades_with_custom_logic.csv', index=False)
 
 
-
 df_all['tp'].value_counts() / len(df_all)
 df_custom['tp'].value_counts() / len(df_custom)
 
+
+df_custom['net_profit'].sum()
+
+
+df = pd.read_csv('../backtests/crypto/trades_with_custom_logic.csv')
+net_profit = df['net_profit']
+net_profit[net_profit > 0].sum() / net_profit[net_profit < 0].sum()
 
 
 
