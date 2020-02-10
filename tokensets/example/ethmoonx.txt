@@ -1,3 +1,4 @@
+https://etherscan.io/address/0x73104e9d3da91e410a6c211068f7bffabbbd3e26
 https://www.tokensets.com/set/ethmoonx
 
 Moonshot is an automated strategy that buys when RSI and volatility is high, sells
