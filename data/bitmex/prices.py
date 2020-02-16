@@ -5,14 +5,16 @@ import ccxt
 from datetime import datetime, timedelta
 import time
 
-signals = pd.read_csv('../../data/signals/atta_insiders.csv')
-
-bitmex = ccxt.bitmex()
-# tickers_traded_2020 = [x for x in signals['ticker'].unique() if '/H20' in x or '/USD' in x]
 
 start = datetime(year=2020, month=1, day=1, hour=0)
+bitmex = ccxt.bitmex()
 
-for ticker in ['XRP/USD']:
+
+# tickers = [t for t in bitmex.fetchTickers() if 'H20' in t]
+tickers = [t for t in bitmex.fetchTickers() if 'H20' in t or '/USD' in t]
+
+
+for ticker in tickers:
     start_date = start
     df = []
 
