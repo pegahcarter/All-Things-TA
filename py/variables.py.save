@@ -2,9 +2,8 @@ import ccxt
 from itertools import permutations
 import numpy as np
 
-exchange = ccxt.bitmex()
-
-tickers = ['BTC/USD', 'ETH/USD', 'XRP/USD', 'ETHH20', 'XRPH20', 'BCHH20', 'EOSH20']
+exchange = ccxt.bitm
+tickers = ['BTC/USD', 'ETH/USD', 'ETHH20', 'XRPH20', 'BCHH20', 'EOSH20', 'XRP]
 
 
 # Telegram
