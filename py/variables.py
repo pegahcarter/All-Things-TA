@@ -4,7 +4,7 @@ import numpy as np
 
 exchange = ccxt.bitmex()
 
-tickers = ['BTC/USD', 'ETH/USD', 'XRP/USD', 'ETHH20', 'XRPH20', 'BCHH20', 'EOSH20']
+tickers = ['BTC/USD', 'ETH/USD', 'ETHH20', 'XRPH20', 'BCHH20', 'EOSH20']
 
 
 # Telegram
