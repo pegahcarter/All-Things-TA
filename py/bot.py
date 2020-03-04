@@ -9,11 +9,6 @@ from datetime import datetime
 import os
 
 
-
-def determine_csv_filename(channel):
-    return f"{os.path.abspath('../')}/data/signals/{channel}.csv"
-
-
 def main(testing=False):
 
     for channel, averages in channels.items():
@@ -22,7 +17,7 @@ def main(testing=False):
         signal_df = logic.run(averages)
 
         # Load past saved signals
-        csv_filename = determine_csv_filename(channel)
+        csv_filename = f"{os.path.abspath('../')}/data/signals/{channel}.csv"
         old_signal_df = pd.read_csv(csv_filename)
 
         # Compare our signals dataframe to the saved signals dataframe
@@ -40,5 +35,5 @@ def main(testing=False):
 
 
 if __name__ == '__main__':
-    main(testing=True)
+    main()
     # TODO: CLI with python arguments
