@@ -1,1 +1,11 @@
 # Contains the variables we need
+tickers:
+  - BTC/USD
+  - ETH/USD
+  - XRP/USD
+  - ETHH20
+  - XRPH20
+  - BCHH20
+  - EOSH20
+
+exchange: bitmex

@@ -1,6 +1,12 @@
 ### Description
-Updated directory for ATTA/WC signals.  OG code was written 6+ ago and we need a
-refresh
+Random shit from Telegram
 
-### To-do
-* [ ] 
+
+---
+### King Nick
+* Historical OHLCV
+  * Timeframe
+    * December 1 2018 to June 30
+    * 1 minute
+  * __Tickers__: BTC/USDT, ETH/BTC, LTC/BTC, EOS/BTC, BCH/BTC
+  * __Exchange__: Binance

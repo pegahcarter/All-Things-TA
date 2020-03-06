@@ -12,6 +12,9 @@ import pandas as pd
 import numpy as np
 
 
+with open('config.yaml', 'r') as f:
+    config = yaml.load(f, Loader=yaml.Loader)
+
 
 
 def determine_csv_filename(channel):
