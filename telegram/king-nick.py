@@ -3,38 +3,33 @@ import pandas as pd
 import numpy as np
 import sys
 from TAcharts.indicators import sdev, rolling
+from group_candles import group_candles
+
 
 # Read in data
-ltc = pd.read_csv('data/LTC-BTC.csv')[['date', 'open', 'close', 'volume']]
-btc = pd.read_csv('data/BTC-USDT.csv')[['date', 'open', 'close', 'volume']]
+ltc = pd.read_csv('data/LTC-BTC.csv')
+btc = pd.read_csv('data/BTC-USDT.csv')
 
+
+# Group by 5 min
+ltc_5min = group_candles(ltc, 5)
+btc_5min = group_candles(btc, 5)
 
 # Add columns
-ltc['pct_change'] = (ltc['close'] - ltc['open']) / ltc['open']
-# btc['pct_change'] = (btc['close'] - btc['open']) / btc['open']
-
-# ltc['rolling_pct_change'] = np.cumsum(ltc['pct_change'])
-
-# Minimum value of top 10% of pct_change candles
-top_2pct_change = ltc['pct_change'].sort_values()[int(len(ltc) * .98)]
+ltc_5min['delta'] = (ltc_5min['close'] - ltc_5min['open']) / ltc_5min['open']
+# btc_5min['delta'] = (btc_5min['close'] - btc_5min['open']) / btc_5min['open']
 
 
-# Feb 7, 2019 at 9pm
-ltc_halving_pump = ltc.loc[ltc['date'] >= '2019-02-07 21:00:00'].reset_index(drop=True)[:60*24]
+# Only take top 1% of candles
+bottom_99pct_cnt = int(len(ltc_5min) * .99)
+top_delta = ltc_5min['delta'].sort_values().reset_index(drop=True)[bottom_99pct_cnt]
+ltc_5min_top = ltc_5min[ltc_5min['delta'] >= top_delta]
 
 
-ltc_halving_pump_top = ltc_halving_pump[ltc_halving_pump['pct_change'] > top_2pct_change]
-ltc_halving_pump_top[:10]
+# Wait 5 min, then see what the following BTC candle looks like (LTC candle closed 5 min after date)
+start_pos = ltc_5min_top.iloc[0].name + 2
 
 
-# Convert /BTC to /USD for alts
-btc_price = btc['open']
-
-btc['volume_usd'] = btc_price * btc['volume']
-ltc['volume_usd'] = ltc['open'] * btc_price * ltc['volume']
-eos['volume_usd'] = eos['open'] * btc_price * eos['volume']
-eth['volume_usd'] = eth['open'] * btc_price * eth['volume']
-
-btc['alt_volume_usd'] = ltc['volume_usd'] + eos['volume_usd'] + eth['volume_usd']
-
-btc.head()
+#  NOTE: Testing - group together the candle above with the two following to get 15 min pct change
+btc_window = btc_5min.iloc[start_pos:start_pos+3]
+btc_window_delta = (btc_window['close'].iat[-1] - btc_window['open'].iat[0]) / btc_window['open'].iat[0]
