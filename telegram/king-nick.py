@@ -5,10 +5,8 @@ import sys
 from TAcharts.indicators import sdev, rolling
 
 # Read in data
-ltc = pd.read_csv('LTC-BTC.csv')[['date', 'open', 'close', 'volume']]
-btc = pd.read_csv('BTC-USDT.csv')[['date', 'open', 'close', 'volume']]
-eos = pd.read_csv('EOS-BTC.csv')[['date', 'open', 'close', 'volume']]
-eth = pd.read_csv('ETH-BTC.csv')[['date', 'open', 'close', 'volume']]
+ltc = pd.read_csv('data/LTC-BTC.csv')[['date', 'open', 'close', 'volume']]
+btc = pd.read_csv('data/BTC-USDT.csv')[['date', 'open', 'close', 'volume']]
 
 
 # Add columns
