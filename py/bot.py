@@ -17,7 +17,7 @@ def main(testing=False):
         signal_df = logic.run(averages)
 
         # Load past saved signals
-        csv_filename = f"{os.path.abspath('../')}/data/signals/{channel}.csv"
+        csv_filename = f"/home/carter/peter-signal/data/signals/{channel}.csv"
         old_signal_df = pd.read_csv(csv_filename)
 
         # Compare our signals dataframe to the saved signals dataframe
