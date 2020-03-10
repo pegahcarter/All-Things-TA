@@ -53,10 +53,8 @@ print(ltc_delta_top_1pct)
 #   only take LTC rows with price that change at least 0.7%
 ltc_5min_top = ltc_5min[ltc_5min['delta'] >= ltc_delta_top_1pct]
 # To validate, let's check the first five rows and make sure "delta" (price movement)
-#   is at least 0.7% 
+#   is at least 0.7%
 ltc_5min_top.head()
-
-
 
 # Wait 5 min, then see what the following BTC candle looks like (LTC candle closed 5 min after date)
 start_pos = ltc_5min_top.iloc[0].name + 2
@@ -66,3 +64,5 @@ btc_window = btc_5min.iloc[start_pos:start_pos+3]
 
 #
 btc_window_delta = (btc_window['close'].iat[-1] - btc_window['open'].iat[0]) / btc_window['open'].iat[0]
+
+ltc_5min_top.iloc[1]
