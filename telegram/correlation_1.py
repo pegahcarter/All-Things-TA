@@ -1,3 +1,4 @@
+# Correlation between BTC and LTC for top 1% of candles using one set of parameters
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -20,22 +21,27 @@ bottom_99pct_count = int(len(ltc_5min) * 0.99)
 
 # Sort the candles in order by their change in price
 ltc_delta_sorted = ltc_5min['delta'].sort_values().reset_index(drop=True)
-
 ltc_delta_top_1pct = ltc_delta_sorted[bottom_99pct_count]
 
+# Only take top LTC deltas
 ltc_5min_top = ltc_5min[ltc_5min['delta'] >= ltc_delta_top_1pct]
 
-# Wait 5 min after close
-start_pos = ltc_5min_top.iloc[0].name + 2
+df = []
 
-# Group BTC window for the next 15 minutes
-btc_window = btc_5min.iloc[start_pos:start_pos+3]
+for index, row in ltc_5min_top.iterrows():
+    # Wait 5 min after close
+    start_pos = index + 2
 
-# Compare deltas
-btc_window_delta = (btc_window['close'].iat[-1] - btc_window['open'].iat[0]) / btc_window['open'].iat[0]
+    # Group BTC window for the next 15 minutes
+    btc_window = btc_5min.iloc[start_pos:start_pos+3]
 
-# df = pd.DataFrame()
-# df = df.append({
-#     'delta_LTC': ltc_5min_top['delta'].iat[0],
-#     'delta_BTC': btc_window_delta
-# }, ignore_index=True)
+    # Get BTC delta
+    btc_window_delta = (btc_window['close'].iat[-1] - btc_window['open'].iat[0]) / btc_window['open'].iat[0]
+
+    df.append({
+        'delta_LTC': row['delta'],
+        'delta_BTC': btc_window_delta
+    })
+
+df = pd.DataFrame().from_records(df)
+np.corrcoef(df['delta_LTC'], df['delta_BTC'])[1][0]
