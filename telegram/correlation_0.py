@@ -19,7 +19,6 @@ ltc['date'].iat[-1]
 ltc_5min = group_candles(ltc, 5)
 btc_5min = group_candles(btc, 5)
 
-
 # Add column for price change of LTC using the open and close
 ltc_5min['delta'] = (ltc_5min['close'] - ltc_5min['open']) / ltc_5min['open']
 
@@ -62,7 +61,11 @@ start_pos = ltc_5min_top.iloc[0].name + 2
 # Group BTC window for the next 15 minutes
 btc_window = btc_5min.iloc[start_pos:start_pos+3]
 
-#
+# Compare deltas
 btc_window_delta = (btc_window['close'].iat[-1] - btc_window['open'].iat[0]) / btc_window['open'].iat[0]
 
-ltc_5min_top.iloc[1]
+# df = pd.DataFrame()
+# df = df.append({
+#     'delta_LTC': ltc_5min_top['delta'].iat[0],
+#     'delta_BTC': btc_window_delta
+# }, ignore_index=True)
