@@ -4,10 +4,7 @@ import numpy as np
 from group_candles import group_candles
 
 
-def candle_correlation(alt_coin, candle_period, delay_period, btc_window_period, bottom_percentile=0.99):
-
-    df_btc = group_candles(pd.read_csv('data/BTC-USDT.csv'), candle_period)
-    df_alt = group_candles(pd.read_csv(f'data/{alt_coin}-BTC.csv'), candle_period)
+def candle_correlation( df_btc, df_alt, candle_period, delay_period, btc_window_period, bottom_percentile=0.99):
 
     # Add column for price change of alt coin using open and close
     df_alt['delta'] = (df_alt['close'] - df_alt['open']) / df_alt['open']
@@ -19,16 +16,27 @@ def candle_correlation(alt_coin, candle_period, delay_period, btc_window_period,
     alt_delta_sorted = abs(df_alt['delta']).sort_values().reset_index(drop=True)
 
     # After sorting alt price changes, remove the any candlw within the bottom_percentile
-    alt_delta_top_percentile = alt_delta_sorted[bottom_percentile_cnt]
+    alt_delta_min_val = alt_delta_sorted[bottom_percentile_cnt]
 
     # Now that we know the top percent of alt price movement, only take take those candles
-    df_alt_top = df_alt[abs(df_alt['delta']) >= alt_delta_top_percentile]
+    alt_grouped_top = df_alt[abs(df_alt['delta']) >= alt_delta_min_val]
 
-    # Wait 5 min, then see what the following BTC candle looks like (LTC candle closed 5 min after date)
-    start_pos = df_alt_top.iloc[0].name + 2
+    # Main lists to compare correlation
+    alt_delta_list = []
+    btc_delta_list = []
 
-    # Group BTC window for the next 15 minutes
-    btc_window = df_btc.iloc[start_pos:start_pos+3]
+    # Loop through top alt movements and determnine correlation with lagged btc movement
+    for index, row in alt_grouped_top.iterrows():
 
-    # Compare deltas
-    btc_window_delta = (btc_window['close'].iat[-1] - btc_window['open'].iat[0]) / btc_window['open'].iat[0]
+        start_pos = index + delay_period
+        btc_window = df_btc.iloc[start_pos: start_pos + btc_window_period]
+        btc_window_delta = (btc_window['close'].iat[-1] - btc_window['open'].iat[0]) / btc_window['open'].iat[0]
+
+        # Save alt and btc deltas to main lists
+        alt_delta_list.append(row['delta'])
+        btc_delta_list.append(btc_window_delta)
+
+    # Determine correlation between two lists
+    correlation = np.corrcoef(alt_delta_list, btc_delta_list)
+
+    return correlation
