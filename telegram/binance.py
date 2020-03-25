@@ -9,8 +9,7 @@ import os
 binance = ccxt.binance()
 
 
-for ticker in ['ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'BCH/BTC']:
-    ticker = 'BTC/USDT'
+for ticker in ['BTC/USDT', 'ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'BCH/BTC']:
 
     start_date = datetime(year=2018, month=12, day=1, hour=1, minute=0)
     df = []
@@ -22,8 +21,7 @@ for ticker in ['ETH/BTC', 'LTC/BTC', 'EOS/BTC', 'BCH/BTC']:
         df.extend(data)
 
         # fetching last date to
-        data = np.array(data)
-        last_date = datetime.fromtimestamp(data[-1, 0]/1000)
+        last_date = datetime.fromtimestamp(data[-1][0]/1000)
         start_date = last_date + timedelta(minutes=1)
 
         time.sleep(.1)
