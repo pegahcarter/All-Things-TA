@@ -42,10 +42,9 @@ def send_signal(row, channel):
     signal = row['signal']
 
     if channel == 'wc_elite':
-        low_price, high_price = buy_range(price, diff=.00128)
+        low_price, high_price = buy_range(price, diff=.001)
     else:  # channel == 'ata_insiders'
-        price *= .9998
-        low_price, high_price = buy_range(price, diff=.00111)
+        low_price, high_price = buy_range(price, diff=.0008)
 
 
     diff = price - stop_loss
