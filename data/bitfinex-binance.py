@@ -20,7 +20,7 @@ for csvfile in os.listdir('binance/'):
     df = []
 
     # Run until Valentine's Day, 2020
-    while start_date < datetime(year=2020, month=2, day=14, hour=1):
+    while start_date < datetime(year=2020, month=3, day=25, hour=1):
         data = binance.fetch_ohlcv(ticker, '1h', limit=500, since=int(time.mktime(start_date.timetuple())*1000))
         df.extend(data)
 
