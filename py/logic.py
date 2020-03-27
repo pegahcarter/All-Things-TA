@@ -20,7 +20,8 @@ def run(averages):
         df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
 
         signals = find_signals(df, *averages)
-        if 'H20' in ticker: ticker = ticker[:3] + '/H20'
+        # if 'M20' in ticker: ticker = ticker[:3] + '/M20'
+        if 'M20' in ticker: ticker = ticker[:3] + '/M20'
 
         if len(signals) > 0:
             signals = pd.DataFrame.from_dict(signals).drop('index_opened', axis=1)
@@ -102,7 +103,7 @@ def msg_wc(ticker, signal, stop_loss, low_price, high_price, tps):
     # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
     requests.get(url + urlencode({'chat_id': wc_id, 'text': text}))
 
-    # if ticker in ['XRP/H20', 'LTC/H20', 'BCH/H20']:
+    # if ticker in ['XRP/M20', 'LTC/M20', 'BCH/M20']:
     requests.get(url + urlencode({'chat_id': wc_elite_id, 'text': text}))
 
 
@@ -121,5 +122,5 @@ def msg_atta(ticker, signal, stop_loss, low_price, high_price, tps):
     # requests.get(url + urlencode({'chat_id': '@testgbot123', 'text': text}))
     requests.get(url + urlencode({'chat_id': atta_id, 'text': text}))
 
-    # if ticker in ['BTC/USD', 'ETH/USD',  'ETH/H20']:
+    # if ticker in ['BTC/USD', 'ETH/USD',  'ETH/M20']:
     requests.get(url + urlencode({'chat_id': atta_insiders_id, 'text': text}))
